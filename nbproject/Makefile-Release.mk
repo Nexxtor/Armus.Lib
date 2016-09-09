@@ -36,7 +36,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/cdfee43a/Errores.o \
-	${OBJECTDIR}/_ext/cdfee43a/Scanner.o
+	${OBJECTDIR}/_ext/cdfee43a/PreScanner.o \
+	${OBJECTDIR}/_ext/cdfee43a/Standar.o
 
 
 # C Compiler Flags
@@ -68,10 +69,15 @@ ${OBJECTDIR}/_ext/cdfee43a/Errores.o: /home/nextor/NetBeansProjects/Armus.Lib/Er
 	${RM} "$@.d"
 	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Errores.o /home/nextor/NetBeansProjects/Armus.Lib/Errores.c
 
-${OBJECTDIR}/_ext/cdfee43a/Scanner.o: /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c 
+${OBJECTDIR}/_ext/cdfee43a/PreScanner.o: /home/nextor/NetBeansProjects/Armus.Lib/PreScanner.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
 	${RM} "$@.d"
-	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Scanner.o /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/PreScanner.o /home/nextor/NetBeansProjects/Armus.Lib/PreScanner.c
+
+${OBJECTDIR}/_ext/cdfee43a/Standar.o: /home/nextor/NetBeansProjects/Armus.Lib/Standar.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Standar.o /home/nextor/NetBeansProjects/Armus.Lib/Standar.c
 
 # Subprojects
 .build-subprojects:

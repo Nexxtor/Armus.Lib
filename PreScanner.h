@@ -8,13 +8,8 @@
 extern "C" {
 #endif
 #define MAX_FILE 150
-#define MAX_NAME_FILE 256*4
-#define MAX_LINEA 1024
-    
+#define MAX_NAME_FILE 256*4    
     FILE *fp;
-    char linea[MAX_LINEA];
-    int getline(char s[], int lim);
-
     /*
      * Class:     armus_lib_scanner_Scanner
      * Method:    lsFiles
