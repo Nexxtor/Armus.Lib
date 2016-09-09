@@ -7,13 +7,21 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*
- * Class:     armus_lib_scanner_Scanner
- * Method:    lsFiles
- * Signature: (Ljava/lang/String;)[Ljava/lang/String;
- */
-JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
-  (JNIEnv *, jobject, jstring);
+#define MAX_FILE 150
+#define MAX_NAME_FILE 256*4
+#define MAX_LINEA 1024
+    
+    FILE *fp;
+    char linea[MAX_LINEA];
+    int getline(char s[], int lim);
+
+    /*
+     * Class:     armus_lib_scanner_Scanner
+     * Method:    lsFiles
+     * Signature: (Ljava/lang/String;)[Ljava/lang/String;
+     */
+    JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
+    (JNIEnv *, jobject, jstring);
 
 #ifdef __cplusplus
 }

@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/cdfee43a/Errores.o \
 	${OBJECTDIR}/_ext/cdfee43a/Scanner.o
 
 
@@ -61,6 +62,11 @@ LDLIBSOPTIONS=
 dist/libArmus.Lib.so: ${OBJECTFILES}
 	${MKDIR} -p dist
 	${LINK.c} -o dist/libArmus.Lib.so ${OBJECTFILES} ${LDLIBSOPTIONS} -shared -fPIC
+
+${OBJECTDIR}/_ext/cdfee43a/Errores.o: /home/nextor/NetBeansProjects/Armus.Lib/Errores.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
+	${RM} "$@.d"
+	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Errores.o /home/nextor/NetBeansProjects/Armus.Lib/Errores.c
 
 ${OBJECTDIR}/_ext/cdfee43a/Scanner.o: /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a

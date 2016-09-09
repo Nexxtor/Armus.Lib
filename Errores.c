@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "Errores.h"
 
 void log_error(int error){
     FILE *f=fopen("log.txt","a");

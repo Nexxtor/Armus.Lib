@@ -7,7 +7,8 @@ extern "C" {
     char *errores[4] = {
         "Error el archivo no pudo ser abierto","","","",""
     };
-
+    void log_error(int error);
+    #include "Errores.c"
 #ifdef __cplusplus
 }
 #endif
