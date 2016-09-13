@@ -9,7 +9,6 @@ extern "C" {
 #endif
 #define MAX_FILE 150
 #define MAX_NAME_FILE 256*4    
-    FILE *fp;
     /*
      * Class:     armus_lib_scanner_Scanner
      * Method:    lsFiles

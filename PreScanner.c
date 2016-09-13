@@ -2,33 +2,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "PreScanner.h"
+
 #include "Errores.h"
 #include "Standar.h"
+#include "PreScanner.h"
 
+FILE *fp = NULL;
+char linea[MAX_LINEA];
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
 (JNIEnv *env, jobject obt, jstring pathFirtsFile) {
-    int poslinea = 0;
-    FILE *fp;
+    int posLinea = 0;
+    //**** Extraer paramentros desde java
     const char *strFirstFile = (*env)->GetStringUTFChars(env, pathFirtsFile, NULL);
 
     char **lsArchivos = (char **) malloc(MAX_FILE * sizeof (char *));
     lsArchivos[0] = (char *) malloc(MAX_NAME_FILE * sizeof (char));
 
     strncpy(lsArchivos[0], strFirstFile, MAX_NAME_FILE);
-
+    ///Fin de extraer
 
     fp = fopen(lsArchivos[0], "r");
     if (fp == NULL) {
         //primer error
         log_error(0);
+        return NULL;
     }
-    poslinea = getline(linea, MAX_LINEA);
+    //Se lee una linea del archivo
+    posLinea = getLine(linea, MAX_LINEA);
+
     int pos = 0, comillas = 0, file = 1, posRuta = 0;
 
-    while (pos <= poslinea) {
+    while (posLinea > 0 && pos <= posLinea) {
         if (linea[pos] == 'i' && comillas == 0) {
-            if (pos + 6 <= poslinea
+            if (pos + 6 <= posLinea
                     && linea[pos + 1 ] == 'n'
                     && linea[pos + 2 ] == 'c'
                     && linea[pos + 3 ] == 'l'
@@ -37,7 +43,7 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
                     && linea[pos + 6 ] == 'r') {
                 pos = pos + 7;
                 //Omite todos los espacios despus de incluir
-                while (pos <= poslinea
+                while (pos <= posLinea
                         && (linea[pos] == ' ' || linea[pos] == '\t')
                         && linea[pos] != '\"')
                     pos++;
@@ -46,8 +52,10 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
                     //mal escrito el incluir falta archivo
                     log_error(2);
                     //trabajamos con la siguente linea
-                    poslinea = getline(linea, MAX_LINEA);
+                    posLinea = getLine(linea, MAX_LINEA);
                     pos = 0;
+                    posRuta = 0; 
+                    comillas = 0;
                 }
 
                 if (linea[pos] == '\"') {
@@ -69,7 +77,7 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
             if (linea[pos] == '\"') {
                 comillas = 0;
                 //OMite espacio entre ruta y ;
-                while (pos <= poslinea
+                while (pos <= posLinea
                         && (linea[pos] == ' ' || linea[pos] == '\t')
                         && linea[pos] != ';')
                     pos++;
@@ -77,15 +85,15 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
                 if (linea[pos] == '\n') {
                     //falta punto y coma
                     log_error(3);
-                     //trabajamos con la siguente linea
-                    poslinea = getline(linea, MAX_LINEA);
+                    //trabajamos con la siguente linea
+                    posLinea = getLine(linea, MAX_LINEA);
                     pos = 0;
                     posRuta = 0;
                 }
-               
+
                 //Se prepara para la siguiente ruta
                 if (linea[pos] == ';') {
-                     // MArco el fin de la ruta
+                    // MArco el fin de la ruta
                     lsArchivos[file][posRuta] = '\0';
                     file++;
                     posRuta = 0;
@@ -93,13 +101,23 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
                 pos++;
                 continue;
             }
-            lsArchivos[file][posRuta] = linea[pos];
-            posRuta++;
+            ///PREGUNTAR SI SE ENCUETRA UN ENTER 
+            if (linea[pos] == '\n') {
+                //probable cadena multilinea
+                log_error(4);
+                posLinea = getLine(linea, MAX_LINEA);
+                posRuta = 0;
+                comillas = 0;
+                lsArchivos[file][0] = '\0';
+            } else {
+                lsArchivos[file][posRuta] = linea[pos];
+                posRuta++;
+            }
 
         }
         pos++;
     }
 
-
+    printf("Hola");
     return NULL;
 }
