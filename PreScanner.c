@@ -14,18 +14,25 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
     int posLinea = 0;
     //**** Extraer paramentros desde java
     const char *strFirstFile = (*env)->GetStringUTFChars(env, pathFirtsFile, NULL);
+    
+    char **listaPreliminar;
+    listaPreliminar = obtenerArchivosIncluir(strFirstFile);
+    
+    return NULL;
+}
 
+char** obtenerArchivosIncluir(const char *strFirstFile){
+    int posLinea = 0;
+    
     char **lsArchivos = (char **) malloc(MAX_FILE * sizeof (char *));
     lsArchivos[0] = (char *) malloc(MAX_NAME_FILE * sizeof (char));
-
     strncpy(lsArchivos[0], strFirstFile, MAX_NAME_FILE);
-    ///Fin de extraer
-
+    
     fp = fopen(lsArchivos[0], "r");
     if (fp == NULL) {
         //primer error
         log_error(0);
-        return NULL;
+        return;
     }
     //Se lee una linea del archivo
     posLinea = getLine(linea, MAX_LINEA);
@@ -138,6 +145,6 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
         }
         pos++;
     }
-    return NULL;
+    return lsArchivos;
 }
 
