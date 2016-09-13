@@ -38,7 +38,7 @@ char** obtenerArchivosIncluir(const char *strFirstFile){
     posLinea = getLine(linea, MAX_LINEA);
     int pos = 0, comillas = 0, file = 1, posRuta = 0, guardando = 0;
 
-    while (posLinea > 0 && pos < posLinea) {
+    while (posLinea > 0 && pos < posLinea && file < MAX_FILE) {
        //printf("Entrado al while pos = %d, posLinea = %d, linea[pos]=%c\n",pos, posLinea,linea[pos]);
        if(linea[pos] == '\n'){
            pos = comillas = posRuta = guardando = 0;
@@ -137,9 +137,14 @@ char** obtenerArchivosIncluir(const char *strFirstFile){
                 comillas = 0;
                 lsArchivos[file][0] = '\0';
             } else {
-                lsArchivos[file][posRuta] = linea[pos];
-                printf("\t Guardando (%d) linea[%d] = %c\n",posRuta, pos, linea[pos]);
-                posRuta++;
+                if(MAX_NAME_FILE > posRuta){
+                    lsArchivos[file][posRuta] = linea[pos];
+                    printf("\t Guardando (%d) linea[%d] = %c\n",posRuta, pos, linea[pos]);
+                    posRuta++;
+                }else{
+                    log_error(2);
+                    printf("\nNombre de archivo demasiado largo");
+                }
             }
 
         }
