@@ -85,11 +85,11 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
 
     fp = fopen(lsArchivos[0], "r");
     if (fp == NULL) {
-        //primer error
-        printf("%s \n", strFirstFile);
         log_error(0);
         return NULL;
     }
+    char *rutaAbsoluta = obtenerDirectorio(strFirstFile);
+    printf("Rtua %s \n",rutaAbsoluta);
     //Se lee una linea del archivo
     posLinea = getLine(linea, MAX_LINEA);
     int pos = 0, comillas = 0, file = 1, posRuta = 0, guardando = 0;
@@ -220,4 +220,24 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
     fp = NULL;
     return lsArchivos;
 }
+
+ char *obtenerDirectorio(const char *strFirstFile){     
+     int posSlash = 0,i=0;
+     while(strFirstFile[i] != '\0') {
+         if(strFirstFile[i]== '/'){
+             posSlash = i;
+         }
+         i++;
+     }
+     
+     char *directorio = (char *) malloc((sizeof(char )* posSlash )+ 1);
+     i = 0;
+     while(i <= posSlash){
+         directorio[i] = strFirstFile[i];
+         i++;
+     }
+     directorio[i] = '\0';
+     
+     return directorio;
+ }
 

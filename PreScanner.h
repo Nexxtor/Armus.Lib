@@ -18,7 +18,7 @@ extern "C" {
     (JNIEnv *, jobject, jstring);
     char** obtenerArchivosIncluir(const char *strFirstFile);
     char **unirListaArchivos(char **listaPreliminar,char **masArchivos);
-
+    char *obtenerDirectorio(const char *strFirstFile);
 #ifdef __cplusplus
 }
 #endif
