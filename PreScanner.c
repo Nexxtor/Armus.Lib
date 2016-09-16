@@ -20,14 +20,19 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
     listaPreliminar = obtenerArchivosIncluir(strFirstFile);
     while(listaPreliminar[i][0] != '\0'){
         char**masArchivos = obtenerArchivosIncluir(listaPreliminar[i]);
+        printf("%s \n",listaPreliminar[i]);
         if(masArchivos == NULL){
-            printf("PAnico");
+            printf("-------PAnico----\n");
             return NULL;
         }
         listaPreliminar = unirListaArchivos(listaPreliminar,masArchivos);
         i++;
     }
-
+    i = 0;
+    while(listaPreliminar[i][0] != '\0'){
+        printf("%s\n",listaPreliminar[i]);
+        i++;
+    }
 
     return NULL;
 }
@@ -89,7 +94,6 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
         return NULL;
     }
     char *rutaAbsoluta = obtenerDirectorio(strFirstFile);
-    printf("Rtua %s \n",rutaAbsoluta);
     //Se lee una linea del archivo
     posLinea = getLine(linea, MAX_LINEA);
     int pos = 0, comillas = 0, file = 1, posRuta = 0, guardando = 0;
@@ -132,7 +136,17 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                     pos++;
                     printf("\tReservando espacio\n");
                     lsArchivos[file] = (char *) malloc(sizeof (char) * MAX_NAME_FILE * 3);
-                    lsArchivos[file][0] = '\0';
+                    if(linea[pos] != '/'){
+                        //printf("-------------------Copiando cosas --------\n ");
+                        int largo = strlen(rutaAbsoluta);
+                        
+                        strncpy(lsArchivos[file], rutaAbsoluta, MAX_NAME_FILE * 3);
+                        
+                        posRuta = largo;
+                        //printf("%s %s %d",rutaAbsoluta, lsArchivos[file], largo);
+                         //printf("---------------- Terminando Copiando cosas --------\n ");
+                    }else
+                        lsArchivos[file][0] = '\0';
                 }
             }
         }
@@ -192,9 +206,10 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                 lsArchivos[file][0] = '\0';
             } else {
                 if (MAX_NAME_FILE * 3 > posRuta) {
+                    //printf("posRuta vale %d", posRuta);
                     lsArchivos[file][posRuta] = linea[pos];
                     lsArchivos[file][posRuta+1]  = '\0';
-                    printf("\t Guardando %s\n",  lsArchivos[file]);
+                    //printf("\t Guardando %c %s\n",linea[pos],  lsArchivos[file]);
                     posRuta++;
                 } else {
                     log_error(5);
