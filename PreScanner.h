@@ -17,6 +17,7 @@ extern "C" {
     JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
     (JNIEnv *, jobject, jstring);
     char** obtenerArchivosIncluir(const char *strFirstFile);
+    char **unirListaArchivos(char **listaPreliminar,char **masArchivos);
 
 #ifdef __cplusplus
 }
