@@ -18,49 +18,83 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
     char **listaPreliminar;
     int i = 1;
     listaPreliminar = obtenerArchivosIncluir(strFirstFile);
-    //sacar los incluir de todos los archivos listados
-    while (listaPreliminar[i] != NULL) {
-        const char *archivoActual = listaPreliminar[i];
-        char ** masArchivos = obtenerArchivosIncluir(archivoActual);
-        listaPreliminar = unirListaArchivos(listaPreliminar, masArchivos);
+    while(listaPreliminar[i][0] != '\0'){
+        char**masArchivos = obtenerArchivosIncluir(listaPreliminar[i]);
+        if(masArchivos == NULL){
+            printf("PAnico");
+            return NULL;
+        }
+        listaPreliminar = unirListaArchivos(listaPreliminar,masArchivos);
+        i++;
     }
+
 
     return NULL;
 }
 
-char ** unirListaArchivos(char **listaPreliminar, char **masArchivos) {
-    int i, j, k=0;
-    char **listaResultado;
-    for (i = 0; i < MAX_FILE; i++) {
-        for (j = 0; j < MAX_FILE; j++) {
-            if (strcmp(listaPreliminar[i], masArchivos[j])) {
-                strncpy(listaResultado[k],listaPreliminar[i],MAX_NAME_FILE);
-                
-            }else{
-                
+char ** unirListaArchivos(char **lista, char **masArchivos) {
+    int indices[MAX_FILE] , i = 0, w = 0;
+    int encontrado = 0;
+    //mas archivos en lista
+    while(masArchivos[i][0] != '\0'){
+        int j = 0;
+        
+        while(lista[j][0] != '\0'){
+            if(strcmp(masArchivos[i],lista[j]) == 0){
+              encontrado = 1;
             }
+            j++;
         }
+        if(encontrado == 0){
+            indices[w] = i;
+            w++;
+        }else{
+            encontrado = 0;
+        }
+        i++;
     }
+    
+    
+    
+    char **respuestas = (char **) malloc(sizeof(char *) * MAX_FILE);
+    int copia = 0;
+    
+    while(lista[copia][0] != '\0'){
+        respuestas[copia] = (char *) malloc(sizeof(char ) * MAX_NAME_FILE * 3);
+        strncpy(respuestas[copia],lista[copia], MAX_NAME_FILE * 3);
+        copia++;
+    }
+    for(i = 0 ; i < w; i++){
+        respuestas[copia] = (char *) malloc(sizeof(char ) * MAX_NAME_FILE * 3);
+        strncpy(respuestas[copia],masArchivos[indices[i]], MAX_NAME_FILE * 3);
+        copia++;
+    }
+    respuestas[copia] = malloc(2);
+    respuestas[copia][0] = '\0';
+    return respuestas;
+    
 }
 
 char** obtenerArchivosIncluir(const char *strFirstFile) {
     int posLinea = 0;
 
     char **lsArchivos = (char **) malloc(MAX_FILE * sizeof (char *));
-    lsArchivos[0] = (char *) malloc(MAX_NAME_FILE * sizeof (char));
+    lsArchivos[0] = (char *) malloc(MAX_NAME_FILE * 3 * sizeof (char));
+    
     strncpy(lsArchivos[0], strFirstFile, MAX_NAME_FILE);
 
     fp = fopen(lsArchivos[0], "r");
     if (fp == NULL) {
         //primer error
+        printf("%s \n", strFirstFile);
         log_error(0);
-        return;
+        return NULL;
     }
     //Se lee una linea del archivo
     posLinea = getLine(linea, MAX_LINEA);
     int pos = 0, comillas = 0, file = 1, posRuta = 0, guardando = 0;
 
-    while (posLinea > 0 && pos < posLinea && file < MAX_FILE) {
+    while (posLinea > 0 && pos < posLinea) {
         //printf("Entrado al while pos = %d, posLinea = %d, linea[pos]=%c\n",pos, posLinea,linea[pos]);
         if (linea[pos] == '\n') {
             pos = comillas = posRuta = guardando = 0;
@@ -83,7 +117,7 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                 //Por si se acaba la linea
                 if (linea[pos] == '\n') {
                     //mal escrito el incluir falta archivo
-                    log_error(2);
+                    log_error(1);
                     printf("\n Hay un enter entre incluir y \" \n");
                     //trabajamos con la siguente linea
                     posLinea = getLine(linea, MAX_LINEA);
@@ -97,15 +131,15 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                     guardando = 1;
                     pos++;
                     printf("\tReservando espacio\n");
-                    lsArchivos[file] = (char *) malloc(sizeof (char) * MAX_NAME_FILE);
+                    lsArchivos[file] = (char *) malloc(sizeof (char) * MAX_NAME_FILE * 3);
                     lsArchivos[file][0] = '\0';
                 }
             }
         }
-        if (comillas == 1) {
+        if (comillas == 1 && file < MAX_FILE) {
             if (linea[pos] == ';') {
                 //Falto comillas de cierre 
-                log_error(3);
+                log_error(2);
                 printf("\n Falto comillia (\") de cierre \n");
                 //HAy un error asumo que lo que sigue esta bueno
                 posRuta = 0;
@@ -144,8 +178,6 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                     pos = 0;
                     posRuta = 0;
                 }
-
-
                 pos++;
                 continue;
             }
@@ -159,12 +191,13 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                 comillas = 0;
                 lsArchivos[file][0] = '\0';
             } else {
-                if (MAX_NAME_FILE > posRuta) {
+                if (MAX_NAME_FILE * 3 > posRuta) {
                     lsArchivos[file][posRuta] = linea[pos];
-                    printf("\t Guardando (%d) linea[%d] = %c\n", posRuta, pos, linea[pos]);
+                    lsArchivos[file][posRuta+1]  = '\0';
+                    printf("\t Guardando %s\n",  lsArchivos[file]);
                     posRuta++;
                 } else {
-                    log_error(2);
+                    log_error(5);
                     printf("\nNombre de archivo demasiado largo");
                 }
             }
@@ -175,9 +208,16 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
     
     //registar cantidad extesa de archivos
     if(file >= MAX_FILE){
-        log_error(2);
+        log_error(6);
         printf("\nSe alcanzo la cantidad maxima de archivos");
+        return NULL;
     }
+    
+    lsArchivos[file] = malloc(2);
+    lsArchivos[file][0] = '\0';
+    
+    fclose(fp);
+    fp = NULL;
     return lsArchivos;
 }
 
