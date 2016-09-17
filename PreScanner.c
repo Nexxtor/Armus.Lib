@@ -20,7 +20,7 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
     listaPreliminar = obtenerArchivosIncluir(strFirstFile);
     while(listaPreliminar[i][0] != '\0'){
         char**masArchivos = obtenerArchivosIncluir(listaPreliminar[i]);
-        printf("%s \n",listaPreliminar[i]);
+        //printf("%s \n",listaPreliminar[i]);
         if(masArchivos == NULL){
             printf("-------PAnico----\n");
             return NULL;
@@ -45,7 +45,7 @@ char ** unirListaArchivos(char **lista, char **masArchivos) {
         int j = 0;
         
         while(lista[j][0] != '\0'){
-            if(strcmp(masArchivos[i],lista[j]) == 0){
+            if(strcmp( obtenerNombreBase(masArchivos[i]),obtenerNombreBase(lista[j]) ) == 0){
               encontrado = 1;
             }
             j++;
@@ -122,7 +122,7 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                 if (linea[pos] == '\n') {
                     //mal escrito el incluir falta archivo
                     log_error(1);
-                    printf("\n Hay un enter entre incluir y \" \n");
+                    //printf("\n Hay un enter entre incluir y \" \n");
                     //trabajamos con la siguente linea
                     posLinea = getLine(linea, MAX_LINEA);
                     pos = 0;
@@ -134,7 +134,7 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                     comillas = 1;
                     guardando = 1;
                     pos++;
-                    printf("\tReservando espacio\n");
+                    //printf("\tReservando espacio\n");
                     lsArchivos[file] = (char *) malloc(sizeof (char) * MAX_NAME_FILE * 3);
                     if(linea[pos] != '/'){
                         //printf("-------------------Copiando cosas --------\n ");
@@ -154,7 +154,7 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
             if (linea[pos] == ';') {
                 //Falto comillas de cierre 
                 log_error(2);
-                printf("\n Falto comillia (\") de cierre \n");
+               // printf("\n Falto comillia (\") de cierre \n");
                 //HAy un error asumo que lo que sigue esta bueno
                 posRuta = 0;
                 comillas = 0;
@@ -177,7 +177,7 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                     guardando = 0;
 
                 } else {
-                    printf("Falto ; ");
+                    //printf("Falto ; ");
                     //falto punto y coma
                     log_error(3);
                     lsArchivos[file][0] = '\0';
@@ -186,7 +186,7 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                 }
                 //Por si se acaba la linea
                 if (linea[pos] == '\n') {
-                    printf("\n Falto comillia (\") de cierre salto de linea inesperado \n");
+                    //printf("\n Falto comillia (\") de cierre salto de linea inesperado \n");
                     //trabajamos con la siguente linea
                     posLinea = getLine(linea, MAX_LINEA);
                     pos = 0;
@@ -199,7 +199,7 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
             if (linea[pos] == '\n') {
                 //probable cadena multilinea
                 log_error(4);
-                printf("\n Salto de linea inesperado \n");
+                //printf("\n Salto de linea inesperado \n");
                 posLinea = getLine(linea, MAX_LINEA);
                 posRuta = 0;
                 comillas = 0;
@@ -213,7 +213,7 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
                     posRuta++;
                 } else {
                     log_error(5);
-                    printf("\nNombre de archivo demasiado largo");
+                   // printf("\nNombre de archivo demasiado largo");
                 }
             }
 
@@ -224,7 +224,7 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
     //registar cantidad extesa de archivos
     if(file >= MAX_FILE){
         log_error(6);
-        printf("\nSe alcanzo la cantidad maxima de archivos");
+        //printf("\nSe alcanzo la cantidad maxima de archivos");
         return NULL;
     }
     
@@ -256,3 +256,23 @@ char** obtenerArchivosIncluir(const char *strFirstFile) {
      return directorio;
  }
 
+ char *obtenerNombreBase(const char *strFirstFile){     
+     int posSlash = 0,i=0, j=0;
+     while(strFirstFile[i] != '\0') {
+         if(strFirstFile[i]== '/'){
+             posSlash = i;
+         }
+         i++;
+     }
+     
+     char *directorio = (char *) malloc(MAX_NAME_FILE + 1);
+     i = posSlash + 1;
+     while(strFirstFile[i] != '\0'){
+         directorio[j] = strFirstFile[i];
+         i++;
+         j++;
+     }
+     directorio[j] = '\0';
+     
+     return directorio;
+ }
