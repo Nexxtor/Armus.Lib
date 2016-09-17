@@ -28,13 +28,19 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
         listaPreliminar = unirListaArchivos(listaPreliminar,masArchivos);
         i++;
     }
+    jobjectArray respuesta = 0;
+    jsize size = i;
+    respuesta = (*env)->NewObjectArray(env,size,(*env)->FindClass(env,"java/lang/String"),0);
     i = 0;
     while(listaPreliminar[i][0] != '\0'){
-        printf("%s\n",listaPreliminar[i]);
+        (*env)->SetObjectArrayElement(env,respuesta,i, (*env)->NewStringUTF(env,listaPreliminar[i]) );
         i++;
     }
 
-    return NULL;
+    
+    
+    
+    return respuesta;
 }
 
 char ** unirListaArchivos(char **lista, char **masArchivos) {
