@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "Parametros.h"
 #include "Errores.h"
 #include "Standar.h"
 #include "PreScanner.h"
