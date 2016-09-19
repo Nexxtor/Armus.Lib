@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include "Standar.h"
 #include "Lexico.h"
+
+FILE *fp = NULL;
+char linea[MAX_LINEA];
+
 //getline: lee la siguiente línea del fuente y regresa su tamaño (incluyendo '\n') o 0 si EOF. (por ejemplo: para VAR regresa 4)
 //es probablemente la rutina de más bajo nivel del compilador
 //tomada de "El Lenguaje de programación C" - Kernighan & Ritchie - pag 28                        
