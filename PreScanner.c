@@ -5,10 +5,7 @@
 #include "Parametros.h"
 #include "Errores.h"
 #include "Standar.h"
-#include "PreScanner.h"
-
-FILE *fp = NULL;
-char linea[MAX_LINEA];
+#include "Scanner.h"
 
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
 (JNIEnv *env, jobject obt, jstring pathFirtsFile) {
