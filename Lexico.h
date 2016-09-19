@@ -11,7 +11,7 @@ extern char *lexpal[MAXPAL];
 
 //lista de tokens de ARMUS
 enum simbolo {nulo,ident,numero,mas,menos,por,div,llaveI,llaveF,parentI,parentF,corcheteI,cortecheF,punto,coma,
-puntoycoma,comilla,comillas,asginacion,mei,mai,myr,mnr,igl,nig,negacion,y,o,hexaTok,referencia,enteroTok,byteTok,
+puntoycoma,asginacion,mei,mai,myr,mnr,igl,nig,negacion,y,o,hexaTok,referencia,enteroTok,byteTok,
 realTok,vacioTok,booleanoTok,cadenaTok,caracterTok,objetoTok,archivoTok,siTok,sinoTok,probarTok,casoTok,defectoTok,
 romperTok,mientrasTok,paraTok,hacerTok,paracadaTok,sistemaTok,obtenerEnteroTok,obtenerRealTok,obtenerCadenaTok,
 obtenerCaracterTok,mostrarTok,publicaTok,privadaTok,retornarTok,arregloTok,agregarTok,obtenerTok,cuantosTok,
