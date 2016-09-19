@@ -6,9 +6,7 @@
 #define _Included_armus_lib_scanner_Scanner
 #ifdef __cplusplus
 extern "C" {
-#endif
-#define MAX_FILE 150
-#define MAX_NAME_FILE 256*4    
+#endif   
     /*
      * Class:     armus_lib_scanner_Scanner
      * Method:    lsFiles
