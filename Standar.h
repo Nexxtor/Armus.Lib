@@ -11,4 +11,6 @@ extern long int valor;       //valor numérico de una lexeme correspondiene a un
 
 int getLine(char s[], int lim);
 void obtoken();
-void inicializar_espec(),imprime_token();
+int obtch();
+void inicializar_espec();
+void imprime_token();
