@@ -17,12 +17,12 @@ romperTok,mientrasTok,paraTok,hacerTok,paracadaTok,sistemaTok,obtenerEnteroTok,o
 obtenerCaracterTok,mostrarTok,publicaTok,privadaTok,retornarTok,arregloTok,agregarTok,obtenerTok,cuantosTok,
 quitarTok,abrirTok,leerLineaTok,volcadoTok,cerrarTok,concatenarTok,parteEnteraTok,compararTok,mayorTok,menorTok,
 esParTok,decimalBinTok,potenciaTok,absolutoTok,moduloTok,longitudCadenaTok,claseTok,incluirTok,obtenerBooleanoTok,
-falsoTok,verdaderoTok }; //definido aquí en el encabezado
+falsoTok,verdaderoTok}; //definido aquí en el encabezado
 
 extern enum simbolo token;
 
 //tabla de tokens de palabras reservadas
-extern enum simbolo tokpal [MAXPAL]; 
+extern enum simbolo tokpal[MAXPAL]; 
 
 //tabla de tokens correspondientes a operadores y símbolos especiales
 extern enum simbolo espec[255] ;
