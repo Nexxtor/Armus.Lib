@@ -5,6 +5,7 @@
 #define MAX_DIGIT 20
 #define MAX_FILE 150
 #define MAX_NAME_FILE 256*4
+#define MAXPAL 58  //numero de palabras reservadas
 
 #ifdef __cplusplus
 extern "C" {
