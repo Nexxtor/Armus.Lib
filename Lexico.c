@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "Lexico.h"
 
@@ -36,14 +37,15 @@ void inicializarArbolPalabras() {
     arbol* raiz = NULL;
     raiz = (arbol *) malloc(sizeof (arbol));
 
-    raiz->value = sumCadena(lexPalAux[mitad]);
+    strncpy(raiz->value, lexPalAux[mitad], MAX_FILE);
     raiz->derecha = NULL;
     raiz->izq = NULL;
+    raiz->token = tokpal[mitad];
 
     for (i = 0; i < MAXPAL; i++) {
         if (mitad != i) {
             printf("%d %s\n",i,lexPalAux[i]);
-            insertarArbol(sumCadena(lexPalAux[i]), &raiz, i);
+            insertarArbol(lexPalAux[i], &raiz, i);
         }
     }
     lexpal = raiz;
@@ -59,12 +61,12 @@ int sumCadena(char *cad) {
     return suma;
 }
 
-void insertarArbol(int valor, arbol **raiz, int pos) {
+void insertarArbol(char * valor, arbol **raiz, int pos) {
     arbol *nuevo;
-    if (valor > (*raiz)->value) {
+    if ( strcmp(valor,(*raiz)->value) > 0) {
         if ((*raiz)->derecha == NULL) {
             nuevo = (arbol *) malloc(sizeof (arbol));
-            nuevo->value = valor;
+            strncpy(nuevo->value,valor,MAX_FILE);
             nuevo->derecha = NULL;
             nuevo->izq = NULL;
             nuevo->token = tokpal[pos];
@@ -75,7 +77,7 @@ void insertarArbol(int valor, arbol **raiz, int pos) {
     } else {
         if ((*raiz)->izq == NULL) {
             nuevo = (arbol *) malloc(sizeof (arbol));
-            nuevo->value = valor;
+             strncpy(nuevo->value,valor,MAX_FILE);
             nuevo->derecha = NULL;
             nuevo->izq = NULL;
             (*raiz)->izq =nuevo;

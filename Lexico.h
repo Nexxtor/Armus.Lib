@@ -7,7 +7,7 @@ extern "C" {
 #include "Parametros.h"
 
     //lista de tokens de ARMUS
-enum simbolo {nulo,ident,mas,menos,por,barra,llaveI,llaveF,parentI,parentF,corcheteI,corcheteF,punto,coma,
+enum simbolo {nulo,numeroReal,numeroEntero,ident,mas,menos,por,barra,llaveI,llaveF,parentI,parentF,corcheteI,corcheteF,punto,coma,
 puntoycoma,asignacion,mei,mai,myr,mnr,igl,nig,negacion,ytok,otok,referencia,enteroTok,byteTok,
 realTok,vacioTok,booleanoTok,cadenaTok,caracterTok,objetoTok,archivoTok,siTok,sinoTok,probarTok,casoTok,defectoTok,
 romperTok,mientrasTok,paraTok,hacerTok,paracadaTok,sistemaTok,obtenerEnteroTok,obtenerRealTok,obtenerCadenaTok,
@@ -27,7 +27,7 @@ extern enum simbolo espec[255] ;
 
 
 typedef struct hoja{
-    int value;
+    char value[MAX_FILE]; //Deberia tener el tamaño de la palabrea reservada mas grande
     enum simbolo token;
     struct hoja* izq;
    struct hoja* derecha;
@@ -37,7 +37,7 @@ extern arbol* lexpal;
 
 void inicializarArbolPalabras();
 int sumCadena(char *);
-void insertarArbol(int, arbol**, int);
+void insertarArbol(char *, arbol**, int);
 
 #ifdef __cplusplus
 }

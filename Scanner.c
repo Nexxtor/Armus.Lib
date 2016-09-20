@@ -28,12 +28,22 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
 
         //tokenizar el programa fuente
         while (1) {
+          
             obtoken();
+            if(primerError == 1){
+                printf("PANICO \n");
+                return NULL;
+            }
+            if(fin_de_archivo == 2){
+                break;
+            }
+            if(fin_de_archivo == 1){
+                fin_de_archivo++;
+            }
             imprime_token(); 
         }
-        
         cant--;
-
+        
     }
     return NULL;
 }

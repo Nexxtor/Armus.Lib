@@ -17,4 +17,4 @@ void obtoken();
 int obtch();
 void inicializar_espec();
 void imprime_token();
-enum simbolo buscarToken(int suma);
+enum simbolo buscarToken(char *);

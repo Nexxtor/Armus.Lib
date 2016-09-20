@@ -5,6 +5,7 @@
 #include "Standar.h"
 #include "Lexico.h"
 #include "Errores.h"
+//#include <openssl/md5.h>
 
 FILE *fp = NULL;
 char linea[MAX_LINEA]; //buffer de líneas 
@@ -15,6 +16,7 @@ int ch; //último caracter leído
 char lex[MAX_ID + 1]; //último lexeme leído ( +1 para colocar "\0")
 long int valor; //valor numérico de una lexeme correspondiene a un número
 double valorDoble;
+char valorCaracter;
 char valorCadena[MAX_CADENA];
 
 //getline: lee la siguiente línea del fuente y regresa su tamaño (incluyendo '\n') o 0 si EOF. (por ejemplo: para VAR regresa 4)
@@ -64,14 +66,24 @@ void inicializar_espec() {
 //imprime_token: transforma de enumerado a string. no aparecerá más en el compilador
 
 void imprime_token() {
-    /*
 
-     char *token_string[]={"nulo","ident","numero","mas","menos","por","barra","oddtok","igl","nig","mnr","mei","myr",
-                               "mai","parena","parenc","coma","puntoycoma","punto","asignacion","begintok","endtok","iftok",
-                                               "thentok","whiletok","dotok","calltok","consttok","vartok","proctok"};
-     printf("(%10s) \n",token_string[token]);
-  
-     */
+
+    char *token_string[] = {"nulo", "numeroReal", "numeroEntero", "ident", "mas", "menos", "por", "barra", "llaveI",
+        "llaveF", "parentI", "parentF", "corcheteI", "corcheteF", "punto", "coma", "puntoycoma",
+        "asignacion", "mei", "mai", "myr", "mnr", "igl", "nig", "negacion", "ytok", "otok", "referencia",
+        "enteroTok", "byteTok", "realTok", "vacioTok", "booleanoTok", "cadenaTok", "caracterTok", "objetoTok",
+        "archivoTok", "siTok", "sinoTok", "probarTok", "casoTok", "defectoTok", "romperTok",
+        "mientrasTok", "paraTok", "hacerTok", "paracadaTok", "sistemaTok", "obtenerEnteroTok",
+        "obtenerRealTok", "obtenerCadenaTok", "obtenerCaracterTok", "mostrarTok", "publicaTok",
+        "privadaTok", "retornarTok", "arregloTok", "agregarTok", "obtenerTok", "cuantosTok",
+        "quitarTok", "abrirTok", "leerLineaTok", "volcadoTok", "cerrarTok", "concatenarTok",
+        "parteEnteraTok", "compararTok", "mayorTok", "menorTok", "esParTok", "decimalBinTok",
+        "potenciaTok", "absolutoTok", "moduloTok", "longitudCadenaTok", "claseTok", "incluirTok",
+        "obtenerBooleanoTok", "falsoTok", "verdaderoTok"};
+
+    printf("%s\n", token_string[token]);
+
+
 }
 
 //obtoken: obtiene el siguiente token del programa fuente                   
@@ -83,7 +95,9 @@ void obtoken() {
 
     //quitar blancos, caracter de cambio de línea y tabuladores
     while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
-
+    
+    if(ch == '\0') return; //hay que cambiar dearchivo
+    
     //si la lexeme comienza con una letra, es identificador o palabra reservada
     if ((isalpha(ch) || ch == '_') && ch != '#') {
         lexid[0] = ch;
@@ -93,145 +107,166 @@ void obtoken() {
         lexid[i] = '\0';
 
         //¿es identificador o palabra reservada?.buscar en arbol de palabras reservadas
-        token = buscarToken(sumCadena(lexid));
+        token = buscarToken(lexid);
 
         strcpy(lex, lexid); //copiar en lex
     } else //si comienza con un dígito...
         if (isdigit(ch) || ch == '#') {
-            i= j = 0;
-            int hexa = 0;
-            if(ch != '#'){
-                lexid[i] = ch;
-            }else{
-                hexa = 1;
+        i = j = 0;
+        int hexa = 0;
+        if (ch != '#') {
+            lexid[i] = ch;
+        } else {
+            hexa = 1;
+        }
+        int puntoDecimal = 0;
+        while (isdigit((ch = obtch()))
+                || (ch == '.' && hexa == 0)
+                || ((ch == 'A' || ch == 'B' || ch == 'C' || ch == 'D' || ch == 'E'
+                || ch == 'F') && hexa == 1)) {
+            if (i < MAX_DIGIT) lexid[i++] = ch;
+            if (ch == '.') puntoDecimal++;
+            j++;
+        }
+
+        lexid[i] = '\0';
+
+        if (j > MAX_DIGIT)
+            log_error(0); //este número es demasiado grande
+        if (puntoDecimal > 1)
+            log_error(0); //tiene mas de un punto decimal
+        if (hexa == 0 && (ch == 'A' || ch == 'B' || ch == 'C'
+                || ch == 'D' || ch == 'E' || ch == 'F'))
+            log_error(0); //esta trantado de definir un hex sin #
+        if (puntoDecimal == 1) {
+            token = numeroReal;
+        } else {
+            token = numeroEntero;
+        }
+        if (hexa == 1) {
+            valor = strtol(lexid, NULL, 16);
+        } else {
+            if (puntoDecimal == 1) {
+                valor = atof(lexid); //valor numérico de una lexeme correspondiene a un número	        
+            } else {
+                valor = atol(lexid); //valor numérico de una lexeme correspondiene a un número	        
             }
-            int puntoDecimal = 0;
-            while (isdigit((ch = obtch())) 
-                    ||(ch == '.' && hexa == 0) 
-                    || ((ch == 'A' || ch == 'B' || ch == 'C' || ch == 'D' || ch == 'E'
-                                  || ch == 'F') && hexa == 1 ) ) {
-                if (i < MAX_DIGIT) lexid[i++] = ch;
-                if (ch == '.') puntoDecimal++;
-                j++;
-            }
-            
-            lexid[i] = '\0';
-            
-            if (j > MAX_DIGIT)
-                log_error(0); //este número es demasiado grande
-            if(puntoDecimal > 1)
-                log_error(0); //tiene mas de un punto decimal
-            if(hexa == 0 && ( ch == 'A' || ch == 'B' || ch == 'C' 
-                             || ch == 'D' || ch == 'E'  || ch == 'F'))
-                log_error(0); //esta trantado de definir un hex sin #
-            if(puntoDecimal == 1){
-                token = realTok;
-            }else{
-                token = enteroTok;
-            }
-            if(hexa == 1){
-                valor = strtol(lexid,NULL,16);
-            }else{
-                if(puntoDecimal == 1 ){
-                    valor = atof(lexid); //valor numérico de una lexeme correspondiene a un número	        
-                }else{
-                    valor = atol(lexid); //valor numérico de una lexeme correspondiene a un número	        
-                }
-                
-            }
-        } else //reconocimiento de símbolos especiales, incluyendo pares de simbolos (aplicamos "lookahead symbol technique")
+
+        }
+    } else //reconocimiento de símbolos especiales, incluyendo pares de simbolos (aplicamos "lookahead symbol technique")
         if (ch == '<') {
+        ch = obtch();
+        if (ch == '=') {
+            token = mei;
+            ch = obtch();
+        } else {
+            if (ch == '>') {
+                token = nig;
+                ch = obtch();
+            } else {
+                token = mnr;
+            }
+        }
+    } else {
+        if (ch == '>') {
             ch = obtch();
             if (ch == '=') {
-                token = mei;
+                token = mai;
                 ch = obtch();
-            } else{
-                if (ch == '>') {
-                    token = nig;
-                    ch = obtch();
-                } else{
-                    token = mnr;
-                }
+            } else {
+                token = myr;
             }
-        } else{
-            if (ch == '>') {
+        } else
+            if (ch == '=') {
+            ch = obtch();
+            if (ch == '=') {
+                token = igl;
                 ch = obtch();
-                if (ch == '=') {
-                    token = mai;
+            } else {
+                token = asignacion;
+            }
+        } else {
+            if (ch == '&') {
+                ch = obtch();
+                if (ch == '&') {
+                    token = ytok;
                     ch = obtch();
-                } else{
-                    token = myr;
+                } else {
+                    token = nulo;
                 }
-            } else
-                if (ch == '=') {
+            } else {
+                if (ch == '|') {
                     ch = obtch();
-                    if (ch == '=') {
-                     token = igl;
-                     ch = obtch();
-                    } else{
-                        token = asignacion;
+                    if (ch == '|') {
+                        token = otok;
+                        ch = obtch();
+                    } else {
+                        token = nulo;
                     }
                 } else {
-                    if(ch == '&'){
-                        ch = obtch();
-                        if( ch == '&' ){
-                           token = ytok;
-                           ch = obtch(); 
-                        }else{
-                            token = nulo;
+                    if (ch == '\"') {
+                        i = 0;
+                        //hay que considerar que el ;  es malo antes de "
+                        while ((ch = obtch()) != '\"' && (fin_de_archivo == 0)) {
+                            if (i < MAX_CADENA) valorCadena[i++] = ch;
+
                         }
-                    }else{
-                        if(ch == '|'){
+                        valorCadena[i] = '\0';
+
+                        /*printf("Valor cadena = %s\n", valorCadena);
+                        printf("\n fin de archiv0 %d", fin_de_archivo);
+                        printf("caracter ultimo %c valor entero %d\n",ch,ch);*/
+
+                        if (j > MAX_CADENA)
+                            log_error(0); //se paso del tamaño de la cadena 
+
+                        if (fin_de_archivo == 1) {
+                            log_error(0); //se acano el archivo
+                            token = nulo;
+                            return;
+                        } else {
+                            token = cadenaTok;
+
+                        }
+                        ch = obtch();
+
+                    } else {
+                        if (ch == '\'') {
                             ch = obtch();
-                            if( ch == '|' ){
-                                token = otok;
-                                ch = obtch(); 
-                            }else{
-                                token = nulo;
-                            }
-                        }else{
-                            if(ch == '\"'){
-                                i = 0;
-                                //hay que considerar que el ;  es malo antes de "
-                                while( (ch != '\n' &&  (ch = obtch()) != '\"') && (fin_de_archivo != 1)   ){
-                                    if (i < MAX_CADENA) valorCadena[i++] = ch;
-                                    
-                                }
-                                if (j > MAX_DIGIT)
-                                    log_error(0); //se paso del tamaño de la cadena 
-                                if(ch  ==  '\n')
-                                    log_error(1); //no se aguanta cadenas multilinea
-                                if( fin_de_archivo == 1){
-                                    log_error(0); //se acano el archivo
-                                }
-                                
-                                
-                                token = cadenaTok;
+                            if(ch == '\\'){
                                 ch = obtch();
-                                
-                            }else{
-                                if(ch == '\''){
-                                    ch = obtch();
-                                    if( ch == '\n' || fin_de_archivo == 1 ){
-                                        log_error(0); //fin inesperado de caracter;
-                                    }
-                                    ch = obtch();
-                                    if(ch == '\''){
-                                        token = caracterTok;
-                                    }else{
-                                        token = nulo;
-                                    }
-                                }else{
-                                    token = espec[ch]; //hashing directo en la tabla de tokens de símbolos especiales del lenguaje
-                                    ch = obtch();
-                                }
+                            }
+                            if(ch == '\n' || fin_de_archivo == 1){
+                                log_error(0); //se esperaba un caracter
+                                token = nulo;
+                                return;
+                            }
+                            int largo = 0;
+                            valorCaracter = ch;
+                            while((ch = obtch()) != '\'' && fin_de_archivo != 1){
+                                largo++;
                             }
                             
-                        }                  
+                            if(largo == 0 && ch == '\''){
+                                token = caracterTok;
+                            }else{
+                                log_error(0); //esta inentano escribir una cadena o se acabo el archivo
+                                token = nulo;
+                                return;
+                            }
+                            
+                            ch = obtch();
+                        } else {
+                            token = espec[ch]; //hashing directo en la tabla de tokens de símbolos especiales del lenguaje
+                            ch = obtch();
+                        }
                     }
-                   
+
                 }
+            }
+
         }
+    }
 }
 
 //obtch: obtiene el siguiente caracter del programa fuente
@@ -240,8 +275,10 @@ int obtch() {
 
     if (fin_de_archivo == 1) {
         fclose(fp); //cerrar el programa fuente
-        printf("Analisis lexicografico finalizado.");
-        exit(1); //salir...
+        //printf("Analisis lexicografico finalizado.");
+        fin_de_archivo++;
+        return '\0';
+        //exit(1); //salir...
     }
 
     if (offset == ll - 1) {
@@ -263,14 +300,14 @@ int obtch() {
 
 }
 
-enum simbolo buscarToken(int suma) {
+enum simbolo buscarToken(char * buscado) {
     arbol *s = lexpal;
 
     while (s != NULL) {
-        if (s->value == suma) {
+        if (strcmp(s->value, buscado) == 0) {
             return s->token;
         }
-        if (suma > s->value) {
+        if (strcmp(buscado, s->value) > 0) {
             s = s->derecha;
         } else {
             s = s->izq;
