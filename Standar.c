@@ -92,24 +92,44 @@ void obtoken() {
     char lexid[MAX_ID + 1]; //+1 para colocar el marcador "\0"
     int i, j;
 
-    //quitar blancos, caracter de cambio de línea y tabuladores
-    while (ch == ' ' || ch == '\n' || ch == '\t' ) ch = obtch();
-    if (ch == '/') {
-      ch = obtch();
-      if (ch == '/') {
-          while ((ch = obtch()) != '\n');
-          ch = obtch();
-      }else{
-          offset-=2;
-          ch = obtch();
-      }
-    }
-     //quitar blancos, caracter de cambio de línea y tabuladores
-    while (ch == ' ' || ch == '\n' || ch == '\t' ) ch = obtch();
-    
+       //quitar blancos, caracter de cambio de línea y tabuladores
+        while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
+        if (ch == '/') {
+            ch = obtch();
+            if (ch == '/') {
+                while ((ch = obtch()) != '\n');
+                ch = obtch();
+            } else {
+                if (ch == '*') {
+                    ch = obtch();
+                    char c = ' ';
+                    while (1) {
+                        if (c == '*' && ch == '/') {
+                            ch = obtch();
+                            break;
+                        } else {
+                            c = ch;
+                        }
+                        ch = obtch();
 
-  
+                        if (fin_de_archivo == 1) {
+                            log_error(0); //mal cometario de bloque
+                            return;
+                        }
+                    }
+                } else {
+                    offset -= 2;
+                    ch = obtch();
+                }
+            }
+        }
     
+    //quitar blancos, caracter de cambio de línea y tabuladores
+    while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
+
+
+
+
     if (ch == '\0') return; //hay que cambiar dearchivo
 
     //si la lexeme comienza con una letra, es identificador o palabra reservada
