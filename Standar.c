@@ -5,6 +5,7 @@
 #include "Standar.h"
 #include "Lexico.h"
 #include "Errores.h"
+#include "Scanner.h"
 //#include <openssl/md5.h>
 
 FILE *fp = NULL;
@@ -68,7 +69,7 @@ void inicializar_espec() {
 void imprime_token() {
 
 
-    char *token_string[] = {"nulo", "numeroReal", "numeroEntero", "ident", "mas", "menos", "por", "barra", "llaveI",
+    char *token_string[] = {"nulo", "comentario","numeroReal", "numeroEntero", "ident", "mas", "menos", "por", "barra", "llaveI",
         "llaveF", "parentI", "parentF", "corcheteI", "corcheteF", "punto", "coma", "puntoycoma",
         "asignacion", "mei", "mai", "myr", "mnr", "igl", "nig", "negacion", "ytok", "otok", "referencia",
         "enteroTok", "byteTok", "realTok", "vacioTok", "booleanoTok", "cadenaTok", "caracterTok", "objetoTok",
@@ -92,44 +93,8 @@ void obtoken() {
     char lexid[MAX_ID + 1]; //+1 para colocar el marcador "\0"
     int i, j;
 
-       //quitar blancos, caracter de cambio de línea y tabuladores
-        while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
-        if (ch == '/') {
-            ch = obtch();
-            if (ch == '/') {
-                while ((ch = obtch()) != '\n');
-                ch = obtch();
-            } else {
-                if (ch == '*') {
-                    ch = obtch();
-                    char c = ' ';
-                    while (1) {
-                        if (c == '*' && ch == '/') {
-                            ch = obtch();
-                            break;
-                        } else {
-                            c = ch;
-                        }
-                        ch = obtch();
-
-                        if (fin_de_archivo == 1) {
-                            log_error(0); //mal cometario de bloque
-                            return;
-                        }
-                    }
-                } else {
-                    offset -= 2;
-                    ch = obtch();
-                }
-            }
-        }
-    
     //quitar blancos, caracter de cambio de línea y tabuladores
     while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
-
-
-
-
     if (ch == '\0') return; //hay que cambiar dearchivo
 
     //si la lexeme comienza con una letra, es identificador o palabra reservada
@@ -143,7 +108,7 @@ void obtoken() {
         //¿es identificador o palabra reservada?.buscar en arbol de palabras reservadas
         token = buscarToken(lexid);
 
-        strcpy(lex, lexid); //copiar en lex
+        //strcpy(lex, lexid); //copiar en lex
     } else //si comienza con un dígito...
         if (isdigit(ch) || ch == '#') {
         i = j = 0;
@@ -291,8 +256,58 @@ void obtoken() {
 
                             ch = obtch();
                         } else {
-                            token = espec[ch]; //hashing directo en la tabla de tokens de símbolos especiales del lenguaje
-                            ch = obtch();
+                            if (ch == '/') {
+                                ch = obtch();
+                                if (ch == '/') {
+                                    while ((ch = obtch()) != '\n');
+                                    token = comentario;
+                                   // ch = obtch();
+                                } else {
+                                    if (ch == '*') {
+                                        ch = obtch();
+                                        char c = ' ';
+                                        while (1) {
+                                            if (c == '*' && ch == '/') {
+                                                break;
+                                            } else {
+                                                c = ch;
+                                            }
+                                            ch = obtch();
+
+                                            if (fin_de_archivo == 1) {
+                                                log_error(0); //mal cometario de bloque
+                                                return;
+                                            }
+                                        }
+                                        ch = obtch();
+                                        token = comentario;
+                                      
+                                    }else {
+                                        token = espec['/'];
+                                    }
+                                }
+                            } else {
+                                token = espec[ch]; //hashing directo en la tabla de tokens de símbolos especiales del lenguaje
+                                ch = obtch();
+                            }
+                            /*if (ch == '/') {
+                                ch = obtch();
+                                if (ch == '/') {
+                                    while ((ch = obtch()) != '\n') printf("%c",ch);
+                                    printf("------ FIn comentario -----\n");
+                                    token = comentario;
+                                        //quitar blancos, caracter de cambio de línea y tabuladores
+                                    while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
+                                   // ch = obtch();
+                                }else {
+                                     token = espec['/'];
+                                }
+                            }else{
+                                token = espec[ch]; //hashing directo en la tabla de tokens de símbolos especiales del lenguaje
+                                ch = obtch();
+                            }*/
+                            /* token = espec[ch]; //hashing directo en la tabla de tokens de símbolos especiales del lenguaje
+                                ch = obtch();*/
                         }
                     }
 
@@ -310,7 +325,6 @@ int obtch() {
     if (fin_de_archivo == 1) {
         fclose(fp); //cerrar el programa fuente
         //printf("Analisis lexicografico finalizado.");
-        fin_de_archivo++;
         return '\0';
         //exit(1); //salir...
     }

@@ -10,16 +10,25 @@
 
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
 (JNIEnv *env, jobject obj, jobjectArray allFiles) {
-    int cant = 1;
+    int cant = (*env)->GetArrayLength(env, allFiles);
 
-    while (cant > 0) {
-        fp = fopen("/home/nextor/Escritorio/proyecto/main.acl", "r"); //abrir el fuente solo para lectura
 
-        printf("\n\nCompilador de armus version 0.1\n");
-        //inicializacion de tokens de símbolos especiales 
-        inicializar_espec();
-        inicializarArbolPalabras();
+    printf("\n\nCompilador de armus version 0.1\n");
+    printf("CAntidad de archivos %d\n",cant);
+    //inicializacion de tokens de símbolos especiales 
+    inicializar_espec();
+    inicializarArbolPalabras();
 
+    int i = 0;
+    for (i = 0; i < cant; i++) {
+        jstring string = (jstring) ((*env)->GetObjectArrayElement(env, allFiles, i));
+        const char *rawString = (*env)->GetStringUTFChars(env, string, 0);
+        // Don't forget to call `ReleaseStringUTFChars` when you're done.
+        fp = fopen(rawString, "r"); //abrir el fuente solo para lectura
+        if(fp == NULL){
+            return NULL;
+        }
+        printf("--------------------%s -----------------------\n", rawString);
         //inicializacion de otras variables 
         ch = ' ';
         fin_de_archivo = 0;
@@ -28,22 +37,21 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
 
         //tokenizar el programa fuente
         while (1) {
-          
+
             obtoken();
-            if(primerError == 1){
+            if (primerError == 1) {
                 printf("PANICO \n");
                 return NULL;
             }
-            if(fin_de_archivo == 2){
+            if (fin_de_archivo == 2) {
                 break;
             }
-            if(fin_de_archivo == 1){
+            if (fin_de_archivo == 1) {
                 fin_de_archivo++;
             }
-            imprime_token(); 
+            imprime_token();
         }
-        cant--;
-        
+        fp = NULL;
     }
     return NULL;
 }
