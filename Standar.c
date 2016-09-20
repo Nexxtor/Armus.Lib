@@ -93,37 +93,23 @@ void obtoken() {
     int i, j;
 
     //quitar blancos, caracter de cambio de línea y tabuladores
-    while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
-
+    while (ch == ' ' || ch == '\n' || ch == '\t' ) ch = obtch();
     if (ch == '/') {
-        ch = obtch();
-        if (ch == '/') {
-            while ((ch = obtch()) != '\n');
-            ch = obtch();
-        }else{
-             if(ch == '*'){
-                int asterisco = 0;
-                while((ch=obtch())!='/' && fin_de_archivo == 0){
-                    if(ch == '*'){
-                        asterisco = 1;
-                    }else{
-                        asterisco = 0;
-                    }
-                }
-                if(fin_de_archivo == 1){
-                    log_error(0); //se acabo el archivo anter que se acabara el comentario
-                    return;
-                }
-                if(asterisco ==  1){
-                    ch = obtch();
-                }else{
-                    log_error(0); //Comentario mal escrito
-                    return;
-                }              
-                        
-            }
-        }
+      ch = obtch();
+      if (ch == '/') {
+          while ((ch = obtch()) != '\n');
+          ch = obtch();
+      }else{
+          offset-=2;
+          ch = obtch();
+      }
     }
+     //quitar blancos, caracter de cambio de línea y tabuladores
+    while (ch == ' ' || ch == '\n' || ch == '\t' ) ch = obtch();
+    
+
+  
+    
     if (ch == '\0') return; //hay que cambiar dearchivo
 
     //si la lexeme comienza con una letra, es identificador o palabra reservada
