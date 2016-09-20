@@ -94,8 +94,15 @@ void obtoken() {
     int ok = 0;
 
     //quitar blancos, caracter de cambio de línea y tabuladores
-    while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
+    while (ch == ' ' || ch == '\n' || ch == '\t' )  ch = obtch();
     
+    if(ch == '/'){
+        ch = obtch();
+        if(ch  == '/'){
+            while((ch=obtch()) != '\n');
+            ch=obtch();
+        }
+    }
     if(ch == '\0') return; //hay que cambiar dearchivo
     
     //si la lexeme comienza con una letra, es identificador o palabra reservada
