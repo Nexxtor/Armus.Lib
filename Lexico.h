@@ -6,12 +6,9 @@ extern "C" {
 #endif
 #include "Parametros.h"
 
-//lexemes de las palabras reservadas
-extern char *lexpal[MAXPAL];
-
-//lista de tokens de ARMUS
-enum simbolo {nulo,ident,numero,mas,menos,por,barra,llaveI,llaveF,parentI,parentF,corcheteI,corcheteF,punto,coma,
-puntoycoma,asignacion,mei,mai,myr,mnr,igl,nig,negacion,ytok,otok,hexaTok,referencia,enteroTok,byteTok,
+    //lista de tokens de ARMUS
+enum simbolo {nulo,ident,mas,menos,por,barra,llaveI,llaveF,parentI,parentF,corcheteI,corcheteF,punto,coma,
+puntoycoma,asignacion,mei,mai,myr,mnr,igl,nig,negacion,ytok,otok,referencia,enteroTok,byteTok,
 realTok,vacioTok,booleanoTok,cadenaTok,caracterTok,objetoTok,archivoTok,siTok,sinoTok,probarTok,casoTok,defectoTok,
 romperTok,mientrasTok,paraTok,hacerTok,paracadaTok,sistemaTok,obtenerEnteroTok,obtenerRealTok,obtenerCadenaTok,
 obtenerCaracterTok,mostrarTok,publicaTok,privadaTok,retornarTok,arregloTok,agregarTok,obtenerTok,cuantosTok,
@@ -28,6 +25,19 @@ extern enum simbolo tokpal[MAXPAL];
 extern enum simbolo espec[255] ;
 
 
+
+typedef struct hoja{
+    int value;
+    enum simbolo token;
+    struct hoja* izq;
+   struct hoja* derecha;
+} arbol;
+
+extern arbol* lexpal;
+
+void inicializarArbolPalabras();
+int sumCadena(char *);
+void insertarArbol(int, arbol**, int);
 
 #ifdef __cplusplus
 }
