@@ -91,20 +91,41 @@ void imprime_token() {
 void obtoken() {
     char lexid[MAX_ID + 1]; //+1 para colocar el marcador "\0"
     int i, j;
-    int ok = 0;
 
     //quitar blancos, caracter de cambio de línea y tabuladores
-    while (ch == ' ' || ch == '\n' || ch == '\t' )  ch = obtch();
-    
-    if(ch == '/'){
+    while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
+
+    if (ch == '/') {
         ch = obtch();
-        if(ch  == '/'){
-            while((ch=obtch()) != '\n');
-            ch=obtch();
+        if (ch == '/') {
+            while ((ch = obtch()) != '\n');
+            ch = obtch();
+        }else{
+             if(ch == '*'){
+                int asterisco = 0;
+                while((ch=obtch())!='/' && fin_de_archivo == 0){
+                    if(ch == '*'){
+                        asterisco = 1;
+                    }else{
+                        asterisco = 0;
+                    }
+                }
+                if(fin_de_archivo == 1){
+                    log_error(0); //se acabo el archivo anter que se acabara el comentario
+                    return;
+                }
+                if(asterisco ==  1){
+                    ch = obtch();
+                }else{
+                    log_error(0); //Comentario mal escrito
+                    return;
+                }              
+                        
+            }
         }
     }
-    if(ch == '\0') return; //hay que cambiar dearchivo
-    
+    if (ch == '\0') return; //hay que cambiar dearchivo
+
     //si la lexeme comienza con una letra, es identificador o palabra reservada
     if ((isalpha(ch) || ch == '_') && ch != '#') {
         lexid[0] = ch;
@@ -240,28 +261,28 @@ void obtoken() {
                     } else {
                         if (ch == '\'') {
                             ch = obtch();
-                            if(ch == '\\'){
+                            if (ch == '\\') {
                                 ch = obtch();
                             }
-                            if(ch == '\n' || fin_de_archivo == 1){
+                            if (ch == '\n' || fin_de_archivo == 1) {
                                 log_error(0); //se esperaba un caracter
                                 token = nulo;
                                 return;
                             }
                             int largo = 0;
                             valorCaracter = ch;
-                            while((ch = obtch()) != '\'' && fin_de_archivo != 1){
+                            while ((ch = obtch()) != '\'' && fin_de_archivo != 1) {
                                 largo++;
                             }
-                            
-                            if(largo == 0 && ch == '\''){
+
+                            if (largo == 0 && ch == '\'') {
                                 token = caracterTok;
-                            }else{
+                            } else {
                                 log_error(0); //esta inentano escribir una cadena o se acabo el archivo
                                 token = nulo;
                                 return;
                             }
-                            
+
                             ch = obtch();
                         } else {
                             token = espec[ch]; //hashing directo en la tabla de tokens de símbolos especiales del lenguaje
