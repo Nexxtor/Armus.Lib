@@ -8,9 +8,13 @@ extern int fin_de_archivo;   //bandera de fin de archivo (se usa en pl0.cpp y sc
 extern int ch;               //último caracter leído (se usa en pl0.cpp y scanner.cpp)
 extern char lex[MAX_ID+1];    //último lexeme leído ( +1 para colocar "\0")
 extern long int valor;       //valor numérico de una lexeme correspondiene a un número
+extern double valorDoble; //
+extern char valorCadena[MAX_CADENA];
+
 
 int getLine(char s[], int lim);
 void obtoken();
 int obtch();
 void inicializar_espec();
 void imprime_token();
+enum simbolo buscarToken(int suma);
