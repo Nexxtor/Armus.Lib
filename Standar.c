@@ -185,12 +185,12 @@ void obtoken() {
         lexid[i] = '\0';
 
         if (j > MAX_DIGIT)
-            log_error(0); //este número es demasiado grande
+            log_error(7); //este número es demasiado grande
         if (puntoDecimal > 1)
-            log_error(0); //tiene mas de un punto decimal
+            log_error(8); //tiene mas de un punto decimal
         if (hexa == 0 && (ch == 'A' || ch == 'B' || ch == 'C'
                 || ch == 'D' || ch == 'E' || ch == 'F'))
-            log_error(0); //esta trantado de definir un hex sin #
+            log_error(9); //esta trantado de definir un hex sin #
         if (puntoDecimal == 1) {
             token = numeroReal;
         } else {
@@ -272,10 +272,11 @@ void obtoken() {
                         printf("caracter ultimo %c valor entero %d\n",ch,ch);*/
 
                         if (i > MAX_CADENA)
-                            log_error(0); //se paso del tamaño de la cadena 
+                            log_error(10); //se paso del tamaño de la cadena 
 
                         if (fin_de_archivo == 1) {
-                            log_error(0); //se acano el archivo
+                            printf("en cadena");
+                            log_error(11); //se acano el archivo
                             token = nulo;
                             return;
                         } else {
@@ -291,7 +292,8 @@ void obtoken() {
                                 ch = obtch();
                             }
                             if (ch == '\n' || fin_de_archivo == 1) {
-                                log_error(0); //se esperaba un caracter
+                                log_error(11); //se esperaba un caracter
+                                printf("en caracter");
                                 token = nulo;
                                 return;
                             }
@@ -304,7 +306,7 @@ void obtoken() {
                             if (largo == 0 && ch == '\'') {
                                 token = caracterTok;
                             } else {
-                                log_error(0); //esta inentano escribir una cadena o se acabo el archivo
+                                log_error(12); //esta inentano escribir una cadena o se acabo el archivo
                                 token = nulo;
                                 return;
                             }
@@ -330,7 +332,8 @@ void obtoken() {
                                             ch = obtch();
 
                                             if (fin_de_archivo == 1) {
-                                                log_error(0); //mal cometario de bloque
+                                                log_error(11); //mal cometario de bloque
+                                                printf("en comentario");
                                                 return;
                                             }
                                         }
