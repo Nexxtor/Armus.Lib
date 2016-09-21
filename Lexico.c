@@ -35,7 +35,7 @@ void inicializarArbolPalabras() {
     int mitad = MAXPAL / 2, i = 0;
 
     arbol* raiz = NULL;
-    raiz = (arbol *) malloc(sizeof (arbol));
+    raiz = (arbol *) malloc(sizeof(arbol));
 
     strncpy(raiz->value, lexPalAux[mitad], MAX_FILE);
     raiz->derecha = NULL;
@@ -65,7 +65,7 @@ void insertarArbol(char * valor, arbol **raiz, int pos) {
     arbol *nuevo;
     if ( strcmp(valor,(*raiz)->value) > 0) {
         if ((*raiz)->derecha == NULL) {
-            nuevo = (arbol *) malloc(sizeof (arbol));
+            nuevo = (arbol *) malloc(sizeof(arbol));
             strncpy(nuevo->value,valor,MAX_FILE);
             nuevo->derecha = NULL;
             nuevo->izq = NULL;
@@ -76,7 +76,7 @@ void insertarArbol(char * valor, arbol **raiz, int pos) {
         }
     } else {
         if ((*raiz)->izq == NULL) {
-            nuevo = (arbol *) malloc(sizeof (arbol));
+            nuevo = (arbol *) malloc(sizeof(arbol));
              strncpy(nuevo->value,valor,MAX_FILE);
             nuevo->derecha = NULL;
             nuevo->izq = NULL;

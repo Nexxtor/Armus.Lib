@@ -10,7 +10,9 @@ extern char lex[MAX_ID+1];    //último lexeme leído ( +1 para colocar "\0")
 extern long int valor;       //valor numérico de una lexeme correspondiene a un número
 extern double valorDoble; //
 extern char valorCadena[MAX_CADENA];
-
+extern char valorCaracter;
+extern int simbolo;
+extern FILE *tokenList;
 
 int getLine(char s[], int lim);
 void obtoken();

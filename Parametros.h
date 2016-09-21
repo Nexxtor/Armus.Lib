@@ -7,6 +7,7 @@
 #define MAX_NAME_FILE 256*4
 #define MAXPAL 53  //numero de palabras reservadas
 #define MAX_CADENA 123456
+#define MAX_SIZE_FILE 99999
 
 
 #ifdef __cplusplus

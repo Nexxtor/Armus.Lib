@@ -9,16 +9,19 @@
 //#include <openssl/md5.h>
 
 FILE *fp = NULL;
-char linea[MAX_LINEA]; //buffer de líneas 
-int ll; //contador de caracteres
-int offset; //corrimiento en la lectura de los caracteres del programa fuente
-int fin_de_archivo; //bandera de fin de archivo (obtch)   
-int ch; //último caracter leído
-char lex[MAX_ID + 1]; //último lexeme leído ( +1 para colocar "\0")
-long int valor; //valor numérico de una lexeme correspondiene a un número
-double valorDoble;
-char valorCaracter;
-char valorCadena[MAX_CADENA];
+char linea[MAX_LINEA] = ""; //buffer de líneas 
+int ll = 0; //contador de caracteres
+int offset = 0; //corrimiento en la lectura de los caracteres del programa fuente
+int fin_de_archivo = 0; //bandera de fin de archivo (obtch)   
+int ch = 0; //último caracter leído
+char lex[MAX_ID + 1] = ""; //último lexeme leído ( +1 para colocar "\0")
+long int valor = 0; //valor numérico de una lexeme correspondiene a un número
+double valorDoble = 0;
+char valorCaracter = 'c';
+char valorCadena[MAX_CADENA] = "";
+int simbolo = 0;
+FILE* tokenList = NULL;
+
 
 //getline: lee la siguiente línea del fuente y regresa su tamaño (incluyendo '\n') o 0 si EOF. (por ejemplo: para VAR regresa 4)
 //es probablemente la rutina de más bajo nivel del compilador
@@ -69,7 +72,7 @@ void inicializar_espec() {
 void imprime_token() {
 
 
-    char *token_string[] = {"nulo", "comentario","numeroReal", "numeroEntero", "ident", "mas", "menos", "por", "barra", "llaveI",
+    char *token_string[] = {"nulo", "comentario", "numeroReal", "numeroEntero", "ident", "mas", "menos", "por", "barra", "llaveI",
         "llaveF", "parentI", "parentF", "corcheteI", "corcheteF", "punto", "coma", "puntoycoma",
         "asignacion", "mei", "mai", "myr", "mnr", "igl", "nig", "negacion", "ytok", "otok", "referencia",
         "enteroTok", "byteTok", "realTok", "vacioTok", "booleanoTok", "cadenaTok", "caracterTok", "objetoTok",
@@ -82,7 +85,57 @@ void imprime_token() {
         "potenciaTok", "absolutoTok", "moduloTok", "longitudCadenaTok", "claseTok", "incluirTok",
         "obtenerBooleanoTok", "falsoTok", "verdaderoTok"};
 
-    printf("%s\n", token_string[token]);
+
+
+    if (token != comentario) {
+        fprintf(tokenList,"%s => ", token_string[token]);
+        if (token == numeroEntero) {
+             fprintf(tokenList,"%ld\n", valor);
+        } else {
+            if (token == numeroReal) {
+                fprintf(tokenList,"%f\n", valorDoble);
+            } else {
+                if (token == caracterTok) {
+                     fprintf(tokenList,"%c\n", valorCaracter);
+                } else {
+                    if (token == cadenaTok) {
+                         fprintf(tokenList,"%s\n", valorCadena);
+                    } else {
+                        if (token == ytok) {
+                             fprintf(tokenList,"&&\n");
+                        } else {
+                            if (token == otok) {
+                                 fprintf(tokenList,"||\n");
+                            } else {
+                                if (token == igl) {
+                                     fprintf(tokenList,"==\n");
+                                } else {
+                                    if (token == nig) {
+                                        fprintf(tokenList,"<>\n");
+                                    } else {
+                                        if (token == asignacion) {
+                                             fprintf(tokenList,"=\n");
+                                        } else {
+                                            if (simbolo > 0) {
+                                                fprintf(tokenList,"%s\n", token_string[token]);
+                                            } else {
+                                                 fprintf(tokenList,"%s\n", lex);
+
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
 
 
 }
@@ -92,7 +145,7 @@ void imprime_token() {
 void obtoken() {
     char lexid[MAX_ID + 1]; //+1 para colocar el marcador "\0"
     int i, j;
-
+    simbolo = 0;
     //quitar blancos, caracter de cambio de línea y tabuladores
     while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
     if (ch == '\0') return; //hay que cambiar dearchivo
@@ -108,7 +161,7 @@ void obtoken() {
         //¿es identificador o palabra reservada?.buscar en arbol de palabras reservadas
         token = buscarToken(lexid);
 
-        //strcpy(lex, lexid); //copiar en lex
+        strcpy(lex, lexid); //copiar en lex
     } else //si comienza con un dígito...
         if (isdigit(ch) || ch == '#') {
         i = j = 0;
@@ -216,7 +269,7 @@ void obtoken() {
                         printf("\n fin de archiv0 %d", fin_de_archivo);
                         printf("caracter ultimo %c valor entero %d\n",ch,ch);*/
 
-                        if (j > MAX_CADENA)
+                        if (i > MAX_CADENA)
                             log_error(0); //se paso del tamaño de la cadena 
 
                         if (fin_de_archivo == 1) {
@@ -261,7 +314,7 @@ void obtoken() {
                                 if (ch == '/') {
                                     while ((ch = obtch()) != '\n');
                                     token = comentario;
-                                   // ch = obtch();
+                                    // ch = obtch();
                                 } else {
                                     if (ch == '*') {
                                         ch = obtch();
@@ -281,14 +334,16 @@ void obtoken() {
                                         }
                                         ch = obtch();
                                         token = comentario;
-                                      
-                                    }else {
+
+                                    } else {
                                         token = espec['/'];
                                     }
                                 }
                             } else {
                                 token = espec[ch]; //hashing directo en la tabla de tokens de símbolos especiales del lenguaje
+                                simbolo = ch;
                                 ch = obtch();
+
                             }
                             /*if (ch == '/') {
                                 ch = obtch();
@@ -335,7 +390,7 @@ int obtch() {
             fin_de_archivo = 1; //se retrasa en un blanco la deteccion de EOF, porque obtoken lleva un caracter adelantado. si no, en 
         //algunos casos tendríamos problemas, por ejemplo: no se reconoceria el punto final del programa (...end.)
 
-        printf("\n%s", linea);
+        // printf("\n%s", linea);
         offset = -1;
     }
 
