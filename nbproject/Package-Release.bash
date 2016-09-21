@@ -13,8 +13,8 @@ CND_BUILDDIR=build
 CND_DLIB_EXT=so
 NBTMPDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libArmus.Lib.${CND_DLIB_EXT}
-OUTPUT_BASENAME=libArmus.Lib.${CND_DLIB_EXT}
+OUTPUT_PATH=/opt/armus/lib/libArmus.Lib.so
+OUTPUT_BASENAME=libArmus.Lib.so
 PACKAGE_TOP_DIR=libArmus.Lib.so/
 
 # Functions

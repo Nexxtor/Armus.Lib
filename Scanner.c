@@ -25,8 +25,8 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
     int cant = (*env)->GetArrayLength(env, allFiles);
 
 
-    printf("\n\nCompilador de armus version 0.1\n");
-    printf("CAntidad de archivos %d\n", cant);
+ //   printf("\n\nCompilador de armus version 0.1\n");
+  //  printf("CAntidad de archivos %d\n", cant);
     //inicializacion de tokens de símbolos especiales 
     inicializar_espec();
     inicializarArbolPalabras();
@@ -71,11 +71,11 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
         fprintf(tokenList,"\n");
         fp = NULL;
     }
-
+    fclose(tokenList);
     jobjectArray respuesta = 0;
     jsize size = 1;
     respuesta = (*env)->NewObjectArray(env,size,(*env)->FindClass(env,"java/lang/String"),0);
-    i = 1;
+    i = 0;
     (*env)->SetObjectArrayElement(env,respuesta,i, (*env)->NewStringUTF(env,"ok") );
 
     return respuesta;

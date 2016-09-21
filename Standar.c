@@ -88,38 +88,38 @@ void imprime_token() {
 
 
     if (token != comentario) {
-        fprintf(tokenList,"%s => ", token_string[token]);
+        fprintf(tokenList, "%s => ", token_string[token]);
         if (token == numeroEntero) {
-             fprintf(tokenList,"%ld\n", valor);
+            fprintf(tokenList, "%ld\n", valor);
         } else {
             if (token == numeroReal) {
-                fprintf(tokenList,"%f\n", valorDoble);
+                fprintf(tokenList, "%f\n", valorDoble);
             } else {
                 if (token == caracterTok) {
-                     fprintf(tokenList,"%c\n", valorCaracter);
+                    fprintf(tokenList, "%c\n", valorCaracter);
                 } else {
                     if (token == cadenaTok) {
-                         fprintf(tokenList,"%s\n", valorCadena);
+                        fprintf(tokenList, "%s\n", valorCadena);
                     } else {
                         if (token == ytok) {
-                             fprintf(tokenList,"&&\n");
+                            fprintf(tokenList, "&&\n");
                         } else {
                             if (token == otok) {
-                                 fprintf(tokenList,"||\n");
+                                fprintf(tokenList, "||\n");
                             } else {
                                 if (token == igl) {
-                                     fprintf(tokenList,"==\n");
+                                    fprintf(tokenList, "==\n");
                                 } else {
                                     if (token == nig) {
-                                        fprintf(tokenList,"<>\n");
+                                        fprintf(tokenList, "<>\n");
                                     } else {
                                         if (token == asignacion) {
-                                             fprintf(tokenList,"=\n");
+                                            fprintf(tokenList, "=\n");
                                         } else {
                                             if (simbolo > 0) {
-                                                fprintf(tokenList,"%s\n", token_string[token]);
+                                                fprintf(tokenList, "%s\n", token_string[token]);
                                             } else {
-                                                 fprintf(tokenList,"%s\n", lex);
+                                                fprintf(tokenList, "%s\n", lex);
 
                                             }
                                         }
@@ -168,6 +168,7 @@ void obtoken() {
         int hexa = 0;
         if (ch != '#') {
             lexid[i] = ch;
+            i++;
         } else {
             hexa = 1;
         }
@@ -195,6 +196,7 @@ void obtoken() {
         } else {
             token = numeroEntero;
         }
+       // printf("%s\n", lexid);
         if (hexa == 1) {
             valor = strtol(lexid, NULL, 16);
         } else {
