@@ -72,6 +72,11 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
         fp = NULL;
     }
 
+    jobjectArray respuesta = 0;
+    jsize size = i;
+    respuesta = (*env)->NewObjectArray(env,size,(*env)->FindClass(env,"java/lang/String"),0);
+    i = 1;
+    (*env)->SetObjectArrayElement(env,respuesta,i, (*env)->NewStringUTF(env,"ok") );
 
-    return 1;
+    return respuesta;
 }
