@@ -8,7 +8,7 @@
 #include "Scanner.h"
 #include "Lexico.h"
 
-struct ls {
+/*struct ls {
     char archivo[MAX_NAME_FILE];
     enum simbolo token;
     int simbolo;
@@ -18,7 +18,7 @@ struct ls {
     char cadena[MAX_CADENA];
     char demas[MAX_ID];
     struct ls *sig;
-};
+};*/
 
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
 (JNIEnv *env, jobject obj, jobjectArray allFiles) {
@@ -30,6 +30,7 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
     //inicializacion de tokens de símbolos especiales 
     inicializar_espec();
     inicializarArbolPalabras();
+    iniciarParamentros();
     
     tokenList = fopen("lsToken.tok","w");
     

@@ -37,13 +37,14 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/cdfee43a/Errores.o \
 	${OBJECTDIR}/_ext/cdfee43a/Lexico.o \
+	${OBJECTDIR}/_ext/cdfee43a/Parametros.o \
 	${OBJECTDIR}/_ext/cdfee43a/PreScanner.o \
 	${OBJECTDIR}/_ext/cdfee43a/Scanner.o \
 	${OBJECTDIR}/_ext/cdfee43a/Standar.o
 
 
 # C Compiler Flags
-CFLAGS=-m64 -shared
+CFLAGS=
 
 # CC Compiler Flags
 CCFLAGS=
@@ -60,36 +61,41 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk /opt/armus/lib/libArmus.Lib.so
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libArmus.Lib.${CND_DLIB_EXT}
 
-/opt/armus/lib/libArmus.Lib.so: ${OBJECTFILES}
-	${MKDIR} -p /opt/armus/lib
-	${LINK.c} -o /opt/armus/lib/libArmus.Lib.so ${OBJECTFILES} ${LDLIBSOPTIONS} -shared -fPIC
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libArmus.Lib.${CND_DLIB_EXT}: ${OBJECTFILES}
+	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
+	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libArmus.Lib.${CND_DLIB_EXT} ${OBJECTFILES} ${LDLIBSOPTIONS} -shared -fPIC
 
 ${OBJECTDIR}/_ext/cdfee43a/Errores.o: /home/nextor/NetBeansProjects/Armus.Lib/Errores.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
 	${RM} "$@.d"
-	$(COMPILE.c) -O2 -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Errores.o /home/nextor/NetBeansProjects/Armus.Lib/Errores.c
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Errores.o /home/nextor/NetBeansProjects/Armus.Lib/Errores.c
 
 ${OBJECTDIR}/_ext/cdfee43a/Lexico.o: /home/nextor/NetBeansProjects/Armus.Lib/Lexico.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
 	${RM} "$@.d"
-	$(COMPILE.c) -O2 -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Lexico.o /home/nextor/NetBeansProjects/Armus.Lib/Lexico.c
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Lexico.o /home/nextor/NetBeansProjects/Armus.Lib/Lexico.c
+
+${OBJECTDIR}/_ext/cdfee43a/Parametros.o: /home/nextor/NetBeansProjects/Armus.Lib/Parametros.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Parametros.o /home/nextor/NetBeansProjects/Armus.Lib/Parametros.c
 
 ${OBJECTDIR}/_ext/cdfee43a/PreScanner.o: /home/nextor/NetBeansProjects/Armus.Lib/PreScanner.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
 	${RM} "$@.d"
-	$(COMPILE.c) -O2 -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/PreScanner.o /home/nextor/NetBeansProjects/Armus.Lib/PreScanner.c
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/PreScanner.o /home/nextor/NetBeansProjects/Armus.Lib/PreScanner.c
 
 ${OBJECTDIR}/_ext/cdfee43a/Scanner.o: /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
 	${RM} "$@.d"
-	$(COMPILE.c) -O2 -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Scanner.o /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Scanner.o /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c
 
 ${OBJECTDIR}/_ext/cdfee43a/Standar.o: /home/nextor/NetBeansProjects/Armus.Lib/Standar.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
 	${RM} "$@.d"
-	$(COMPILE.c) -O2 -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Standar.o /home/nextor/NetBeansProjects/Armus.Lib/Standar.c
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Standar.o /home/nextor/NetBeansProjects/Armus.Lib/Standar.c
 
 # Subprojects
 .build-subprojects:
@@ -97,7 +103,7 @@ ${OBJECTDIR}/_ext/cdfee43a/Standar.o: /home/nextor/NetBeansProjects/Armus.Lib/St
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} /opt/armus/lib/libArmus.Lib.so
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libArmus.Lib.${CND_DLIB_EXT}
 
 # Subprojects
 .clean-subprojects:

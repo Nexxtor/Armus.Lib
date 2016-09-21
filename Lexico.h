@@ -27,7 +27,7 @@ extern enum simbolo espec[255] ;
 
 
 typedef struct hoja{
-    char value[MAX_FILE]; //Deberia tener el tamaño de la palabrea reservada mas grande
+    char *value; //Deberia tener el tamaño de la palabrea reservada mas grande
     enum simbolo token;
     struct hoja* izq;
    struct hoja* derecha;

@@ -8,17 +8,17 @@
 #include "Scanner.h"
 //#include <openssl/md5.h>
 
-FILE *fp = NULL;
-char linea[MAX_LINEA] = ""; //buffer de líneas 
+
+char *linea; //buffer de líneas 
 int ll = 0; //contador de caracteres
 int offset = 0; //corrimiento en la lectura de los caracteres del programa fuente
 int fin_de_archivo = 0; //bandera de fin de archivo (obtch)   
 int ch = 0; //último caracter leído
-char lex[MAX_ID + 1] = ""; //último lexeme leído ( +1 para colocar "\0")
+char *lex; //último lexeme leído ( +1 para colocar "\0")
 long int valor = 0; //valor numérico de una lexeme correspondiene a un número
 double valorDoble = 0;
 char valorCaracter = 'c';
-char valorCadena[MAX_CADENA] = "";
+char *valorCadena;
 int simbolo = 0;
 FILE* tokenList = NULL;
 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "Errores.h"
 
-char *errores[12] = {
+char *errores[13] = {
     "000 Error importante: un archivo no pudo ser abierto \n",
     "001 Error: existe un enter entre incluir y \" \n",
     "002 Error: falto comillia (\") de cierre en un incluir \n",

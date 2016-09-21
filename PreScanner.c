@@ -14,6 +14,7 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
 
     char **listaPreliminar;
     int i = 1;
+    iniciarParamentros();
     listaPreliminar = obtenerArchivosIncluir(strFirstFile);
     while(listaPreliminar[i][0] != '\0'){
         char**masArchivos = obtenerArchivosIncluir(listaPreliminar[i]);
