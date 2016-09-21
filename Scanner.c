@@ -23,7 +23,7 @@ struct ls {
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
 (JNIEnv *env, jobject obj, jobjectArray allFiles) {
     int cant = (*env)->GetArrayLength(env, allFiles);
-
+    primerError = 0;
 
  //   printf("\n\nCompilador de armus version 0.1\n");
   //  printf("CAntidad de archivos %d\n", cant);
@@ -55,6 +55,8 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
             obtoken();
             if (primerError == 1) {
                 printf("PANICO \n");
+                fclose(tokenList);
+                fclose(fp);
                 primerError = 0;
                 return NULL;
             }
