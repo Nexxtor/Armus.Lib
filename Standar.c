@@ -83,61 +83,132 @@ void imprime_token() {
         "quitarTok", "abrirTok", "leerLineaTok", "volcadoTok", "cerrarTok", "concatenarTok",
         "parteEnteraTok", "compararTok", "mayorTok", "menorTok", "esParTok", "decimalBinTok",
         "potenciaTok", "absolutoTok", "moduloTok", "longitudCadenaTok", "claseTok", "incluirTok",
-        "obtenerBooleanoTok", "falsoTok", "verdaderoTok"};
+        "obtenerBooleanoTok", "falsoTok", "verdaderoTok", "miTok"};
 
 
 
     if (token != comentario) {
-        fprintf(tokenList, "%s => ", token_string[token]);
+
         if (token == numeroEntero) {
-            fprintf(tokenList, "%ld\n", valor);
+            fprintf(tokenList, "%ld", valor);
         } else {
             if (token == numeroReal) {
-                fprintf(tokenList, "%f\n", valorDoble);
+                fprintf(tokenList, "%f", valorDoble);
             } else {
                 if (token == caracterTok) {
-                    fprintf(tokenList, "%c\n", valorCaracter);
+                    fprintf(tokenList, "%c", valorCaracter);
                 } else {
                     if (token == cadenaTok) {
-                        fprintf(tokenList, "%s\n", valorCadena);
+                        fprintf(tokenList, "%s", valorCadena);
                     } else {
                         if (token == ytok) {
-                            fprintf(tokenList, "&&\n");
+                            fprintf(tokenList, "&&");
                         } else {
                             if (token == otok) {
-                                fprintf(tokenList, "||\n");
+                                fprintf(tokenList, "||");
                             } else {
                                 if (token == igl) {
-                                    fprintf(tokenList, "==\n");
+                                    fprintf(tokenList, "==");
                                 } else {
                                     if (token == nig) {
-                                        fprintf(tokenList, "<>\n");
+                                        fprintf(tokenList, "<>");
                                     } else {
                                         if (token == asignacion) {
-                                            fprintf(tokenList, "=\n");
+                                            fprintf(tokenList, "=");
                                         } else {
-                                            if (simbolo > 0) {
-                                                fprintf(tokenList, "%s\n", token_string[token]);
+                                            if (token == mas) {
+                                                fprintf(tokenList, "+");
                                             } else {
-                                                fprintf(tokenList, "%s\n", lex);
-
+                                                if (token == menos) {
+                                                    fprintf(tokenList, "-");
+                                                } else {
+                                                    if (token == por) {
+                                                        fprintf(tokenList, "*");
+                                                    } else {
+                                                        if (token == barra) {
+                                                            fprintf(tokenList, "/");
+                                                        } else {
+                                                            if (token == llaveI) {
+                                                                fprintf(tokenList, "{");
+                                                            } else {
+                                                                if (token == llaveF) {
+                                                                    fprintf(tokenList, "}");
+                                                                } else {
+                                                                    if (token == parentI) {
+                                                                        fprintf(tokenList, "(");
+                                                                    } else {
+                                                                        if (token == parentF) {
+                                                                            fprintf(tokenList, ")");
+                                                                        } else {
+                                                                            if (token == corcheteI) {
+                                                                                fprintf(tokenList, "[");
+                                                                            } else {
+                                                                                if (token == corcheteF) {
+                                                                                    fprintf(tokenList, "]");
+                                                                                } else {
+                                                                                    if (token == punto) {
+                                                                                        fprintf(tokenList, ".");
+                                                                                    } else {
+                                                                                        if (token == coma) {
+                                                                                            fprintf(tokenList, ",");
+                                                                                        } else {
+                                                                                            if (token == puntoycoma) {
+                                                                                                fprintf(tokenList, ";");
+                                                                                            } else {
+                                                                                                if (token == mai) {
+                                                                                                    fprintf(tokenList, ">=");
+                                                                                                } else {
+                                                                                                    if (token == mei) {
+                                                                                                        fprintf(tokenList, "<=");
+                                                                                                    } else {
+                                                                                                        if (token == negacion) {
+                                                                                                            fprintf(tokenList, "!");
+                                                                                                        } else {
+                                                                                                            if (token == myr) {
+                                                                                                                fprintf(tokenList, ">");
+                                                                                                            } else {
+                                                                                                                if (token == mnr) {
+                                                                                                                    fprintf(tokenList, "<");
+                                                                                                                } else {
+                                                                                                                    if (token == referencia) {
+                                                                                                                        fprintf(tokenList, "~");
+                                                                                                                    } else {
+                                                                                                                        if (simbolo > 0) {
+                                                                                                                            fprintf(tokenList, "%s", token_string[token]);
+                                                                                                                        } else {
+                                                                                                                            fprintf(tokenList, "%s", lex);
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
+
                                 }
-
                             }
-
                         }
                     }
                 }
             }
         }
-
+        fprintf(tokenList, " => %s\n", token_string[token]);
     }
-
-
-
 }
 
 //obtoken: obtiene el siguiente token del programa fuente                   
@@ -196,7 +267,7 @@ void obtoken() {
         } else {
             token = numeroEntero;
         }
-       // printf("%s\n", lexid);
+        // printf("%s\n", lexid);
         if (hexa == 1) {
             valor = strtol(lexid, NULL, 16);
         } else {
