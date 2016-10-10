@@ -52,7 +52,6 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
 
         //tokenizar el programa fuente
         while (1) {
-
             obtoken();
             if (primerError == 1) {
                 printf("PANICO \n");
@@ -69,7 +68,6 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
             }else{
                 imprime_token();
             }
-
         }
         fprintf(tokenList,"\n");
         fp = NULL;
