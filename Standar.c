@@ -81,14 +81,14 @@ void imprime_token() {
         "quitarTok", "abrirTok", "leerLineaTok", "volcadoTok", "cerrarTok", "concatenarTok",
         "parteEnteraTok", "compararTok", "mayorTok", "menorTok", "esParTok", "decimalBinTok",
         "potenciaTok", "absolutoTok", "moduloTok", "longitudCadenaTok", "claseTok", "incluirTok",
-        "obtenerBooleanoTok", "falsoTok", "verdaderoTok", "miTok"};
+        "obtenerBooleanoTok", "falsoTok", "verdaderoTok", "miTok", "datoCadena","datoCaracter"};
 
     if (token != comentario) {
         switch(token){
             case numeroEntero:  fprintf(tokenList, "%ld", valor); break;
             case numeroReal:    fprintf(tokenList, "%f", valorDoble); break;
-            case caracterTok:   fprintf(tokenList, "%c", valorCaracter); break;
-            case cadenaTok:     fprintf(tokenList, "%s", valorCadena); break;
+            case datoCaracter:  fprintf(tokenList, "%c", valorCaracter); break;
+            case datoCadena:     fprintf(tokenList, "%s", valorCadena); break;
             case ytok:          fprintf(tokenList, "&&"); break;
             case otok:          fprintf(tokenList, "||"); break;
             case igl:           fprintf(tokenList, "=="); break;
