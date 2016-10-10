@@ -81,47 +81,75 @@ void imprime_token() {
         "quitarTok", "abrirTok", "leerLineaTok", "volcadoTok", "cerrarTok", "concatenarTok",
         "parteEnteraTok", "compararTok", "mayorTok", "menorTok", "esParTok", "decimalBinTok",
         "potenciaTok", "absolutoTok", "moduloTok", "longitudCadenaTok", "claseTok", "incluirTok",
-        "obtenerBooleanoTok", "falsoTok", "verdaderoTok", "miTok", "datoCadena","datoCaracter"};
+        "obtenerBooleanoTok", "falsoTok", "verdaderoTok", "miTok", "datoCadena", "datoCaracter"};
 
     if (token != comentario) {
-        switch(token){
-            case numeroEntero:  fprintf(tokenList, "%ld", valor); break;
-            case numeroReal:    fprintf(tokenList, "%f", valorDoble); break;
-            case datoCaracter:  fprintf(tokenList, "%c", valorCaracter); break;
-            case datoCadena:     fprintf(tokenList, "%s", valorCadena); break;
-            case ytok:          fprintf(tokenList, "&&"); break;
-            case otok:          fprintf(tokenList, "||"); break;
-            case igl:           fprintf(tokenList, "=="); break;
-            case nig:           fprintf(tokenList, "<>"); break;
-            case asignacion:    fprintf(tokenList, "="); break;
-            case mas:           fprintf(tokenList, "+"); break;
-            case menos:         fprintf(tokenList, "-"); break;
-            case por:           fprintf(tokenList, "*"); break;
-            case barra:         fprintf(tokenList, "/"); break;
-            case llaveI:        fprintf(tokenList, "{"); break;
-            case llaveF:        fprintf(tokenList, "}"); break;
-            case parentI:       fprintf(tokenList, "("); break;
-            case parentF:       fprintf(tokenList, ")"); break;
-            case corcheteI:     fprintf(tokenList, "["); break;
-            case corcheteF:     fprintf(tokenList, "]"); break;
-            case punto:         fprintf(tokenList, "."); break;
-            case coma:          fprintf(tokenList, ","); break;
-            case puntoycoma:    fprintf(tokenList, ";"); break;
-            case mai:           fprintf(tokenList, ">="); break;
-            case mei:           fprintf(tokenList, "<="); break;
-            case negacion:      fprintf(tokenList, "!"); break;
-            case myr:           fprintf(tokenList, ">"); break;
-            case mnr:           fprintf(tokenList, "<"); break;
-            case referencia:    fprintf(tokenList, "~"); break;
-            default:            fprintf(tokenList, "%s", lex);
+        switch (token) {
+            case numeroEntero: fprintf(tokenList, "%ld", valor);
+                break;
+            case numeroReal: fprintf(tokenList, "%f", valorDoble);
+                break;
+            case datoCaracter: fprintf(tokenList, "%c", valorCaracter);
+                break;
+            case datoCadena: fprintf(tokenList, "%s", valorCadena);
+                break;
+            case ytok: fprintf(tokenList, "&&");
+                break;
+            case otok: fprintf(tokenList, "||");
+                break;
+            case igl: fprintf(tokenList, "==");
+                break;
+            case nig: fprintf(tokenList, "<>");
+                break;
+            case asignacion: fprintf(tokenList, "=");
+                break;
+            case mas: fprintf(tokenList, "+");
+                break;
+            case menos: fprintf(tokenList, "-");
+                break;
+            case por: fprintf(tokenList, "*");
+                break;
+            case barra: fprintf(tokenList, "/");
+                break;
+            case llaveI: fprintf(tokenList, "{");
+                break;
+            case llaveF: fprintf(tokenList, "}");
+                break;
+            case parentI: fprintf(tokenList, "(");
+                break;
+            case parentF: fprintf(tokenList, ")");
+                break;
+            case corcheteI: fprintf(tokenList, "[");
+                break;
+            case corcheteF: fprintf(tokenList, "]");
+                break;
+            case punto: fprintf(tokenList, ".");
+                break;
+            case coma: fprintf(tokenList, ",");
+                break;
+            case puntoycoma: fprintf(tokenList, ";");
+                break;
+            case mai: fprintf(tokenList, ">=");
+                break;
+            case mei: fprintf(tokenList, "<=");
+                break;
+            case negacion: fprintf(tokenList, "!");
+                break;
+            case myr: fprintf(tokenList, ">");
+                break;
+            case mnr: fprintf(tokenList, "<");
+                break;
+            case referencia: fprintf(tokenList, "~");
+                break;
+            default: fprintf(tokenList, "%s", lex);
         }
-/*
-        if (simbolo > 0) {
-            fprintf(tokenList, "%s", token_string[token]);
-        } else {
-            fprintf(tokenList, "%s", lex);
-        }
-*/
+        /*
+                if (simbolo > 0) {
+                    fprintf(tokenList, "%s", token_string[token]);
+                } else {
+                    fprintf(tokenList, "%s", lex);
+                }
+         */
         fprintf(tokenList, " => %s\n", token_string[token]);
     }
 }
@@ -299,42 +327,52 @@ void obtoken() {
 
                             ch = obtch();
                         } else {
-                            if (ch == '/') {
-                                ch = obtch();
+                            if (ch == '!') {
+                                 ch = obtch();
+                                 if(ch=='='){
+                                     token = nig;
+                                     ch = obtch();
+                                 }else{
+                                     token = negacion;
+                                 }
+                            } else {
                                 if (ch == '/') {
-                                    while ((ch = obtch()) != '\n');
-                                    token = comentario;
-                                    // ch = obtch();
-                                } else {
-                                    if (ch == '*') {
-                                        ch = obtch();
-                                        char c = ' ';
-                                        while (1) {
-                                            if (c == '*' && ch == '/') {
-                                                break;
-                                            } else {
-                                                c = ch;
+                                    ch = obtch();
+                                    if (ch == '/') {
+                                        while ((ch = obtch()) != '\n');
+                                        token = comentario;
+                                        // ch = obtch();
+                                    } else {
+                                        if (ch == '*') {
+                                            ch = obtch();
+                                            char c = ' ';
+                                            while (1) {
+                                                if (c == '*' && ch == '/') {
+                                                    break;
+                                                } else {
+                                                    c = ch;
+                                                }
+                                                ch = obtch();
+
+                                                if (fin_de_archivo == 1) {
+                                                    log_error(11); //mal cometario de bloque
+                                                    printf("en comentario");
+                                                    return;
+                                                }
                                             }
                                             ch = obtch();
+                                            token = comentario;
 
-                                            if (fin_de_archivo == 1) {
-                                                log_error(11); //mal cometario de bloque
-                                                printf("en comentario");
-                                                return;
-                                            }
+                                        } else {
+                                            token = espec['/'];
                                         }
-                                        ch = obtch();
-                                        token = comentario;
-
-                                    } else {
-                                        token = espec['/'];
                                     }
-                                }
-                            } else {
-                                token = espec[ch]; //hashing directo en la tabla de tokens de símbolos especiales del lenguaje
-                                simbolo = ch;
-                                ch = obtch();
+                                } else {
+                                    token = espec[ch]; //hashing directo en la tabla de tokens de símbolos especiales del lenguaje
+                                    simbolo = ch;
+                                    ch = obtch();
 
+                                }
                             }
                             /*if (ch == '/') {
                                 ch = obtch();
