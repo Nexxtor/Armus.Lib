@@ -30,7 +30,7 @@ void inicializarArbolPalabras() {
         "mostrar", "publica", "privada", "Arreglo", "agregar", "obtener", "cuantos", "volcado",
         "incluir", "booleano", "caracter", "mientras", "retornar", "comparar", "absoluto",
         "paraCada", "leerLinea", "potencia", "verdadero", "concatenar", "decimalBin",
-        "obtenerReal", "parteEntera", "obtenerEntero", "ObtenerCadena", "longitudCadena",
+        "obtenerReal", "parteEntera", "obtenerEntero", "obtenerCadena", "longitudCadena",
         "obtenerCaracter", "obtenerBooleano"};
 
     int mitad = MAXPAL / 2, i = 0;
