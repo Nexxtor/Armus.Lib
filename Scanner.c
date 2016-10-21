@@ -8,6 +8,8 @@
 #include "Scanner.h"
 #include "Lexico.h"
 
+
+//Valor de retorno esta incompleto 
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
 (JNIEnv *env, jobject obj, jobjectArray allFiles) {
     int cant = (*env)->GetArrayLength(env, allFiles);
