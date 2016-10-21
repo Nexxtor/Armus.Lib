@@ -8,18 +8,6 @@
 #include "Scanner.h"
 #include "Lexico.h"
 
-/*struct ls {
-    char archivo[MAX_NAME_FILE];
-    enum simbolo token;
-    int simbolo;
-    long int entero;
-    double real;
-    char caracter;
-    char cadena[MAX_CADENA];
-    char demas[MAX_ID];
-    struct ls *sig;
-};*/
-
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
 (JNIEnv *env, jobject obj, jobjectArray allFiles) {
     int cant = (*env)->GetArrayLength(env, allFiles);
