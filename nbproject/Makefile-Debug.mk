@@ -35,12 +35,13 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_ext/cdfee43a/Errores.o \
-	${OBJECTDIR}/_ext/cdfee43a/Lexico.o \
-	${OBJECTDIR}/_ext/cdfee43a/Parametros.o \
-	${OBJECTDIR}/_ext/cdfee43a/PreScanner.o \
 	${OBJECTDIR}/_ext/cdfee43a/Scanner.o \
-	${OBJECTDIR}/_ext/cdfee43a/Standar.o
+	${OBJECTDIR}/Errores.o \
+	${OBJECTDIR}/Lexico.o \
+	${OBJECTDIR}/Parametros.o \
+	${OBJECTDIR}/Parser.o \
+	${OBJECTDIR}/PreScanner.o \
+	${OBJECTDIR}/Standar.o
 
 
 # C Compiler Flags
@@ -67,35 +68,40 @@ LDLIBSOPTIONS=
 	${MKDIR} -p /opt/armus/lib
 	${LINK.c} -o /opt/armus/lib/libArmus.Lib.so ${OBJECTFILES} ${LDLIBSOPTIONS} -shared -fPIC
 
-${OBJECTDIR}/_ext/cdfee43a/Errores.o: /home/nextor/NetBeansProjects/Armus.Lib/Errores.c 
-	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
-	${RM} "$@.d"
-	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Errores.o /home/nextor/NetBeansProjects/Armus.Lib/Errores.c
-
-${OBJECTDIR}/_ext/cdfee43a/Lexico.o: /home/nextor/NetBeansProjects/Armus.Lib/Lexico.c 
-	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
-	${RM} "$@.d"
-	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Lexico.o /home/nextor/NetBeansProjects/Armus.Lib/Lexico.c
-
-${OBJECTDIR}/_ext/cdfee43a/Parametros.o: /home/nextor/NetBeansProjects/Armus.Lib/Parametros.c 
-	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
-	${RM} "$@.d"
-	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Parametros.o /home/nextor/NetBeansProjects/Armus.Lib/Parametros.c
-
-${OBJECTDIR}/_ext/cdfee43a/PreScanner.o: /home/nextor/NetBeansProjects/Armus.Lib/PreScanner.c 
-	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
-	${RM} "$@.d"
-	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/PreScanner.o /home/nextor/NetBeansProjects/Armus.Lib/PreScanner.c
-
 ${OBJECTDIR}/_ext/cdfee43a/Scanner.o: /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
 	${RM} "$@.d"
-	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Scanner.o /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c
+	$(COMPILE.c) -g -w -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Scanner.o /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c
 
-${OBJECTDIR}/_ext/cdfee43a/Standar.o: /home/nextor/NetBeansProjects/Armus.Lib/Standar.c 
-	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
+${OBJECTDIR}/Errores.o: Errores.c 
+	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Standar.o /home/nextor/NetBeansProjects/Armus.Lib/Standar.c
+	$(COMPILE.c) -g -w -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Errores.o Errores.c
+
+${OBJECTDIR}/Lexico.o: Lexico.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -w -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Lexico.o Lexico.c
+
+${OBJECTDIR}/Parametros.o: Parametros.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -w -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Parametros.o Parametros.c
+
+${OBJECTDIR}/Parser.o: Parser.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -w -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Parser.o Parser.c
+
+${OBJECTDIR}/PreScanner.o: PreScanner.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -w -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PreScanner.o PreScanner.c
+
+${OBJECTDIR}/Standar.o: Standar.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -w -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Standar.o Standar.c
 
 # Subprojects
 .build-subprojects:
