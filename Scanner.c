@@ -30,6 +30,7 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
         const char *rawString = (*env)->GetStringUTFChars(env, string, 0);
         // Don't forget to call `ReleaseStringUTFChars` when you're done.
         fp = fopen(rawString, "r"); //abrir el fuente solo para lectura
+        (*env)->ReleaseStringUTFChars(env, string,rawString);
         if (fp == NULL) {
             return NULL;
         }
