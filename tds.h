@@ -51,8 +51,8 @@ extern "C" {
     };
     
     struct clase{
-        struct listaMetodo lsMetodo;
-        struct listaAtributo lsAtributo;
+        struct listaMetodo *lsMetodo;
+        struct listaAtributo *lsAtributo;
         int esLocal;
         char *ident;
         int esClasePrincipal;
@@ -65,12 +65,13 @@ extern "C" {
     };
     
     struct nodoArchivo{
-        struct listaClase lsClase;
+        struct listaClase *lsClase;
         char **incluidos;
+        char *nombre;
     };
     
     struct arbolArchivo{
-        struct nodoArchivo valor;
+        struct nodoArchivo *valor;
         struct arbolArchivo *izq;
         struct arbolArchivo *dch;
     };
