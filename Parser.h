@@ -15,8 +15,8 @@ extern "C" {
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
   (JNIEnv *, jobject, jobjectArray);
 
-void pasada1(char **lsfiles);
-void pasada2(char **lsfiles);
+int pasada1(char **,int);
+int pasada2(char **,int);
 #ifdef __cplusplus
 }
 #endif
