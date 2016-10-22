@@ -162,7 +162,7 @@ void obtoken() {
     simbolo = 0;
     //quitar blancos, caracter de cambio de línea y tabuladores
     while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
-    if (ch == '\0') return; //hay que cambiar dearchivo
+    if (ch == '\0') { printf("SE termino el archivo\n"); return;} //hay que cambiar dearchivo
 
     //si la lexeme comienza con una letra, es identificador o palabra reservada
     if ((isalpha(ch) || ch == '_') && ch != '#') {
@@ -357,6 +357,7 @@ void obtoken() {
                                                 if (fin_de_archivo == 1) {
                                                     log_error(11); //mal cometario de bloque
                                                     printf("en comentario");
+                                                    token = nulo;
                                                     return;
                                                 }
                                             }
@@ -407,7 +408,7 @@ void obtoken() {
 int obtch() {
 
     if (fin_de_archivo == 1) {
-        fclose(fp); //cerrar el programa fuente
+      //  fclose(fp); //cerrar el programa fuente
         //printf("Analisis lexicografico finalizado.");
         return '\0';
         //exit(1); //salir...
