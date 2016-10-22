@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /* 
  * File:   tds.h
  * Author: nextor
@@ -17,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    enum tipoDato {ENTERO,REAL,OBJETO};
+    enum tipoDato {ENTERO,REAL,CADENA,CARACTER,BOOLEANO,OBJETO};
     
     // los comentarios con * es por que realmente no se a tomado la decision
     // de usarlo o no 
@@ -79,6 +73,9 @@ extern "C" {
     typedef struct arbolArchivo tds;
     
     extern tds tabla;
+    
+    void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch);
+    void instarIncluidosArchivo(char *incluido,struct nodoArchivo *miArchivo);
 #ifdef __cplusplus
 }
 #endif
