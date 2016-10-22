@@ -294,7 +294,7 @@ void obtoken() {
                             token = nulo;
                             return;
                         } else {
-                            token = cadenaTok;
+                            token = datoCadena;
 
                         }
                         ch = obtch();
@@ -318,7 +318,7 @@ void obtoken() {
                             }
 
                             if (largo == 0 && ch == '\'') {
-                                token = caracterTok;
+                                token = datoCaracter;
                             } else {
                                 log_error(12); //esta inentano escribir una cadena o se acabo el archivo
                                 token = nulo;
