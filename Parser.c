@@ -71,6 +71,7 @@ int pasada1(char **lsfiles, int cant) {
         fclose(fp);
         fp = NULL;
     }
+    return 1;
 }
 
 int pasada2(char **lsfiles, int cant) {
@@ -93,6 +94,7 @@ void programa(struct nodoArchivo archivo){
                  if(token == puntoycoma){
                      //guardar en la tabla
                      printf("Se va a guardar en la tabla %s \n", valorCadena);
+                     obtoken();
                  }else{
                      log_error(2); // falto punto y coma;
                  }
