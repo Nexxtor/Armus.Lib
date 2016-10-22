@@ -46,3 +46,7 @@ void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
     a->incluidos= a->lsClase = NULL;
     *arch  = a;
 }
+
+void instarIncluidosArchivo(){
+
+}
