@@ -18,35 +18,50 @@ void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
         if (cmp > 0) {
             if (tAux->dch == NULL) {
                 tAux->dch =
-                         (struct arbolArchivo *)
-                         malloc(sizeof (struct arbolArchivo));
-                tAux->dch->valor = tAux->dch->dch =tAux->dch->izq= NULL;
-            } 
+                        (struct arbolArchivo *)
+                        malloc(sizeof (struct arbolArchivo));
+                tAux->dch->valor = tAux->dch->dch = tAux->dch->izq = NULL;
+            }
             tAux = tAux->dch;
-            
+
         } else {
             if (tAux->izq == NULL) {
                 tAux->izq =
-                         (struct arbolArchivo *)
-                         malloc(sizeof (struct arbolArchivo));
-                tAux->izq->valor = tAux->izq->dch =tAux->izq->izq= NULL;
-            } 
+                        (struct arbolArchivo *)
+                        malloc(sizeof (struct arbolArchivo));
+                tAux->izq->valor = tAux->izq->dch = tAux->izq->izq = NULL;
+            }
             tAux = tAux->izq;
         }
     }
-    
-    tAux->valor = (struct nodoArchivo *) malloc(sizeof(struct nodoArchivo));
-    
+
+    tAux->valor = (struct nodoArchivo *) malloc(sizeof (struct nodoArchivo));
+
     struct nodoArchivo *a = tAux->valor;
-    
-    a->nombre = (char *) malloc(sizeof(char)* strlen(nombreArchivo));
-    strcpy(a->nombre,nombreArchivo);
-   
-    
-    a->incluidos= a->lsClase = NULL;
-    *arch  = a;
+
+    a->nombre = (char *) malloc(sizeof (char)* strlen(nombreArchivo));
+    strcpy(a->nombre, nombreArchivo);
+
+
+    a->incluidos = (char **) malloc(sizeof (char *) * 1);
+    a->incluidos[0] = (char *) malloc(sizeof (char) * 1);
+    a->incluidos[0][0] = '\0';
+    a->lsClase = NULL;
+    *arch = a;
 }
 
-void instarIncluidosArchivo(){
+void instarIncluidosArchivo(char *incluido, struct nodoArchivo *miArchivo) {
+    int i = 0;
+    while (miArchivo->incluidos[i][0] != '\0' && ++i);
+    printf("Se insertara en la posición %i\n", i);
+
+    free(miArchivo->incluidos[i]);
+    miArchivo->incluidos = realloc(miArchivo->incluidos, sizeof (char *)*(i + 1));
+    miArchivo->incluidos[i] = (char *) malloc(sizeof (char)* strlen(incluido));
+    strcpy(miArchivo->incluidos[i], incluido);
+    miArchivo->incluidos[i +1] = (char *) malloc(sizeof (char) * 1);
+    miArchivo->incluidos[i +1][0] = '\0';
+
+
 
 }
