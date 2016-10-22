@@ -41,7 +41,9 @@ OBJECTFILES= \
 	${OBJECTDIR}/Parametros.o \
 	${OBJECTDIR}/Parser.o \
 	${OBJECTDIR}/PreScanner.o \
-	${OBJECTDIR}/Standar.o
+	${OBJECTDIR}/Standar.o \
+	${OBJECTDIR}/Util.o \
+	${OBJECTDIR}/tds.o
 
 
 # C Compiler Flags
@@ -102,6 +104,16 @@ ${OBJECTDIR}/Standar.o: Standar.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Standar.o Standar.c
+
+${OBJECTDIR}/Util.o: Util.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Util.o Util.c
+
+${OBJECTDIR}/tds.o: tds.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/tds.o tds.c
 
 # Subprojects
 .build-subprojects:
