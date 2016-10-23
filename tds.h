@@ -11,6 +11,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define TRUE 1
+#define FALSE 0
     enum tipoDato {ENTERO,REAL,CADENA,CARACTER,BOOLEANO,OBJETO};
     
     // los comentarios con * es por que realmente no se a tomado la decision
@@ -54,7 +56,7 @@ extern "C" {
     };
     
     struct listaClase{
-        struct clase clase;
+        struct clase *clase;
         struct listaClase *sig;
     };
     
@@ -73,9 +75,12 @@ extern "C" {
     typedef struct arbolArchivo tds;
     
     extern tds tabla;
+    extern int hash;
+   
     
     void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch);
     void instarIncluidosArchivo(char *incluido,struct nodoArchivo *miArchivo);
+    void insertarTDSClase(struct nodoArchivo *archivo,char * nombre ,int alcanze,struct clase **clase);
 #ifdef __cplusplus
 }
 #endif
