@@ -132,7 +132,7 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="/home/nextor/NetBeansProjects/Armus.Lib/Scanner.c"
+      <item path="Scanner.c"
             ex="false"
             tool="0"
             flavor2="0">
