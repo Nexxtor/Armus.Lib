@@ -102,6 +102,9 @@ void insertarTDSClase(struct nodoArchivo *archivo, char * nombre, int alcanze, s
     s->clase = (struct clase *) malloc(sizeof (struct clase));
     s->clase->esLocal = (alcanze == localTok) ? TRUE : FALSE;
     s->clase->ident = (char *) malloc(sizeof (char) * strlen(nombre));
+    s->clase->esClasePrincipal = 0;
+    s->clase->lsAtributo = NULL;
+    s->clase->lsMetodo = NULL;
     strcpy(s->clase->ident, nombre);
 
     s->clase->hash = hash;
