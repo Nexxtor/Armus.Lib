@@ -81,7 +81,7 @@ void imprime_token() {
         "quitarTok", "abrirTok", "leerLineaTok", "volcadoTok", "cerrarTok", "concatenarTok",
         "parteEnteraTok", "compararTok", "mayorTok", "menorTok", "esParTok", "decimalBinTok",
         "potenciaTok", "absolutoTok", "moduloTok", "longitudCadenaTok", "claseTok", "incluirTok",
-        "obtenerBooleanoTok", "falsoTok", "verdaderoTok", "miTok", "datoCadena", "datoCaracter"};
+        "obtenerBooleanoTok", "falsoTok", "verdaderoTok", "miTok", "datoCadena", "datoCaracter", "localTok"};
 
     if (token != comentario) {
         switch (token) {
@@ -167,7 +167,7 @@ void obtoken() {
         ch = obtch();
         if (ch == '/') {
             while ((ch = obtch()) != '\n');
-            // ch = obtch();
+             ch = obtch();
         } else {
             if (ch == '*') {
                 ch = obtch();
@@ -182,7 +182,7 @@ void obtoken() {
 
                     if (fin_de_archivo == 1) {
                         log_error(11); //mal cometario de bloque
-                        printf("en comentario");
+                        printf("NUlo en comentario");
                         token = nulo;
                         return;
                     }
@@ -194,7 +194,8 @@ void obtoken() {
         }
     }
 
-
+     //quitar blancos, caracter de cambio de línea y tabuladores
+    while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
 
     if (ch == '\0') {
         printf("SE termino el archivo\n");
@@ -443,6 +444,7 @@ enum simbolo buscarToken(char * buscado) {
 
     while (s != NULL) {
         if (strcmp(s->value, buscado) == 0) {
+            printf("buscado %s valor token = %d\n",buscado, s->token);
             return s->token;
         }
         if (strcmp(buscado, s->value) > 0) {

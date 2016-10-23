@@ -18,7 +18,7 @@ enum simbolo tokpal[MAXPAL] = {miTok, siTok, byteTok, realTok, sinoTok, casoTok,
     incluirTok, booleanoTok, caracterTok, mientrasTok, retornarTok, compararTok, absolutoTok,
     paracadaTok, leerLineaTok, potenciaTok, verdaderoTok, concatenarTok, decimalBinTok,
     obtenerRealTok, parteEnteraTok, obtenerEnteroTok, obtenerCadenaTok, longitudCadenaTok,
-    obtenerCaracterTok, obtenerBooleanoTok};
+    obtenerCaracterTok, obtenerBooleanoTok,localTok};
 
 //tabla de tokens correspondientes a operadores y símbolos especiales
 enum simbolo espec[255];
@@ -31,7 +31,7 @@ void inicializarArbolPalabras() {
         "incluir", "booleano", "caracter", "mientras", "retornar", "comparar", "absoluto",
         "paraCada", "leerLinea", "potencia", "verdadero", "concatenar", "decimalBin",
         "obtenerReal", "parteEntera", "obtenerEntero", "obtenerCadena", "longitudCadena",
-        "obtenerCaracter", "obtenerBooleano"};
+        "obtenerCaracter", "obtenerBooleano","local"};
 
     int mitad = MAXPAL / 2, i = 0;
 
@@ -46,7 +46,7 @@ void inicializarArbolPalabras() {
 
     for (i = 0; i < MAXPAL; i++) {
         if (mitad != i) {
-           // printf("%d %s\n",i,lexPalAux[i]);
+            printf("%d %s\n",i,lexPalAux[i]);
             insertarArbol(lexPalAux[i], &raiz, i);
         }
     }

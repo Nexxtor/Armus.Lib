@@ -68,7 +68,7 @@
             <pElem>/usr/lib/jvm/java-8-oracle/include/linux</pElem>
           </incDir>
           <commandLine>-shared</commandLine>
-          <warningLevel>0</warningLevel>
+          <warningLevel>2</warningLevel>
         </cTool>
         <linkerTool>
           <output>/opt/armus/lib/libArmus.Lib.so</output>

@@ -10,6 +10,7 @@
 
 tds tabla;
 void clearScanner();
+void programa(struct nodoArchivo *archivo);
 
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
 (JNIEnv *env, jobject obj, jobjectArray jsLsFile) {
@@ -67,7 +68,7 @@ int pasada1(char **lsfiles, int cant) {
 
         printf("Se Inserto %s\n", miArchivo->nombre);
         obtoken();
-        programa();
+        programa(miArchivo);
         fclose(fp);
         fp = NULL;
     }
@@ -75,7 +76,7 @@ int pasada1(char **lsfiles, int cant) {
 }
 
 int pasada2(char **lsfiles, int cant) {
-
+    return 1;
 }
 
 void clearScanner() {
@@ -85,7 +86,7 @@ void clearScanner() {
     iniciarParamentros();
 }
 
-void programa(struct nodoArchivo archivo){
+void programa(struct nodoArchivo *archivo){
     do{
         if(token == incluirTok){
             obtoken();
@@ -94,6 +95,7 @@ void programa(struct nodoArchivo archivo){
                  if(token == puntoycoma){
                      //guardar en la tabla
                      printf("Se va a guardar en la tabla %s \n", valorCadena);
+                     instarIncluidosArchivo(valorCadena,archivo);
                      obtoken();
                  }else{
                      log_error(2); // falto punto y coma;
@@ -103,4 +105,20 @@ void programa(struct nodoArchivo archivo){
             }
         }
     }while(token == incluirTok);
+    
+    //Si es publica podria estar escribiendo
+    //Un metodo o atributo en un mal lugar
+    if(token == publicaTok || token == localTok){
+        enum simbolo tokeAux = token;
+        obtoken();
+        
+        if(token == claseTok){
+            //OK si es una clase
+            obtoken();
+            if(token == ident){
+                //y Esta decentemente escrita
+                printf("\tA guardar la clase %s\n", lex );
+            }
+        }
+    }
 }
