@@ -199,6 +199,7 @@ void obtoken() {
 
     if (ch == '\0') {
         printf("SE termino el archivo\n");
+        token = -1;
         return;
     } //hay que cambiar dearchivo
 
