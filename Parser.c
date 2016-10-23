@@ -125,6 +125,7 @@ void programa(struct nodoArchivo *archivo) {
                     struct clase *claseActual;
                     insertarTDSClase(archivo, lex,tokeAux, &claseActual);
                     
+                    printf("Se inserto la clase %s con hash %d\n",claseActual->ident, claseActual->hash);
                     //Aunque no intese mucho que esta 100% bien 
                     // escrita si tiene que usar { cuerpo }
                     // para poder detectar todas las clases
