@@ -14,7 +14,7 @@ enum simbolo token;
 enum simbolo tokpal[MAXPAL] = {miTok, siTok, byteTok, realTok, sinoTok, casoTok, paraTok, vacioTok, hacerTok,
     abrirTok, mayorTok, menorTok, esParTok, claseTok, falsoTok, enteroTok, cadenaTok, objetoTok,
     probarTok, romperTok, quitarTok, cerrarTok, moduloTok, archivoTok, defectoTok, sistemaTok,
-    mostrarTok, publicaTok, privadaTok, arregloTok, agregarTok, obtenerTok, cuantosTok, volcadoTok,
+    mostrarTok, publicaTok, privadoTok, arregloTok, agregarTok, obtenerTok, cuantosTok, volcadoTok,
     incluirTok, booleanoTok, caracterTok, mientrasTok, retornarTok, compararTok, absolutoTok,
     paracadaTok, leerLineaTok, potenciaTok, verdaderoTok, concatenarTok, decimalBinTok,
     obtenerRealTok, parteEnteraTok, obtenerEnteroTok, obtenerCadenaTok, longitudCadenaTok,
