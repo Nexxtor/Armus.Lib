@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "Lexico.h"
+
+int hash =1;
 
 void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
     tds *tAux = t;
@@ -20,7 +23,9 @@ void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
                 tAux->dch =
                         (struct arbolArchivo *)
                         malloc(sizeof (struct arbolArchivo));
-                tAux->dch->valor = tAux->dch->dch = tAux->dch->izq = NULL;
+                tAux->dch->valor = NULL;
+                tAux->dch->dch = NULL;
+                tAux->dch->izq = NULL;
             }
             tAux = tAux->dch;
 
@@ -29,7 +34,9 @@ void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
                 tAux->izq =
                         (struct arbolArchivo *)
                         malloc(sizeof (struct arbolArchivo));
-                tAux->izq->valor = tAux->izq->dch = tAux->izq->izq = NULL;
+                tAux->izq->valor = NULL;
+                tAux->izq->dch = NULL;
+                tAux->izq->izq = NULL;
             }
             tAux = tAux->izq;
         }
@@ -59,9 +66,43 @@ void instarIncluidosArchivo(char *incluido, struct nodoArchivo *miArchivo) {
     miArchivo->incluidos = realloc(miArchivo->incluidos, sizeof (char *)*(i + 1));
     miArchivo->incluidos[i] = (char *) malloc(sizeof (char)* strlen(incluido));
     strcpy(miArchivo->incluidos[i], incluido);
-    miArchivo->incluidos[i +1] = (char *) malloc(sizeof (char) * 1);
-    miArchivo->incluidos[i +1][0] = '\0';
+    miArchivo->incluidos[i + 1] = (char *) malloc(sizeof (char) * 1);
+    miArchivo->incluidos[i + 1][0] = '\0';
 
 
 
+}
+
+void insertarTDSClase(struct nodoArchivo *archivo, char * nombre, int alcanze, struct clase **clase) {
+
+    if (archivo->lsClase == NULL) {
+        //POr que al principio no hay nada inicializado
+        struct listaClase *ins;
+        ins = (struct listaClase*) malloc(sizeof (struct listaClase));
+        ins->sig = NULL;
+        ins->clase = NULL;
+        archivo->lsClase = ins;
+    } else {
+        //Algoritmo de insercion como tal
+        struct listaClase *s = archivo->lsClase;
+        while (s->sig != NULL) s = s->sig;
+        if (s->clase != NULL) { //caso considerado acausa del primer if
+            //Significa que tengo que insertar el en siguiete
+            struct listaClase *ins;
+            ins = (struct listaClase *) malloc(sizeof (struct listaClase));
+            ins->sig = NULL;
+            ins->clase = NULL;
+            s->sig= ins;
+            s = s->sig;
+        }
+        s->clase = (struct clase *) malloc(sizeof(struct clase));
+        s->clase->esLocal = (alcanze == localTok)?TRUE:FALSE;
+        s->clase->ident = (char *) malloc(sizeof(char) * strlen(nombre));
+        strcpy(s->clase->ident,nombre);
+        
+        s->clase->hash = hash;
+        hash++;
+        
+        *clase = s->clase;
+    }
 }
