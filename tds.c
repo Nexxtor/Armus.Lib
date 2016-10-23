@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "Lexico.h"
 
-int hash =1;
+int hash = 1;
 
 void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
     tds *tAux = t;
@@ -69,7 +69,7 @@ void instarIncluidosArchivo(char *incluido, struct nodoArchivo *miArchivo) {
     miArchivo->incluidos[i + 1] = (char *) malloc(sizeof (char) * 1);
     miArchivo->incluidos[i + 1][0] = '\0';
 
-
+    //falta insterar en incluidos la ruta absoluta 
 
 }
 
@@ -77,32 +77,36 @@ void insertarTDSClase(struct nodoArchivo *archivo, char * nombre, int alcanze, s
 
     if (archivo->lsClase == NULL) {
         //POr que al principio no hay nada inicializado
+        printf("Creando espacio para la clase\n");
         struct listaClase *ins;
         ins = (struct listaClase*) malloc(sizeof (struct listaClase));
         ins->sig = NULL;
         ins->clase = NULL;
         archivo->lsClase = ins;
-    } else {
-        //Algoritmo de insercion como tal
-        struct listaClase *s = archivo->lsClase;
-        while (s->sig != NULL) s = s->sig;
-        if (s->clase != NULL) { //caso considerado acausa del primer if
-            //Significa que tengo que insertar el en siguiete
-            struct listaClase *ins;
-            ins = (struct listaClase *) malloc(sizeof (struct listaClase));
-            ins->sig = NULL;
-            ins->clase = NULL;
-            s->sig= ins;
-            s = s->sig;
-        }
-        s->clase = (struct clase *) malloc(sizeof(struct clase));
-        s->clase->esLocal = (alcanze == localTok)?TRUE:FALSE;
-        s->clase->ident = (char *) malloc(sizeof(char) * strlen(nombre));
-        strcpy(s->clase->ident,nombre);
-        
-        s->clase->hash = hash;
-        hash++;
-        
-        *clase = s->clase;
+        printf("Creado ... \n");
     }
+    //Algoritmo de insercion como tal
+    struct listaClase *s = archivo->lsClase;
+    while (s->sig != NULL) s = s->sig;
+    if (s->clase != NULL) { //caso considerado acausa del primer if
+        //Significa que tengo que insertar el en siguiete
+        printf("Sera en la sigueinte\n");
+        struct listaClase *ins;
+        ins = (struct listaClase *) malloc(sizeof (struct listaClase));
+        ins->sig = NULL;
+        ins->clase = NULL;
+        s->sig = ins;
+        s = s->sig;
+    }
+    printf("Guardando clase\n");
+    s->clase = (struct clase *) malloc(sizeof (struct clase));
+    s->clase->esLocal = (alcanze == localTok) ? TRUE : FALSE;
+    s->clase->ident = (char *) malloc(sizeof (char) * strlen(nombre));
+    strcpy(s->clase->ident, nombre);
+
+    s->clase->hash = hash;
+    hash++;
+
+    *clase = s->clase;
+
 }
