@@ -46,7 +46,7 @@ void inicializarArbolPalabras() {
 
     for (i = 0; i < MAXPAL; i++) {
         if (mitad != i) {
-            printf("%d %s\n",i,lexPalAux[i]);
+          //  printf("%d %s\n",i,lexPalAux[i]);
             insertarArbol(lexPalAux[i], &raiz, i);
         }
     }
