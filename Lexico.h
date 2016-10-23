@@ -11,7 +11,7 @@ enum simbolo {nulo,comentario,numeroReal,numeroEntero,ident,mas,menos,por,barra,
 puntoycoma,asignacion,mei,mai,myr,mnr,igl,nig,negacion,ytok,otok,referencia,enteroTok,byteTok,
 realTok,vacioTok,booleanoTok,cadenaTok,caracterTok,objetoTok,archivoTok,siTok,sinoTok,probarTok,casoTok,defectoTok,
 romperTok,mientrasTok,paraTok,hacerTok,paracadaTok,sistemaTok,obtenerEnteroTok,obtenerRealTok,obtenerCadenaTok,
-obtenerCaracterTok,mostrarTok,publicaTok,privadaTok,retornarTok,arregloTok,agregarTok,obtenerTok,cuantosTok,
+obtenerCaracterTok,mostrarTok,publicaTok,privadoTok,retornarTok,arregloTok,agregarTok,obtenerTok,cuantosTok,
 quitarTok,abrirTok,leerLineaTok,volcadoTok,cerrarTok,concatenarTok,parteEnteraTok,compararTok,mayorTok,menorTok,
 esParTok,decimalBinTok,potenciaTok,absolutoTok,moduloTok,longitudCadenaTok,claseTok,incluirTok,obtenerBooleanoTok,
 falsoTok,verdaderoTok,miTok,datoCadena,datoCaracter,localTok}; //definido aquí en el encabezado
