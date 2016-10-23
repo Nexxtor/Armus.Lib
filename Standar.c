@@ -444,7 +444,7 @@ enum simbolo buscarToken(char * buscado) {
 
     while (s != NULL) {
         if (strcmp(s->value, buscado) == 0) {
-            printf("buscado %s valor token = %d\n",buscado, s->token);
+            //printf("buscado %s valor token = %d\n",buscado, s->token);
             return s->token;
         }
         if (strcmp(buscado, s->value) > 0) {
