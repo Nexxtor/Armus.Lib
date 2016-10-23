@@ -37,10 +37,10 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
     tabla.dch = NULL;
     tabla.valor = NULL;
 
-    tds *incioTDS = &tabla;
+//    tds *incioTDS = &tabla;
 
-    pasada1(lsfiles, cant);
-
+    int a =  pasada1(lsfiles, cant);
+    printf("%d\n",a);
     //Relase Java things
     for (i = 0; i < cant; i++) {
         (*env)->ReleaseStringUTFChars(env, *((jstring *) jstrings[i]), lsfiles[i]);
@@ -64,7 +64,7 @@ int pasada1(char **lsfiles, int cant) {
         offset = -1;
         ll = 0;
         struct nodoArchivo *miArchivo;
-        instarArchivoTDS(lsfiles[i],&tabla,&miArchivo);
+        instarArchivoTDS(lsfiles[i], &tabla, &miArchivo);
 
         printf("Se Inserto %s\n", miArchivo->nombre);
         obtoken();
@@ -86,39 +86,74 @@ void clearScanner() {
     iniciarParamentros();
 }
 
-void programa(struct nodoArchivo *archivo){
-    do{
-        if(token == incluirTok){
+void programa(struct nodoArchivo *archivo) {
+    do {
+        if (token == incluirTok) {
             obtoken();
-            if(token == datoCadena){
-                 obtoken();
-                 if(token == puntoycoma){
-                     //guardar en la tabla
-                     printf("Se va a guardar en la tabla %s \n", valorCadena);
-                     instarIncluidosArchivo(valorCadena,archivo);
-                     obtoken();
-                 }else{
-                     log_error(2); // falto punto y coma;
-                 }
-            }else{
+            if (token == datoCadena) {
+                obtoken();
+                if (token == puntoycoma) {
+                    //guardar en la tabla
+                    printf("Se va a guardar en la tabla %s \n", valorCadena);
+                    instarIncluidosArchivo(valorCadena, archivo);
+                    obtoken();
+                } else {
+                    log_error(2); // falto punto y coma;
+                }
+            } else {
                 log_error(1); // No esta bien escrita la cadena;
             }
         }
-    }while(token == incluirTok);
-    
+    } while (token == incluirTok);
+
     //Si es publica podria estar escribiendo
     //Un metodo o atributo en un mal lugar
-    if(token == publicaTok || token == localTok){
-        enum simbolo tokeAux = token;
-        obtoken();
-        
-        if(token == claseTok){
-            //OK si es una clase
+    if (token == publicaTok || token == localTok) {
+        do {
+            enum simbolo tokeAux = token;
             obtoken();
-            if(token == ident){
-                //y Esta decentemente escrita
-                printf("\tA guardar la clase %s\n", lex );
+
+            if (token == claseTok) {
+                //OK si es una clase
+                obtoken();
+                if (token == ident) {
+                    //y Esta decentemente escrita
+                    printf("\tA guardar la clase %s\n", lex);
+                    //Guardamos la definicion de clase
+                    // Aunque pueda estar mal escrita
+                    // Solo intereza su exitencia
+                    struct clase *claseActual;
+                    insertarTDSClase(archivo, lex,tokeAux, &claseActual);
+                    
+                    //Aunque no intese mucho que esta 100% bien 
+                    // escrita si tiene que usar { cuerpo }
+                    // para poder detectar todas las clases
+                    // del mismo archivo
+                    obtoken();
+                    if (token == llaveI) {
+                        //cuerpo(claseActual);
+                        printf("\t\tRevisando el cuerpo\n");
+                        if (token == llaveF) {
+                            printf("\t\tClase bien escrita\n");
+                            obtoken();
+                        }else{
+                            log_error(1); //falto llave de cierre
+                        }
+                    } else {
+                        log_error(1); //falta llave de apertura
+                    }
+                }
+            } else {
+                //Es ambiguo en este punto por eso se da los 
+                //dos mensaje por que no se logra adivinar 
+                //la intencion del programador
+                if (tokeAux == publicaTok) {
+                    log_error(1); // esta declarando una propiedad o metodo
+                    // fuera de la clase  
+                }
+
+                log_error(1); // no puso la palabra clabe clase         
             }
-        }
+        } while (token == publicaTok || token == localTok || token == privadoTok);
     }
 }
