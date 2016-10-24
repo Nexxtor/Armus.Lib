@@ -104,3 +104,218 @@ void programa(struct nodoArchivo archivo){
         }
     }while(token == incluirTok);
 }
+
+//Expresion Conjuncion
+void expresion_conjuncion(){
+	expresion_relacional();
+	while(token == ytok){
+		 obtoken();
+		 expresion_racional();
+	}
+}
+
+//**************************************************************************
+//Expresion Relacional
+
+void expresion_relacional(){
+	if(token == negacion){
+		obtoken();
+	expresion_aritmetica();
+		if ( (token!=igl) && (token!=nig) && (token!=mnr) && (token!=mei) && (token!=myr) && (token!=mai) ){
+       error(50); //error 50: Se esperaba un operador relacional 
+			else {
+				obtoken();
+				expresion_aritmetica(); 
+			}
+		}	
+	}
+}	else{
+	 expresion_aritmetica();
+	if ( (token!=igl) && (token!=nig) && (token!=mnr) && (token!=mei) && (token!=myr) && (token!=mai) )
+       error(51); //error 51: Se esperaba un operador relacional 
+       else {
+            obtoken();
+	        expresion_aritmetica(); 
+	   }
+	}
+}
+
+//*************************************************************************
+//Expresion Aritmetica
+
+void expresion_aritmetica(){
+	termino();
+	while (token == mas || token == menos){
+		obtoken();
+		termino();
+	}
+}
+//**************************************************************************
+//Termino
+void termino(){
+	factor();
+	while (token == por || token == barra){
+		obtoken();
+		factor();
+	}
+}
+
+
+//**************************************************************************
+void factor(){
+	while (token == mas || token == menos){
+			obtoken();
+	}
+	if(token == numeroEntero){
+			obtoken();
+	}else{
+	     if(token == numeroReal){
+		 	obtoken();
+	   }else{
+		   if (token==ident){
+			obtoken();
+			if(token == punto){
+				obtoken();
+				/*if(token == ident){
+					 obtoken();
+				 }else{
+					 llamada_Metodo();
+				 }
+				 */
+			}
+			
+		   }else{
+			    if (token==parena) {
+					obtoken();
+					expresion_numerica();
+			    if (token==parenc)
+					obtoken();
+				else
+				//error(52); //error 52: Falta un paréntesis de cierre  
+				}else{
+					if(token == sistema){
+						obtoken();
+						if(token == punto){
+							obtoken();
+							 if(token == longitudCadenaTok || token == compararTok){
+								 funcion_numerica_cadena();
+							 }else{
+								 funcion_numerica();
+							 }
+						}else{
+						//	error(54); //Error 54: funcion numerica debe ser seguido de un punto
+						}
+					}else{
+						//error(53);// error 53: no era ninguna de las anteriores 
+					}
+				}
+			   
+		   }  
+	   }
+	}				
+}
+
+//************************************************************************************
+//Funcion Numerica Cadena
+
+
+void funcion_numerica_cadena(){
+	if(token == compararTok){
+		obtoken();
+		if(token == corcheteI){
+			obtoken();
+			dato_cadena();
+			if(token == coma){
+				obtoken();
+				dato_cadena();
+				if(token == corcheteF){
+					obtoken();
+				}else{
+				//	error (58); // Se esperaba corchete de cierre
+				}
+			}else{
+			//	error(56);// Error 56: Se esperaba una coma en la comparacion
+			}
+		}else{
+		//	error(55);//Error 55: se esperaba parentesis de apertura
+		}
+	}else{
+		if(token == longitudCadenaTok){
+			obtoken();
+			if(token == corcheteI){
+			obtoken();
+			dato_cadena();
+			if(token == corcheteF){
+					obtoken();
+				}else{
+				//	error (58); // Se esperaba corchete de cierre
+				}
+		}else{
+		//	error(55);//Error 55: se esperaba parentesis de apertura
+		}
+	}
+	
+	
+}
+
+//************************************************************************************
+//Funcion Numerica
+
+void funcion_numerica(){
+	if(token == parteEnteraTok || token == esParTok || token == decimalBinTok || token == absolutoTok ){
+		obtoken();
+		if(token == corcheteI){
+			obtoken();
+			expresion_numerica();
+			if(token == corcheteF){
+					obtoken();
+				}else{
+				//	error (58); // Se esperaba corchete de cierre
+				}
+		}else{
+			//error(55);//Error 55: se esperaba parentesis de apertura
+		}
+}else{
+		if(token == mayorTok || token == menorTok || token == potenciaTok || token == moduloTok ){
+			obtoken();
+			if(token == corcheteI){
+			obtoken();
+			expresion_numerica();
+			if(token == coma){
+				obtoken();
+				expresion_numerica();
+				if(token == corcheteF){
+					obtoken();
+				}else{
+					//error (58); // Se esperaba corchete de cierre
+				}
+			}else{
+			//	error(56);// Error 56: Se esperaba una coma en la comparacion
+			}
+		}else{
+			//error(55);//Error 55: se esperaba parentesis de apertura
+		}
+	  }else{
+		  //error(59); // instruccion no valida
+	  }
+	}		
+			
+}
+
+// ***************************************************************************
+// Dato Caracter
+
+void dato_caracter(){
+	if (token==ident){
+			obtoken();
+			if(token == punto){
+				obtoken();
+				/*
+				 llamada_Metodo();
+				 */
+				 }
+			
+		   }else{
+			   dato_caracter();
+		   }
+}
