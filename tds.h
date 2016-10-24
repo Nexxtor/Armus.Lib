@@ -13,7 +13,7 @@ extern "C" {
 #endif
 #define TRUE 1
 #define FALSE 0
-    enum tipoDato {ENTERO,REAL,CADENA,CARACTER,BOOLEANO,OBJETO};
+    enum tipoDato {ENTERO,REAL,CADENA,CARACTER,BOOLEANO,OBJETO, ARREGLO, ARCHIVO, BYTE};
     
     // los comentarios con * es por que realmente no se a tomado la decision
     // de usarlo o no 
@@ -21,12 +21,15 @@ extern "C" {
     //Creo que se deberia nombrar como variable
     struct atributo{
         int esPrimitivo;
-        int esArreglo;
+        enum tipoDato tipoContenidoArreglo;  // Si es otro arreglo valor apuntara a otro atributo
         char *ident;
         void *valor;       
         enum tipoDato tipo;
         int hashClase; //para saber de que clase es  *
         int hash; //para diferencias instacias  *
+        int parametro;
+        int esPorReferencia;
+        int alcanze;
     };
 
     struct listaAtributo{

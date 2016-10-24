@@ -60,7 +60,7 @@ void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
 void instarIncluidosArchivo(char *incluido, struct nodoArchivo *miArchivo) {
     int i = 0;
     while (miArchivo->incluidos[i][0] != '\0' && ++i);
-    printf("Se insertara en la posición %i\n", i);
+   // printf("Se insertara en la posición %i\n", i);
 
     free(miArchivo->incluidos[i]);
     miArchivo->incluidos = realloc(miArchivo->incluidos, sizeof (char *)*(i + 1));
@@ -77,20 +77,20 @@ void insertarTDSClase(struct nodoArchivo *archivo, char * nombre, int alcanze, s
 
     if (archivo->lsClase == NULL) {
         //POr que al principio no hay nada inicializado
-        printf("Creando espacio para la clase\n");
+      //  printf("Creando espacio para la clase\n");
         struct listaClase *ins;
         ins = (struct listaClase*) malloc(sizeof (struct listaClase));
         ins->sig = NULL;
         ins->clase = NULL;
         archivo->lsClase = ins;
-        printf("Creado ... \n");
+        //printf("Creado ... \n");
     }
     //Algoritmo de insercion como tal
     struct listaClase *s = archivo->lsClase;
     while (s->sig != NULL) s = s->sig;
     if (s->clase != NULL) { //caso considerado acausa del primer if
         //Significa que tengo que insertar el en siguiete
-        printf("Sera en la sigueinte\n");
+      //  printf("Sera en la sigueinte\n");
         struct listaClase *ins;
         ins = (struct listaClase *) malloc(sizeof (struct listaClase));
         ins->sig = NULL;
@@ -98,7 +98,7 @@ void insertarTDSClase(struct nodoArchivo *archivo, char * nombre, int alcanze, s
         s->sig = ins;
         s = s->sig;
     }
-    printf("Guardando clase\n");
+   // printf("Guardando clase\n");
     s->clase = (struct clase *) malloc(sizeof (struct clase));
     s->clase->esLocal = (alcanze == localTok) ? TRUE : FALSE;
     s->clase->ident = (char *) malloc(sizeof (char) * strlen(nombre));
