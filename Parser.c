@@ -220,6 +220,9 @@ void cuerpo(struct clase *clase) {
 
                 if (token == ident) {
                     printf("El nombre es %s ", lex);
+                    atributo->ident = (char *) malloc(sizeof(char )* strlen(lex)+ 1);
+                    strcpy(atributo->ident, lex);
+                    insertarTDSAtributo(clase,atributo);
                     obtoken();
                     do {
                         //viene otra priopiedad 
@@ -228,7 +231,17 @@ void cuerpo(struct clase *clase) {
                             obtoken();
                             //Y se llama
                             if (token == ident) {
-                                printf(", luego esta %s ", lex);
+                                struct atributo *atributo2 = (struct atributo*) malloc(sizeof (struct atributo));
+                                atributo2->esPrimitivo =  atributo->esPrimitivo;
+                                atributo2->tipo = atributo->tipo ;
+                                atributo2->ident = (char *) malloc(sizeof(char )* strlen(lex)+ 1);
+                                atributo2->tipoContenidoArreglo = atributo->tipoContenidoArreglo;
+                                
+                                atributo2->valor = atributo->valor; //No son copia es el mismo
+                                //tenemos que hacer
+                                strcpy(atributo2->ident, lex);
+                                printf("\t\t luego esta %s ", lex);
+                                insertarTDSAtributo(clase,atributo2);
                             } else {
                                 log_error(1);
                             }

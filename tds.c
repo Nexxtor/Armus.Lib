@@ -113,3 +113,22 @@ void insertarTDSClase(struct nodoArchivo *archivo, char * nombre, int alcanze, s
     *clase = s->clase;
 
 }
+
+void insertarTDSAtributo(struct clase *clase, struct atributo *atributo){
+    if(clase->lsAtributo == NULL){
+        clase->lsAtributo =  (struct listaAtributo *) malloc(sizeof(struct listaAtributo));
+        clase->lsAtributo->atributo = atributo;
+        clase->lsAtributo->sig = NULL;
+        printf("\n\t\t\tSe inserto el altributo %s\n",clase->lsAtributo->atributo->ident);
+    }else{
+       struct listaAtributo *ls =  clase->lsAtributo;
+       while(ls->sig != NULL) {
+           ls = ls->sig;
+       }
+       ls->sig =  (struct listaAtributo *) malloc(sizeof(struct listaAtributo));
+       ls->sig->atributo = atributo;
+       ls->sig->sig = NULL;
+       printf("\n\t\t\tSe inserto el altributo %s\n",ls->sig->atributo->ident);
+    }
+     
+}

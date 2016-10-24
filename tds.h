@@ -33,7 +33,7 @@ extern "C" {
     };
 
     struct listaAtributo{
-        struct atributo atributo;
+        struct atributo *atributo;
         struct listaAtributo *sig;
     };
     
@@ -84,6 +84,7 @@ extern "C" {
     void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch);
     void instarIncluidosArchivo(char *incluido,struct nodoArchivo *miArchivo);
     void insertarTDSClase(struct nodoArchivo *archivo,char * nombre ,int alcanze,struct clase **clase);
+    void insertarTDSAtributo(struct clase *clase, struct atributo *atributo);
 #ifdef __cplusplus
 }
 #endif
