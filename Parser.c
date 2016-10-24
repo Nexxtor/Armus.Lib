@@ -10,11 +10,11 @@
 
 tds tabla;
 void clearScanner();
-void programa(struct nodoArchivo *archivo);
-void cuerpo(struct clase *clase);
-void tipoD(struct atributo *atributo);
+void programaP1(struct nodoArchivo *archivo);
+void cuerpoP1(struct clase *clase);
+void tipoDP1(struct atributo *atributo);
 void copiarValor(struct atributo *dest, struct atributo *org);
-void insertarTDSMetodo(struct clase *clase, struct metodo *metodo);
+
 
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
 (JNIEnv *env, jobject obj, jobjectArray jsLsFile) {
@@ -44,6 +44,7 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
     //    tds *incioTDS = &tabla;
 
     int a = pasada1(lsfiles, cant);
+    int b = pasada2(lsfiles, cant);
     printf("%d\n", a);
     //Relase Java things
     for (i = 0; i < cant; i++) {
@@ -72,7 +73,7 @@ int pasada1(char **lsfiles, int cant) {
 
         // printf("Se Inserto %s\n", miArchivo->nombre);
         obtoken();
-        programa(miArchivo);
+        programaP1(miArchivo);
         fclose(fp);
         fp = NULL;
     }
@@ -80,6 +81,28 @@ int pasada1(char **lsfiles, int cant) {
 }
 
 int pasada2(char **lsfiles, int cant) {
+    int i;
+    clearScanner();
+    //Hacerlo con cada archivo
+    for (i = 0; i < cant; i++) {
+        fp = fopen(lsfiles[i], "r");
+        if (fp == NULL) {
+            return -1; //panico si no se puede abrir el archivo
+        }
+
+        ch = ' ';
+        fin_de_archivo = 0;
+        offset = -1;
+        ll = 0;
+        struct nodoArchivo *miArchivo;
+        instarArchivoTDS(lsfiles[i], &tabla, &miArchivo);
+
+        // printf("Se Inserto %s\n", miArchivo->nombre);
+        obtoken();
+        programaP1(miArchivo);
+        fclose(fp);
+        fp = NULL;
+    }
     return 1;
 }
 
@@ -90,7 +113,7 @@ void clearScanner() {
     iniciarParamentros();
 }
 
-void programa(struct nodoArchivo *archivo) {
+void programaP1(struct nodoArchivo *archivo) {
     do {
         if (token == incluirTok) {
             obtoken();
@@ -139,7 +162,7 @@ void programa(struct nodoArchivo *archivo) {
                     if (token == llaveI) {
                         obtoken();
                         printf("\tRevisando el cuerpo\n");
-                        cuerpo(claseActual);
+                        cuerpoP1(claseActual);
                         if (token == llaveF) {
                             printf("\tClase bien escrita\n");
                             obtoken();
@@ -165,7 +188,7 @@ void programa(struct nodoArchivo *archivo) {
     }
 }
 
-void cuerpo(struct clase *clase) {
+void cuerpoP1(struct clase *clase) {
     // Se aumentara cada vez que exista una llaver de apertura
     // Se disminuira cuando se cierre
     int countLlaveI = 0;
@@ -191,16 +214,16 @@ void cuerpo(struct clase *clase) {
                     //Ok es un metodo
                     printf("\t\tRegistrando metodo %s\n", nombre);
                     struct metodo *metodo;
-                    metodo = (struct metodo*) malloc(sizeof(struct metodo));
-                    metodo->ident = (char *) malloc(sizeof(char )*strlen(nombre)+1);
-                    strcpy(metodo->ident,nombre);
-                   
+                    metodo = (struct metodo*) malloc(sizeof (struct metodo));
+                    metodo->ident = (char *) malloc(sizeof (char)*strlen(nombre) + 1);
+                    strcpy(metodo->ident, nombre);
+
                     metodo->parametros = NULL;
                     metodo->tipoRetorno = -1;
                     metodo->esFuncion = -1;
-                    
+
                     insertarTDSMetodo(clase, metodo);
-                    
+
                     obtoken();
                     //Por el momento me salto los parametros
                     while (token != corcheteF && token != -1) {
@@ -222,9 +245,9 @@ void cuerpo(struct clase *clase) {
                     printf(" %s que es un objeto ", nombre);
                     atributo->esPrimitivo = 0;
                     atributo->tipo = OBJETO;
-                    
+
                 } else {
-                    tipoD(atributo);
+                    tipoDP1(atributo);
                 }
                 //Para que verificar el tipo
                 //Y ademas venga el inicio del registro
@@ -233,9 +256,9 @@ void cuerpo(struct clase *clase) {
 
                 if (token == ident) {
                     printf("El nombre es %s ", lex);
-                    atributo->ident = (char *) malloc(sizeof(char )* strlen(lex)+ 1);
+                    atributo->ident = (char *) malloc(sizeof (char)* strlen(lex) + 1);
                     strcpy(atributo->ident, lex);
-                    insertarTDSAtributo(clase,atributo);
+                    insertarTDSAtributo(clase, atributo);
                     obtoken();
                     do {
                         //viene otra priopiedad 
@@ -245,17 +268,17 @@ void cuerpo(struct clase *clase) {
                             //Y se llama
                             if (token == ident) {
                                 struct atributo *atributo2 = (struct atributo*) malloc(sizeof (struct atributo));
-                                atributo2->esPrimitivo =  atributo->esPrimitivo;
-                                atributo2->tipo = atributo->tipo ;
-                                atributo2->ident = (char *) malloc(sizeof(char )* strlen(lex)+ 1);
+                                atributo2->esPrimitivo = atributo->esPrimitivo;
+                                atributo2->tipo = atributo->tipo;
+                                atributo2->ident = (char *) malloc(sizeof (char)* strlen(lex) + 1);
                                 atributo2->tipoContenidoArreglo = atributo->tipoContenidoArreglo;
-                                
+
                                 atributo2->valor = atributo->valor; //copiarValor(atributo2,atributo); //No son copia es el mismo
                                 //tenemos que hacer
-                                
+
                                 strcpy(atributo2->ident, lex);
                                 printf("\t\t luego esta %s ", lex);
-                                insertarTDSAtributo(clase,atributo2);
+                                insertarTDSAtributo(clase, atributo2);
                             } else {
                                 log_error(1);
                             }
@@ -278,7 +301,7 @@ void cuerpo(struct clase *clase) {
     } while (countLlaveI >= 0);
 }
 
-void tipoD(struct atributo *atributo) {
+void tipoDP1(struct atributo *atributo) {
     atributo->esPrimitivo = 1;
     atributo->valor = NULL; // NO se crea la instaciona hasta que sea necesario
     switch (token) {
@@ -326,7 +349,7 @@ void tipoD(struct atributo *atributo) {
             if (token == mnr) {
                 struct atributo *valor = (struct atributo*) malloc(sizeof (struct atributo));
                 obtoken();
-                tipoD(valor);
+                tipoDP1(valor);
 
                 if (token == myr) {
                     atributo->esPrimitivo = 0;
@@ -341,7 +364,7 @@ void tipoD(struct atributo *atributo) {
                         atributo->tipoContenidoArreglo = valor->tipo;
                     }
                     printf(">. ");
-                }else{
+                } else {
                     log_error(1); //se esperaba cierre
                 }
             }
@@ -353,80 +376,60 @@ void tipoD(struct atributo *atributo) {
 
 }
 
-void copiarValor(struct atributo *dest, struct atributo *org){
-    switch(org->tipo){
+void copiarValor(struct atributo *dest, struct atributo *org) {
+    switch (org->tipo) {
         case ENTERO:
-            dest->valor = malloc(sizeof(int));
+            dest->valor = malloc(sizeof (int));
             //Para que solo copie lo del int 
-            int *valorO = (int *)org->valor;
-            int *valorD = (int *)org->valor;
+            int *valorO = (int *) org->valor;
+            int *valorD = (int *) org->valor;
             *valorD = *valorO;
             break;
         case REAL:
-            dest->valor = malloc(sizeof(float));
+            dest->valor = malloc(sizeof (float));
             //Para que solo copie lo del int 
             float *valorOf = org->valor;
             float *valorDf = org->valor;
             *valorDf = *valorOf;
             break;
-         case BYTE:
-            dest->valor = malloc(sizeof(char));
+        case BYTE:
+            dest->valor = malloc(sizeof (char));
             //Para que solo copie lo del int 
             char *valorOB = org->valor;
             char *valorDB = org->valor;
             *valorDB = *valorOB;
             break;
-         case BOOLEANO:
-            dest->valor = malloc(sizeof(int));
+        case BOOLEANO:
+            dest->valor = malloc(sizeof (int));
             //Para que solo copie lo del int 
             int *valorOBo = org->valor;
             int *valorDBo = org->valor;
             *valorDBo = *valorOBo;
             break;
-         case CADENA:
-            dest->valor = malloc(sizeof(char ) * strlen(org->valor) +1);
+        case CADENA:
+            dest->valor = malloc(sizeof (char) * strlen(org->valor) + 1);
             //Para que solo copie lo del int 
             char **valorOC = org->valor;
             char **valorDC = org->valor;
             strcpy(*valorDC, *valorOC);
             break;
-          case CARACTER:
-            dest->valor = malloc(sizeof(char ));
+        case CARACTER:
+            dest->valor = malloc(sizeof (char));
             //Para que solo copie lo del int 
             char *valorOCa = org->valor;
             char *valorDCa = org->valor;
             *valorDCa = *valorOCa;
             break;
         case ARREGLO:
-            if(org->tipoContenidoArreglo != ARREGLO){
+            if (org->tipoContenidoArreglo != ARREGLO) {
                 //Caso facil
-            }else{
+            } else {
                 //caso dificil me recursion 
             }
             break;
-        default: 
+        default:
             //FALTA DEFINIR objeto y archivo
             break;
     }
 }
 
-
-void insertarTDSMetodo(struct clase *clase, struct metodo *metodo){
-    if(clase->lsMetodo == NULL){
-        clase->lsMetodo =  (struct listaMetodo*) malloc(sizeof(struct listaMetodo));
-        clase->lsMetodo->metodo = metodo;
-        clase->lsMetodo->sig = NULL;
-        printf("\t\t\t SE REGISTRO el metodo %s\n", clase->lsMetodo->metodo->ident);
-    }else{
-        struct listaMetodo *s = clase->lsMetodo;
-        while(s->sig !=NULL){
-            s = s->sig;
-        }
-        s->sig =  (struct listaMetodo*) malloc(sizeof(struct listaMetodo));
-        s->sig->metodo = metodo;
-        s->sig->sig = NULL;
-         printf("\t\t\t SE REGISTRO el metodo %s\n", s->sig->metodo->ident);
-    }
-    
-
-}
