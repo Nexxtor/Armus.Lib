@@ -85,6 +85,7 @@ extern "C" {
     void instarIncluidosArchivo(char *incluido,struct nodoArchivo *miArchivo);
     void insertarTDSClase(struct nodoArchivo *archivo,char * nombre ,int alcanze,struct clase **clase);
     void insertarTDSAtributo(struct clase *clase, struct atributo *atributo);
+    void insertarTDSMetodo(struct clase *clase, struct metodo *metodo);
 #ifdef __cplusplus
 }
 #endif
