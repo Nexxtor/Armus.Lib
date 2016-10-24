@@ -13,6 +13,8 @@ void clearScanner();
 void programa(struct nodoArchivo *archivo);
 void cuerpo(struct clase *clase);
 void tipoD(struct atributo *atributo);
+void copiarValor(struct atributo *dest, struct atributo *org);
+void insertarTDSMetodo(struct clase *clase, struct metodo *metodo);
 
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
 (JNIEnv *env, jobject obj, jobjectArray jsLsFile) {
@@ -188,6 +190,17 @@ void cuerpo(struct clase *clase) {
                     propiedad = 0;
                     //Ok es un metodo
                     printf("\t\tRegistrando metodo %s\n", nombre);
+                    struct metodo *metodo;
+                    metodo = (struct metodo*) malloc(sizeof(struct metodo));
+                    metodo->ident = (char *) malloc(sizeof(char )*strlen(nombre)+1);
+                    strcpy(metodo->ident,nombre);
+                   
+                    metodo->parametros = NULL;
+                    metodo->tipoRetorno = -1;
+                    metodo->esFuncion = -1;
+                    
+                    insertarTDSMetodo(clase, metodo);
+                    
                     obtoken();
                     //Por el momento me salto los parametros
                     while (token != corcheteF && token != -1) {
@@ -237,8 +250,9 @@ void cuerpo(struct clase *clase) {
                                 atributo2->ident = (char *) malloc(sizeof(char )* strlen(lex)+ 1);
                                 atributo2->tipoContenidoArreglo = atributo->tipoContenidoArreglo;
                                 
-                                atributo2->valor = atributo->valor; //No son copia es el mismo
+                                atributo2->valor = atributo->valor; //copiarValor(atributo2,atributo); //No son copia es el mismo
                                 //tenemos que hacer
+                                
                                 strcpy(atributo2->ident, lex);
                                 printf("\t\t luego esta %s ", lex);
                                 insertarTDSAtributo(clase,atributo2);
@@ -336,5 +350,83 @@ void tipoD(struct atributo *atributo) {
             log_error(1); //NO es un tipo de dato valido
     }
     obtoken();
+
+}
+
+void copiarValor(struct atributo *dest, struct atributo *org){
+    switch(org->tipo){
+        case ENTERO:
+            dest->valor = malloc(sizeof(int));
+            //Para que solo copie lo del int 
+            int *valorO = (int *)org->valor;
+            int *valorD = (int *)org->valor;
+            *valorD = *valorO;
+            break;
+        case REAL:
+            dest->valor = malloc(sizeof(float));
+            //Para que solo copie lo del int 
+            float *valorOf = org->valor;
+            float *valorDf = org->valor;
+            *valorDf = *valorOf;
+            break;
+         case BYTE:
+            dest->valor = malloc(sizeof(char));
+            //Para que solo copie lo del int 
+            char *valorOB = org->valor;
+            char *valorDB = org->valor;
+            *valorDB = *valorOB;
+            break;
+         case BOOLEANO:
+            dest->valor = malloc(sizeof(int));
+            //Para que solo copie lo del int 
+            int *valorOBo = org->valor;
+            int *valorDBo = org->valor;
+            *valorDBo = *valorOBo;
+            break;
+         case CADENA:
+            dest->valor = malloc(sizeof(char ) * strlen(org->valor) +1);
+            //Para que solo copie lo del int 
+            char **valorOC = org->valor;
+            char **valorDC = org->valor;
+            strcpy(*valorDC, *valorOC);
+            break;
+          case CARACTER:
+            dest->valor = malloc(sizeof(char ));
+            //Para que solo copie lo del int 
+            char *valorOCa = org->valor;
+            char *valorDCa = org->valor;
+            *valorDCa = *valorOCa;
+            break;
+        case ARREGLO:
+            if(org->tipoContenidoArreglo != ARREGLO){
+                //Caso facil
+            }else{
+                //caso dificil me recursion 
+            }
+            break;
+        default: 
+            //FALTA DEFINIR objeto y archivo
+            break;
+    }
+}
+
+
+void insertarTDSMetodo(struct clase *clase, struct metodo *metodo){
+    if(clase->lsMetodo == NULL){
+        clase->lsMetodo =  (struct listaMetodo*) malloc(sizeof(struct listaMetodo));
+        clase->lsMetodo->metodo = metodo;
+        clase->lsMetodo->sig = NULL;
+        printf("\t\t\t SE REGISTRO el metodo %s\n", clase->lsMetodo->metodo->ident);
+    }else{
+        struct listaMetodo *s = clase->lsMetodo;
+        while(s->sig !=NULL){
+            s = s->sig;
+        }
+        s->sig =  (struct listaMetodo*) malloc(sizeof(struct listaMetodo));
+        s->sig->metodo = metodo;
+        s->sig->sig = NULL;
+         printf("\t\t\t SE REGISTRO el metodo %s\n", s->sig->metodo->ident);
+    }
+    
 
 }

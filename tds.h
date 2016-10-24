@@ -13,7 +13,7 @@ extern "C" {
 #endif
 #define TRUE 1
 #define FALSE 0
-    enum tipoDato {ENTERO,REAL,CADENA,CARACTER,BOOLEANO,OBJETO, ARREGLO, ARCHIVO, BYTE};
+    enum tipoDato {VACIO,ENTERO,REAL,CADENA,CARACTER,BOOLEANO,OBJETO, ARREGLO, ARCHIVO, BYTE};
     
     // los comentarios con * es por que realmente no se a tomado la decision
     // de usarlo o no 
@@ -45,7 +45,7 @@ extern "C" {
     };
     
     struct listaMetodo{
-        struct metodo metodo;
+        struct metodo *metodo;
         struct listaMetodo *sig;
     };
     
