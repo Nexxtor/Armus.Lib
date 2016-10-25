@@ -15,7 +15,6 @@ void cuerpoP1(struct clase *clase);
 void tipoDP1(struct atributo *atributo);
 void copiarValor(struct atributo *dest, struct atributo *org);
 
-
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
 (JNIEnv *env, jobject obj, jobjectArray jsLsFile) {
 
@@ -44,7 +43,7 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
     //    tds *incioTDS = &tabla;
 
     int a = pasada1(lsfiles, cant);
-    int b = pasada2(lsfiles, cant);
+    //int b = pasada2(lsfiles, cant);
     printf("%d\n", a);
     //Relase Java things
     for (i = 0; i < cant; i++) {
@@ -94,12 +93,12 @@ int pasada2(char **lsfiles, int cant) {
         fin_de_archivo = 0;
         offset = -1;
         ll = 0;
-        struct nodoArchivo *miArchivo;
-        instarArchivoTDS(lsfiles[i], &tabla, &miArchivo);
 
-        // printf("Se Inserto %s\n", miArchivo->nombre);
         obtoken();
-        programaP1(miArchivo);
+        //Buscar en la tabla de simbolos el archivo
+        //Si el archivo seguir, sino fracazar 
+        programa();
+
         fclose(fp);
         fp = NULL;
     }
@@ -218,17 +217,76 @@ void cuerpoP1(struct clase *clase) {
                     metodo->ident = (char *) malloc(sizeof (char)*strlen(nombre) + 1);
                     strcpy(metodo->ident, nombre);
 
-                    metodo->parametros = NULL;
-                    metodo->tipoRetorno = -1;
-                    metodo->esFuncion = -1;
-
                     insertarTDSMetodo(clase, metodo);
 
                     obtoken();
-                    //Por el momento me salto los parametros
-                    while (token != corcheteF && token != -1) {
+                    if (token == corcheteF) {
+                        //metodo sin parametros
+                        metodo->parametros = NULL;
+                        printf("\t\t\t sin parametros \n");
                         obtoken();
+                        if (token == arregloTok || token == objetoTok || token == archivoTok
+                                || token == caracterTok || token == cadenaTok || token == enteroTok
+                                || token == realTok || token == byteTok || token == booleanoTok || token == ident) {
+                            printf("\t\t\t y con retorno %d\n", token);
+                            metodo->tipoRetorno = -1;
+                            metodo->esFuncion = -1;
+                        } else {
+                            if (token == llaveI) countLlaveI++;
+                            if (token == llaveF) countLlaveI--;
+                        }
+
+                    } else {
+                        //Tiene paramentros
+                        //Preparamos el espacio para los paramentros
+                        struct listaAtributo *parametros
+                                = (struct listaAtributo *) malloc(sizeof (struct listaAtributo));
+                        int i = 0;
+                        do {
+                            if (i == 1) {
+                                obtoken();
+                            }
+                            struct atributo *parametro = (struct atributo *) malloc(sizeof (struct atributo));
+                            parametro->parametro = TRUE;
+
+                            printf("\t\t\tSe detecto parametro de tipo ");
+                            tipoDP1(parametro);
+
+                            if (token == por) {
+                                printf(" es por referencia ");
+                                parametro->esPorReferencia = TRUE;
+                                obtoken();
+                            }
+
+                            if (token == ident) {
+                                parametro->ident = (char *) malloc(sizeof (char) * strlen(lex) + 1);
+                                obtoken();
+                                i = 1;
+                                printf("Se inserta el parametro \n");
+                            } else {
+                                log_error(1); // Se esperaba un ident
+                                printf("Error \n");
+                            }
+                        } while (token == coma);
+
+                        if (token == corcheteF) {
+                            obtoken();
+                            if (token == arregloTok || token == objetoTok || token == archivoTok
+                                    || token == caracterTok || token == cadenaTok || token == enteroTok
+                                    || token == realTok || token == byteTok || token == booleanoTok || token == ident) {
+                                printf("\t\t\t y con retorno %d", token);
+                                metodo->tipoRetorno = -1;
+                                metodo->esFuncion = -1;
+                            } else {
+                                if (token == llaveI) countLlaveI++;
+                                if (token == llaveF) countLlaveI--;
+                            }
+                            printf("\t\t\ty esta bien escrito\n");
+                        } else {
+                            log_error(1); // si esperaba corchete de cierre
+                        }
                     }
+
 
                 }
 
@@ -370,6 +428,7 @@ void tipoDP1(struct atributo *atributo) {
             }
             break;
         default:
+            printf("Error en tipo \n");
             log_error(1); //NO es un tipo de dato valido
     }
     obtoken();
@@ -433,3 +492,866 @@ void copiarValor(struct atributo *dest, struct atributo *org) {
     }
 }
 
+/*
+void programa() {
+
+    //Area de inclusion 
+    do {
+        if (token == incluirTok) {
+            obtoken();
+            if (token == datoCadena) {
+                obtoken();
+                if (token == puntoycoma) {
+                    printf("Esta bien escrito incluit");
+                    obtoken();
+                } else {
+                    log_error(1); //se esperaba ;
+                }
+            } else {
+                log_error(1); //se espera cadena
+            }
+        }
+    } while (token == incluirTok);
+
+    //Area de clase
+
+    do {
+        if (token == publicaTok || token == localTok) {
+            int tokenAux = token;
+            obtoken();
+            if (token == claseTok) {
+                obtoken();
+                if (token == ident) {
+                    //verifica que la clase solo exita en este archivo
+                    obtoken();
+                    if (token == llaveI) {
+                        obtoken();
+                        cuerpo();
+                        if (token == llaveF) {
+                            printf("Clase bien escrita\n");
+                            obtoken();
+                        }
+                    } else {
+                        log_error(1); //se esperaba una llave de apertura
+                    }
+                } else {
+                    log_error(1); //se eperaba nombre de clase
+                }
+            } else {
+                log_error(1); //Se esperaba la declaracion de un clase
+            }
+        }
+    } while (token != -1);
+
+
+}
+
+void cuerpo() {
+    if (token == llaveF) {
+        printf("No tenia nada");
+        return;
+    }
+    if (token == publicaTok || token == privadoTok) {
+        obtoken();
+        if (token == arregloTok || token == objetoTok || token == archivoTok
+                || token == caracterTok || token == cadenaTok || token == enteroTok
+                || token == realTok || token == byteTok || token == booleanoTok) {
+            tipo();
+        } else {
+            if (token == ident) {
+                //Verifica si en lex esta guardada un ident de clase
+                //con la TDS
+                if (buscarClaseTDS(lex) == 1) {
+                    //significa que el ident leido es una clase
+                    obtoken();
+                    if (token == ident) {
+                        //Verificar si yaesta registrada 
+                        printf("Se tiene el atributo bien puesto");
+                        obtoken();
+                        if (token == igl) {
+                            obtoken();
+                            expresion();
+                        }
+
+                        do {
+                            if (token == coma) {
+                                obtoken();
+                                if (token == ident) {
+                                    //Verificar si yaesta registrada 
+                                    obtoken();
+                                    if (token == igl) {
+                                        obtoken();
+                                        expresion();
+                                    }
+                                } else {
+                                    log_error(1); //se esperaba un idnet de atributo
+                                }
+                            }
+                        } while (token != puntoycoma);
+
+                        if (token == puntoycoma) {
+                            obtoken();
+                            printf("Declaracion bien escrita");
+                        }
+                    } else {
+                        log_error(1); //se esperava un ident para el atriburo
+                    }
+                } else {
+                    //puede ser un metodo
+                    if (buscarMetodoTDS(clase) == 1) {
+                        metodo();
+                    } else {
+                        log_error(1); /// error desconocido culpa de carlos
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+void metodo() {
+    if (token == ident) {
+        obtoken();
+        if (token == corcheteI) {
+            obtoken();
+            if (token == corcheteF) {
+                obtoken();
+                if (token == arregloTok || token == objetoTok || token == archivoTok
+                        || token == caracterTok || token == cadenaTok || token == enteroTok
+                        || token == realTok || token == byteTok || token == booleanoTok) {
+                    printf("La funcion estaba bien escrita\n");
+
+                }
+
+                if (token == ident) {
+                    if (buscarClaseTDS(lex) == 1) {
+                        printf("EL tipo de retorno es un objeto y valido");
+
+                    } else {
+                        printf("EL tipo de retorno es un objeto y no es valido");
+                        log_error(1); // NO exite el tipo de dato lex
+                    }
+                }
+                if (token != llaveI) {
+                    obtoken();
+                }
+                bloque();
+            } else {
+                parametro();
+                while (token == coma) {
+                    obtoken();
+                    parametro();
+                }
+                if (token == corcheteF) {
+                    obtoken();
+                    if (token == arregloTok || token == objetoTok || token == archivoTok
+                            || token == caracterTok || token == cadenaTok || token == enteroTok
+                            || token == realTok || token == byteTok || token == booleanoTok) {
+                        printf("La funcion estaba bien escrita\n");
+
+                    }
+
+                    if (token == ident) {
+                        if (buscarClaseTDS(lex) == 1) {
+                            printf("EL tipo de retorno es un objeto y valido");
+
+                        } else {
+                            printf("EL tipo de retorno es un objeto y no es valido");
+                            log_error(1); // NO exite el tipo de dato lex
+                        }
+                    }
+                    if (token != llaveI) {
+                        obtoken();
+                    }
+                    bloque();
+                } else {
+                    log_error(1); // se esperaba cierre de corchete
+                }
+
+            }
+        } else log_error(1);
+    } else log_error(1);
+}
+
+void parametro() {
+    tipo();
+
+    if (token == por) {
+        obtoken();
+    }
+
+    if (token == ident) {
+        obtoken();
+    } else {
+        log_error(1); // Se esperaba un ident
+    }
+}
+
+void tipo() {
+    switch (token) {
+
+        case ident:
+            if (buscarClaseTDS(lex) == 1) {
+                printf("ES de tipo adecuedo");
+            } else {
+                log_error(1); // se esperaba un identi de clase
+            }
+            break;
+        case objetoTok:
+        case archivoTok:
+        case caracterTok:
+        case cadenaTok:
+        case enteroTok:
+        case realTok:
+        case byteTok:
+        case booleanoTok:
+        case arregloTok: //Caso dificil
+            printf("ES de tipo primitivo");
+            break;
+        default:
+            log_error(1); //NO es un tipo de dato valido
+    }
+    obtoken();
+
+}
+
+void bloque() {
+    if (token == llaveI) {
+        obtoken();
+        while (token == arregloTok || token == objetoTok || token == archivoTok
+                || token == caracterTok || token == cadenaTok || token == enteroTok
+                || token == realTok || token == byteTok || token == booleanoTok) {
+            declaracion_variable();
+            if (token == puntoycoma) {
+                obtoken();
+            } else {
+                log_error(1); //se esperaba un punto y coma
+            }
+        }
+        instruccion();
+        if (token == llaveF) {
+            obtoken();
+        } else {
+            log_error(1); //se esperaba una llave de cierre
+        }
+    }
+}
+
+void instruccion() {
+    switch (token) {
+        case ident:
+            obtoken();
+            //Es una llamada a metodo de una clase
+            if (token == punto) {
+                obtoken();
+                if (token == abrirTok || token == leerLineaTok
+                        || token == volcadoTok || token == cerrarTok) {
+                    funcion_archivo();
+                } else {
+                    llamada_metodo();
+                    if (token == puntoycoma) {
+                        obtoken();
+                        printf("EStaba escrita bien la llamada a metodo\n");
+                    } else {
+                        log_error(1); //se esperaba un punto y coma
+                    }
+                }
+            } else {
+                //Es una asignación
+                if (token == igl) {
+                    asignacion();
+                    if (token == puntoycoma) {
+                        obtoken();
+                        printf("EStaba escrita bien la asgnacion\n");
+                    }
+                } else {
+                    log_error(1); //esperaba una llaamda a metodo o un asignacion;
+                }
+            }
+            break;
+        case: romperTok:
+            instruccion_romper();
+            break;
+        case siTok:
+            instruccion_si();
+            break;
+        case probarTok:
+            instruccion_probar();
+            break;
+        case mientrasTok:
+            instruccion_mientras();
+            break;
+        case paraTok:
+            instruccion_para();
+            break;
+        case hacerTok:
+            instruccion_hacer();
+            break;
+        case paracadaTok:
+            instruccion_paraCada();
+            break;
+        case sistemaTok:
+            instruccion_es();
+            break;
+        case retornaTok:
+            obtoken();
+            expresion();
+            if (token == puntoycoma) {
+                printf("REtornar bien escrito");
+                obtoken();
+            } else {
+                log_error(1); //se esperaba punto y coma
+            }
+            break;
+        case llaveF:
+            printf("Se acabo insturcion"); // no se adelante por que encontro el siguiente
+            return;
+            break;
+
+    }
+    instruccion();
+
+}
+
+void funcion_archivo() {
+    if (token == abrirTok) {
+        obtoken();
+        if (token == corcheteI) {
+            obtoken();
+            valor_cadena();
+            if (token == corcheteF) {
+                obtoken();
+                printf("funcion archivo bien escrita camino 1");
+            } else {
+                log_error(1); //se esperaba corchete de cierre
+            }
+        } else {
+            log_error(1); //se esperaba corchete de apertura
+        }
+    } else {
+        switch (token) {
+            case leerLineaTok:
+            case volcadoTok:
+            case cerrarTok:
+                obtoken();
+                if (token == corcheteI) {
+                    obtoken();
+                    if (token == corcheteF) {
+                        obtoken();
+                        printf("funcion archivo bien escrita camino 2");
+                    } else {
+                        log_error(1); //se esperaba corchete de cierre
+                    }
+                } else {
+                    log_error(1); //se esperaba corchete de abierto
+                }
+                break;
+            default:
+                log_error(1); //NO deberia llegar aqui Se esperaba la llamada a funciones de archivos
+        }
+    }
+}
+
+void valor_cadena() {
+    switch (token) {
+        case datoCadena:
+            printf("Hay una cadena\n");
+            obtoken();
+            break;
+        case ident:
+            obtoken();
+            if (token == punto) {
+                obtoken();
+                llamada_metodo();
+            }
+            break;
+        case concatenarTok:
+            funcion_cadena();
+            break;
+    }
+
+
+}
+
+void declaracion_principal() {
+    if (token == publicaTok) {
+        obtoken();
+        if (token == principalTok) {
+            obtoken();
+            if (token == corcheteI) {
+                obtoken();
+                if (token == corcheteF) {
+                    obtoken();
+                    if (token == llaveI) {
+                        //obtoken();
+                        bloque();
+                    }
+                } else {
+                    parametros_principal();
+
+                    if (token == corcheteF) {
+                        obtoken();
+                    }
+                }
+
+            } else log_error(1);
+        } else log_error(1);
+    } else log_error(1);
+}
+
+void parametros_principal() {
+    if (token == caracterTok || token == cadenaTok || token == enteroTok || token == realTok || token == byteTok || token == booleanoTok) {
+        tipo_primitivo();
+        obtoken();
+        if (token == ident) {
+            obtoken();
+            if (token == coma) {
+                obtoken();
+                if (token == caracterTok || token == cadenaTok || token == enteroTok || token == realTok || token == byteTok || token == booleanoTok) {
+                    tipo_primitivo();
+                    if (token == ident) {
+                        obtoken();
+                    } else log_error(1);
+                } else log_error(1);
+            }
+
+        } else log_error(1);
+    } else log_error(1);
+
+
+}
+ 
+void llamada_metodo() {
+    if (token == ident) {
+        obtoken();
+        if (token == corcheteI) {
+            obtoken();
+            //Vefiricar la cantidad de parametro de este metodo
+            if (token == corcheteF) {
+                printf("BUena llamada a metodo\n");
+                obtoken();
+            } else {
+                if (token == referencia) {
+                    obtoken();
+                    if (token == ident) {
+                        obtoken();
+                        printf("BUena llamada a metodo 2\n");
+                    } else {
+                        log_error(1); //se espera un ident
+                    }
+                } else {
+                    expresion();
+                }
+                int i = 2;
+                while (token == coma) {
+                    printf("Parametro %d\n", i);
+                    obtoken();
+                    if (token == referencia) {
+                        obtoken();
+                        if (token == ident) {
+                            obtoken();
+                        } else {
+                            log_error(1); //se espera un ident
+                        }
+                    } else {
+                        expresion();
+                    }
+                    i++;
+                }
+            }
+
+        } else {
+            log_error(1); //falta corchete de apertura
+        }
+    } else {
+
+        funcion_arreglo();
+    }
+}
+
+void expresion() {
+    if (token == verdaderoTok || token == falsoTok) {
+        printf("Era un booleano \n");
+        obtoken();
+        return;
+    }
+    !, +, -,
+
+}
+
+void expresion_numerica() {
+    expresion_conjuncion();
+    while (token == otok) {
+
+        obtoken();
+        expresion_conjuncion();
+    }
+
+}
+
+void expresion_conjuncion() {
+    expresion_relacional()
+    while (token == ytok) {
+        obtoken();
+        expresion_relacional();
+    }
+}
+
+void expresion_relacional() {
+    if (token == negacion) {
+        obtoken();
+    }
+
+    expresion_aritmetica();
+    if (token == mnr || token == myr || token == mai || token == mei || token == igl || token == nig) {
+        obtoken();
+        expresion_aritmetica();
+    }
+}
+
+void expresion_aritmetica() {
+    termino();
+    if (token == mas || token == menos) {
+        do {
+            obtoken();
+            termino();
+        } while (token == mas || token == menos);
+    } else {
+        obtoken();
+    }
+}
+
+void termino() {
+    factor();
+    if (token == por || token == barra) {
+        do {
+            obtoken();
+            factor();
+        } while (token == por || token == barra);
+    } else {
+        obtoken();
+    }
+}
+
+void factor(){
+    while(token == mas || token == menos){
+        obtoken();
+    }
+    
+    if(token == numeroEntero || token == numeroReal){
+        obtoken();
+        printf("Encontre un numero\n");
+        return;
+    }
+    
+    if(token == ident){
+        //GUardar este idnet
+        //SI esta en la tds seguir
+        //sino dar error
+        obtoken();
+        if(token == punto){
+            obtoken();
+            //si empeza con la llamada a los
+            //token de funcion arreglo
+            //llamar a llamada_metodo
+            if(token == ident){
+                
+                
+                //Sino con la tds verificar si es un metodo // llmar a llamada metodo
+                //Y si una propiedad  buscar en la TDS si existe ok
+                
+                
+                return;
+            }else{
+                log_error(1); //se espera un atriubuto o metodo
+            }
+            
+        }
+    }
+    
+    //Aqui va funcion
+}
+
+void instruccion_mientras() {
+    if (token == mientrasTok) {
+        obtoken();
+        if (token == corcheteI) {
+            obtoken();
+            expresion_numerica();
+            if (token == corcheteF) {
+                obtoken();
+                if (token == llaveI) {
+                    obtoken();
+                    Instruccion();
+                    if (token == llaveF)
+                        obtoken();
+                    else
+                        error(); //no esta }
+                } else
+                    error(); //no esta {
+            } else
+                error(); //no esta el ]
+        } else
+            error(); //no esta el [
+    } else
+        error(); // no es el token mientras       
+}
+
+void instruccion_romper() {
+    if (token == romperTok) {
+        obtoken();
+        if (token == puntoycoma)
+            obtoken();
+        else
+            error(); //no esta el ;
+    } else
+        error(); // no esta el token romper
+}
+
+void instruccion_probar() {
+    if (token == probarTok) {
+        obtoken();
+        if (token == corcheteI) {
+            obtoken();
+            Expresion();
+            if (token == corcheteF) {
+                obtoken();
+                if (token == llaveI) {
+                    obtoken();
+                    if (token == casoTok) {
+                        while (token == casoTok) {
+                            obtoken();
+                            Expresion();
+                            if (token == dospuntos) {
+                                obtoken();
+                                Instruccion();
+                            } else
+                                error(); //faltan :
+                        }
+                        if (token == defectoTok) {
+                            obtoken();
+                            if (token == dospuntos) {
+                                obtoken();
+                                Instruccion();
+                            } else
+                                error(); //falta :
+                        } else
+                            error(); //falta defecto
+                        if (token == llaveF) {
+                            obtoken();
+                        } else
+                            error(); //falta}
+                    } else
+                        error(); //falta caso
+                } else
+                    error(); //falta {
+            } else
+                error(); //falta]
+        } else
+            error(); //falta [
+    } else
+        error(); //falta probar
+}
+
+void instruccion_para() {
+    int i;
+    if (token == paraTok) {
+        obtoken();
+        if (token == corcheteI) {
+            obtoken();
+            if (token == ident) {
+                i = posicion();
+                if (i == 0)
+                    error(11); //error 11: Identificador no declarado
+                else
+                    //if (tabla[i].tipo==PROCEDIMIENTO)
+                    //   error(21); //error 21: Una expresi\F3n no debe contener un identificador de procedimiento
+                    obtoken();
+
+                expresion_numerica();
+                if (token == coma) {
+                    obtoken();
+                    expresion_numerica();
+                    if (token == coma) {
+                        obtoken();
+                        expresion_numerica();
+                        if (token == corcheteF) {
+                            obtoken();
+                            if (token == puntoycoma) {
+                                obtoken();
+                            } else if (token == llaveI) {
+                                obtoken();
+                                Instruccion();
+                                if (token == llaveF)
+                                    obtoken();
+                                else
+                                    error(); //falta }
+                            } else
+                                error(); // falta el ;       
+                        } else
+                            error(); //falta]
+                    } else
+                        error(); //falta,
+                } else
+                    error(); //falta ,
+            } else
+                error(); //no es un identificador
+        } else
+            error(); //no es [
+    } else
+        errror(); //no es la palabra para
+}
+
+void instruccion_hacer() {
+    if (token == hacerTok) {
+        obtoken();
+        if (token == llaveI) {
+            obtoken();
+            Instruccion();
+            if (token == llaveF) {
+                obtoken();
+                if (token == mientrasTok) {
+                    obtoken();
+                    if (token == corcheteI) {
+                        obtoken();
+                        expresion_numerica();
+                        if (token == corcheteF) {
+                            obtoken();
+                            if (token == puntoycoma)
+                                obtoken();
+                            else
+                                error(); //falta ;
+                        } else
+                            error(); //falta ]
+                    } else
+                        error(); //falta[
+                } else
+                    error(); //falta token mientras
+            } else
+                error(); //falta }
+        } else
+            error(); //falta {
+    }
+}
+
+void instruccion_paraCada() {
+    int i;
+    if (token == paracadaTok) {
+        obtoken();
+        if (token == corcheteI) {
+            obtoken();
+            Tipo();
+            if (token == ident) {
+                i = posicion();
+                if (i == 0)
+                    error(11); //error 11: identificador no declarado 
+                // else 
+                //if (tabla[i].tipo != VARIABLE)
+                //    error(12); //error 12: no est\E1n permitidas las asignaciones a constantes o a procedimientos
+                obtoken();
+                if (token == coma) {
+                    obtoken();
+                    if (token == ident) {
+                        i = posicion();
+                        if (i == 0)
+                            error(11);
+                        // else 
+                        //if (tabla[i].tipo != VARIABLE)
+                        //error(12); //error 12: no est\E1n permitidas las asignaciones a constantes o a procedimientos
+                        obtoken();
+                        if (token == corcheteF) {
+                            obtoken();
+                            if (token == llaveI) {
+                                obtoken();
+                                Instruccion();
+                                if (token == llaveF) {
+                                    obtoken();
+                                } else
+                                    error(); //falta }
+                            } else
+                                error(); //falta {
+                        } else
+                            error(); //falta]
+                    } else
+                        error(); //no es un identificador
+                } else
+                    error(); //falta ,
+            } else
+                error(); // no es un identificador
+        } else
+            error(); // no esta el [
+    } else
+        error(); //no esta token paracada 
+
+}
+
+void instruccion_obtener() {
+    int i;
+    if (token == sistemaTok) {
+        obtoken();
+        if (token == punto) {
+            obtoken();
+            if (token == obtenerEnteroTok || token == obtenerRealTok || token == obtenerCadenaTok || token == obtenerCaracterTok) {
+                obtoken();
+                if (token == corcheteI) {
+                    obtoken();
+                    if (token == ident) {
+                        i = posicion();
+                        if (i == 0)
+                            error(11);
+                        // else 
+                        //if (tabla[i].tipo != VARIABLE)
+                        // error(12); //error 12: no est\E1n permitidas las asignaciones a constantes o a procedimientos
+                        obtoken();
+                        if (token == corcheteF) {
+                            obtoken();
+                            if (token == puntoycoma) {
+                                obtoken();
+                            } else
+                                error(); //no es un ;
+                        } else
+                            error(); //no es un ]
+                    } else
+                        error(); //no es un identificador
+                } else
+                    error(); //no es un [
+            } else
+                error(); // no es entero, real, cadena, o caracter
+        } else
+            error(); //no es .
+    } else
+        error(); //no es el token sistema
+}
+
+void instruccion_mostrar() {
+    if (token == sistemaTok) {
+        obtoken();
+        if (token == punto) {
+            obtoken();
+            if (token == mostrarTok) {
+                obtoken();
+                if (token == corcheteI) {
+                    obtoken();
+                    Expresion();
+                    if (token == coma) {
+                        Expresion();
+                    }
+                    if (token == corcheteF) {
+                        obtoken();
+                        if (token == puntoycoma)
+                            obtoken();
+                        else
+                            error(); //no es el ;
+                    } else
+                        error(); //no es ]
+                } else
+                    error(); //no es [
+            } else
+                error(); //no es la palabra mostrar
+        } else
+            error(); //no es un .
+    } else
+        error(); //no es el token sistema
+}
+ */
