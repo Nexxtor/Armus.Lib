@@ -548,6 +548,10 @@ void programa( struct nodoArchivo *miArchivo) {
                 obtoken();
                 if (token == ident) {
                     //verifica que la clase solo exita en este archivo
+                    if(evitarRedefinicionClase(lex, miArchivo,&tabla) >= 1){
+                        printf("Eesta clase exite en mas de un lugar\n");
+                        log_error(1); //la calse estaba definida
+                    }
                     obtoken();
                     if (token == llaveI) {
                         obtoken();
