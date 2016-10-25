@@ -14,6 +14,7 @@ void programaP1(struct nodoArchivo *archivo);
 void cuerpoP1(struct clase *clase);
 void tipoDP1(struct atributo *atributo);
 void copiarValor(struct atributo *dest, struct atributo *org);
+void programa( struct nodoArchivo *);
 
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
 (JNIEnv *env, jobject obj, jobjectArray jsLsFile) {
@@ -43,7 +44,7 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
     //    tds *incioTDS = &tabla;
 
     int a = pasada1(lsfiles, cant);
-    //int b = pasada2(lsfiles, cant);
+    int b = pasada2(lsfiles, cant);
     printf("%d\n", a);
     //Relase Java things
     for (i = 0; i < cant; i++) {
@@ -80,6 +81,7 @@ int pasada1(char **lsfiles, int cant) {
 }
 
 int pasada2(char **lsfiles, int cant) {
+    printf("------------------------------------------------------\n");
     int i;
     clearScanner();
     //Hacerlo con cada archivo
@@ -93,11 +95,17 @@ int pasada2(char **lsfiles, int cant) {
         fin_de_archivo = 0;
         offset = -1;
         ll = 0;
-
+        
+        struct nodoArchivo *valor = NULL;
+        buscarArchivoTDS(&valor,&tabla,lsfiles[i]);
+        printf("Archivo %s \n",lsfiles[i]);
+        if(valor == NULL){
+            printf("EL ARCHIVO NO SE REGISTRO BIEN PANICO TOTAL LA SEGUNDA PASADA PROBABLEMETE FUE EJECUTADA DE FORMA INDEPENDIENTO O SE CAMBIARON LA LISTA DE ARCHIVOS");
+            log_error(1);
+            
+        }
         obtoken();
-        //Buscar en la tabla de simbolos el archivo
-        //Si el archivo seguir, sino fracazar 
-        programa();
+        programa(valor);
 
         fclose(fp);
         fp = NULL;
@@ -500,8 +508,8 @@ void copiarValor(struct atributo *dest, struct atributo *org) {
     }
 }
 
-/*
-void programa() {
+//Programa necesita saber en el contexto de que archivo esta
+void programa( struct nodoArchivo *miArchivo) {
 
     //Area de inclusion 
     do {
@@ -509,8 +517,17 @@ void programa() {
             obtoken();
             if (token == datoCadena) {
                 obtoken();
+                //verificamos que lo que quiere incluir existe
+                struct nodoArchivo *incluir = NULL;
+                buscarArchivoTDS(&incluir,&tabla,valorCadena);
+                //Verificamos pro que le la primera pasada solo se registor
+                //pero no se sabia si existia o no
+                if(incluir == NULL){
+                    printf("El archivo a incluir no se reconoce\n");
+                    log_error(1);
+                }
                 if (token == puntoycoma) {
-                    printf("Esta bien escrito incluit");
+                    printf("\tincluir %s\n",valorCadena);
                     obtoken();
                 } else {
                     log_error(1); //se esperaba ;
@@ -550,10 +567,8 @@ void programa() {
             }
         }
     } while (token != -1);
-
-
 }
-
+/*
 void cuerpo() {
     if (token == llaveF) {
         printf("No tenia nada");
@@ -616,8 +631,8 @@ void cuerpo() {
         }
     }
 
-}
-
+}*/
+/*
 void metodo() {
     if (token == ident) {
         obtoken();
@@ -1095,15 +1110,15 @@ void instruccion_mientras() {
                     if (token == llaveF)
                         obtoken();
                     else
-                        error(); //no esta }
+                       log_error(1); //no esta }
                 } else
-                    error(); //no esta {
+                   log_error(1); //no esta {
             } else
-                error(); //no esta el ]
+               log_error(1); //no esta el ]
         } else
-            error(); //no esta el [
+           log_error(1); //no esta el [
     } else
-        error(); // no es el token mientras       
+       log_error(1); // no es el token mientras       
 }
 
 void instruccion_romper() {
@@ -1112,9 +1127,9 @@ void instruccion_romper() {
         if (token == puntoycoma)
             obtoken();
         else
-            error(); //no esta el ;
+           log_error(1); //no esta el ;
     } else
-        error(); // no esta el token romper
+       log_error(1); // no esta el token romper
 }
 
 void instruccion_probar() {
@@ -1135,7 +1150,7 @@ void instruccion_probar() {
                                 obtoken();
                                 Instruccion();
                             } else
-                                error(); //faltan :
+                               log_error(1); //faltan :
                         }
                         if (token == defectoTok) {
                             obtoken();
@@ -1143,23 +1158,23 @@ void instruccion_probar() {
                                 obtoken();
                                 Instruccion();
                             } else
-                                error(); //falta :
+                               log_error(1); //falta :
                         } else
-                            error(); //falta defecto
+                           log_error(1); //falta defecto
                         if (token == llaveF) {
                             obtoken();
                         } else
-                            error(); //falta}
+                           log_error(1); //falta}
                     } else
-                        error(); //falta caso
+                       log_error(1); //falta caso
                 } else
-                    error(); //falta {
+                   log_error(1); //falta {
             } else
-                error(); //falta]
+               log_error(1); //falta]
         } else
-            error(); //falta [
+           log_error(1); //falta [
     } else
-        error(); //falta probar
+       log_error(1); //falta probar
 }
 
 void instruccion_para() {
@@ -1194,19 +1209,19 @@ void instruccion_para() {
                                 if (token == llaveF)
                                     obtoken();
                                 else
-                                    error(); //falta }
+                                   log_error(1); //falta }
                             } else
-                                error(); // falta el ;       
+                               log_error(1); // falta el ;       
                         } else
-                            error(); //falta]
+                           log_error(1); //falta]
                     } else
-                        error(); //falta,
+                       log_error(1); //falta,
                 } else
-                    error(); //falta ,
+                   log_error(1); //falta ,
             } else
-                error(); //no es un identificador
+               log_error(1); //no es un identificador
         } else
-            error(); //no es [
+           log_error(1); //no es [
     } else
         errror(); //no es la palabra para
 }
@@ -1229,17 +1244,17 @@ void instruccion_hacer() {
                             if (token == puntoycoma)
                                 obtoken();
                             else
-                                error(); //falta ;
+                               log_error(1); //falta ;
                         } else
-                            error(); //falta ]
+                           log_error(1); //falta ]
                     } else
-                        error(); //falta[
+                       log_error(1); //falta[
                 } else
-                    error(); //falta token mientras
+                   log_error(1); //falta token mientras
             } else
-                error(); //falta }
+               log_error(1); //falta }
         } else
-            error(); //falta {
+           log_error(1); //falta {
     }
 }
 
@@ -1276,21 +1291,21 @@ void instruccion_paraCada() {
                                 if (token == llaveF) {
                                     obtoken();
                                 } else
-                                    error(); //falta }
+                                   log_error(1); //falta }
                             } else
-                                error(); //falta {
+                               log_error(1); //falta {
                         } else
-                            error(); //falta]
+                           log_error(1); //falta]
                     } else
-                        error(); //no es un identificador
+                       log_error(1); //no es un identificador
                 } else
-                    error(); //falta ,
+                   log_error(1); //falta ,
             } else
-                error(); // no es un identificador
+               log_error(1); // no es un identificador
         } else
-            error(); // no esta el [
+           log_error(1); // no esta el [
     } else
-        error(); //no esta token paracada 
+       log_error(1); //no esta token paracada 
 
 }
 
@@ -1317,19 +1332,19 @@ void instruccion_obtener() {
                             if (token == puntoycoma) {
                                 obtoken();
                             } else
-                                error(); //no es un ;
+                               log_error(1); //no es un ;
                         } else
-                            error(); //no es un ]
+                           log_error(1); //no es un ]
                     } else
-                        error(); //no es un identificador
+                       log_error(1); //no es un identificador
                 } else
-                    error(); //no es un [
+                   log_error(1); //no es un [
             } else
-                error(); // no es entero, real, cadena, o caracter
+               log_error(1); // no es entero, real, cadena, o caracter
         } else
-            error(); //no es .
+           log_error(1); //no es .
     } else
-        error(); //no es el token sistema
+       log_error(1); //no es el token sistema
 }
 
 void instruccion_mostrar() {
@@ -1350,16 +1365,16 @@ void instruccion_mostrar() {
                         if (token == puntoycoma)
                             obtoken();
                         else
-                            error(); //no es el ;
+                           log_error(1); //no es el ;
                     } else
-                        error(); //no es ]
+                       log_error(1); //no es ]
                 } else
-                    error(); //no es [
+                   log_error(1); //no es [
             } else
-                error(); //no es la palabra mostrar
+               log_error(1); //no es la palabra mostrar
         } else
-            error(); //no es un .
+           log_error(1); //no es un .
     } else
-        error(); //no es el token sistema
+       log_error(1); //no es el token sistema
 }
- */
+*/

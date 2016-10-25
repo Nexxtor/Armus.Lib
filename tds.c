@@ -3,14 +3,14 @@
 #include <string.h>
 #include <stdio.h>
 #include "Lexico.h"
-
+#include "Util.h"
 int hash = 1;
 
 void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
     tds *tAux = t;
     //Se busca en donde instar
     while (tAux->valor != NULL) {
-        int cmp = strcmp(nombreArchivo, tAux->valor->nombre);
+        int cmp = strcmp(obtenerNombreBase(nombreArchivo), tAux->valor->nombre);
         //esto no deberia de pasar
         // si pasa hay que revisar el preScanner
         if (cmp == 0) {
@@ -46,8 +46,8 @@ void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
 
     struct nodoArchivo *a = tAux->valor;
 
-    a->nombre = (char *) malloc(sizeof (char)* strlen(nombreArchivo));
-    strcpy(a->nombre, nombreArchivo);
+    a->nombre = (char *) malloc(sizeof (char)* strlen(obtenerNombreBase(nombreArchivo)+ 1));
+    strcpy(a->nombre, obtenerNombreBase(nombreArchivo));
 
 
     a->incluidos = (char **) malloc(sizeof (char *) * 1);
@@ -64,8 +64,8 @@ void instarIncluidosArchivo(char *incluido, struct nodoArchivo *miArchivo) {
 
     free(miArchivo->incluidos[i]);
     miArchivo->incluidos = realloc(miArchivo->incluidos, sizeof (char *)*(i + 1));
-    miArchivo->incluidos[i] = (char *) malloc(sizeof (char)* strlen(incluido));
-    strcpy(miArchivo->incluidos[i], incluido);
+    miArchivo->incluidos[i] = (char *) malloc(sizeof (char)* strlen(obtenerNombreBase(incluido) +1 ));
+    strcpy(miArchivo->incluidos[i], obtenerNombreBase(incluido));
     miArchivo->incluidos[i + 1] = (char *) malloc(sizeof (char) * 1);
     miArchivo->incluidos[i + 1][0] = '\0';
 
@@ -132,3 +132,44 @@ void insertarTDSAtributo(struct clase *clase, struct atributo *atributo){
     }
      
 }
+
+void insertarTDSMetodo(struct clase *clase, struct metodo *metodo) {
+    if (clase->lsMetodo == NULL) {
+        clase->lsMetodo = (struct listaMetodo*) malloc(sizeof (struct listaMetodo));
+        clase->lsMetodo->metodo = metodo;
+        clase->lsMetodo->sig = NULL;
+        printf("\t\t\t SE REGISTRO el metodo %s\n", clase->lsMetodo->metodo->ident);
+    } else {
+        struct listaMetodo *s = clase->lsMetodo;
+        while (s->sig != NULL) {
+            s = s->sig;
+        }
+        s->sig = (struct listaMetodo*) malloc(sizeof (struct listaMetodo));
+        s->sig->metodo = metodo;
+        s->sig->sig = NULL;
+        printf("\t\t\t SE REGISTRO el metodo %s\n", s->sig->metodo->ident);
+    }
+
+
+}
+
+void buscarArchivoTDS( struct nodoArchivo **archivo,tds *tabla ,char * buscado){
+     tds *s = tabla;
+     if(s == NULL){
+         *archivo = NULL;
+         return;
+     }
+     
+     int cmp = strcmp(obtenerNombreBase(buscado),s->valor->nombre);
+     //printf("Se esta comparando %s con %s %d\n",obtenerNombreBase(buscado),s->valor->nombre, cmp);
+     if(cmp == 0){
+        *archivo = s->valor;
+      //  printf("Se encontro el archivo\n");
+     }else{
+         if(cmp >0){
+            buscarArchivoTDS(archivo,s->dch ,buscado); 
+         }else{
+            buscarArchivoTDS( archivo,s->izq ,buscado);  
+         }
+     }
+ }

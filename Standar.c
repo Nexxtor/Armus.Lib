@@ -62,6 +62,7 @@ void inicializar_espec() {
     espec[']'] = corcheteF;
     espec['!'] = negacion;
     espec['~'] = referencia;
+    espec[':'] = dosPuntos;
     espec[46] = punto;
     espec[44] = coma;
     espec[59] = puntoycoma;
