@@ -165,10 +165,15 @@ void obtoken() {
     while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
 
     if (ch == '/') {
+        printf("-------------- Encontre un barra\n");
         ch = obtch();
         if (ch == '/') {
-            while ((ch = obtch()) != '\n');
-             ch = obtch();
+            printf("-------------- Encontre un barra 2\n");
+            ch = obtch();
+            while (ch != '\n'){
+                ch = obtch();
+            }
+            ch = obtch();
         } else {
             if (ch == '*') {
                 ch = obtch();
@@ -191,6 +196,7 @@ void obtoken() {
                 ch = obtch();
             } else {
                 token = espec['/'];
+                return;
             }
         }
     }

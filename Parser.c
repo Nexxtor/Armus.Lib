@@ -14,7 +14,11 @@ void programaP1(struct nodoArchivo *archivo);
 void cuerpoP1(struct clase *clase);
 void tipoDP1(struct atributo *atributo);
 void copiarValor(struct atributo *dest, struct atributo *org);
-void programa( struct nodoArchivo *);
+void programa(struct nodoArchivo *);
+void cuerpo(struct nodoArchivo* miArchivo, struct clase *clase);
+int tipo(struct nodoArchivo *miArchivo, struct clase *clase);
+void metodo(struct nodoArchivo* miArchivo, struct clase *clase);
+void parametro(struct nodoArchivo *miArchivo, struct clase *clase, struct metodo*);
 
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
 (JNIEnv *env, jobject obj, jobjectArray jsLsFile) {
@@ -95,14 +99,14 @@ int pasada2(char **lsfiles, int cant) {
         fin_de_archivo = 0;
         offset = -1;
         ll = 0;
-        
+
         struct nodoArchivo *valor = NULL;
-        buscarArchivoTDS(&valor,&tabla,lsfiles[i]);
-        printf("Archivo %s \n",lsfiles[i]);
-        if(valor == NULL){
+        buscarArchivoTDS(&valor, &tabla, lsfiles[i]);
+        printf("Archivo %s \n", lsfiles[i]);
+        if (valor == NULL) {
             printf("EL ARCHIVO NO SE REGISTRO BIEN PANICO TOTAL LA SEGUNDA PASADA PROBABLEMETE FUE EJECUTADA DE FORMA INDEPENDIENTO O SE CAMBIARON LA LISTA DE ARCHIVOS");
             log_error(1);
-            
+
         }
         obtoken();
         programa(valor);
@@ -237,7 +241,7 @@ void cuerpoP1(struct clase *clase) {
                                 || token == caracterTok || token == cadenaTok || token == enteroTok
                                 || token == realTok || token == byteTok || token == booleanoTok || token == ident) {
                             printf("\t\t\t y con retorno %d\n", token);
-                            metodo->tipoRetorno =  token; //Cambiar esto por el tipo en mayusculas
+                            metodo->tipoRetorno = token; //Cambiar esto por el tipo en mayusculas
                             metodo->esFuncion = TRUE;
                         } else {
                             if (token == llaveI) countLlaveI++;
@@ -260,11 +264,11 @@ void cuerpoP1(struct clase *clase) {
                                 parametros->sig = (struct listaAtributo *) malloc(sizeof (struct listaAtributo));
                                 parametros = parametros->sig;
                                 parametros->sig = NULL;
-                                
+
                             }
-                            
-                            parametros->atributo =  parametroX;
-                            
+
+                            parametros->atributo = parametroX;
+
                             printf("\t\t\tSe detecto parametro de tipo ");
                             tipoDP1(parametroX);
 
@@ -291,7 +295,7 @@ void cuerpoP1(struct clase *clase) {
                                     || token == caracterTok || token == cadenaTok || token == enteroTok
                                     || token == realTok || token == byteTok || token == booleanoTok || token == ident) {
                                 printf("\t\t\t y con retorno %d\n", token);
-                                metodo->tipoRetorno = -1;
+                                metodo->tipoRetorno = token;
                                 metodo->esFuncion = -1;
                             } else {
                                 if (token == llaveI) countLlaveI++;
@@ -313,6 +317,7 @@ void cuerpoP1(struct clase *clase) {
                 printf("\t\tPropiedad de tipo");
 
                 struct atributo *atributo = (struct atributo*) malloc(sizeof (struct atributo));
+                atributo->alcanze = alcanze;
                 //ES un propieda cuyo tipo es un objeto
                 if (propiedad == 2) {
                     //En la version completa buscar el hashClase
@@ -346,7 +351,7 @@ void cuerpoP1(struct clase *clase) {
                                 atributo2->tipo = atributo->tipo;
                                 atributo2->ident = (char *) malloc(sizeof (char)* strlen(lex) + 1);
                                 atributo2->tipoContenidoArreglo = atributo->tipoContenidoArreglo;
-
+                                atributo2->alcanze = atributo->alcanze;
                                 atributo2->valor = atributo->valor; //copiarValor(atributo2,atributo); //No son copia es el mismo
                                 //tenemos que hacer
 
@@ -509,7 +514,8 @@ void copiarValor(struct atributo *dest, struct atributo *org) {
 }
 
 //Programa necesita saber en el contexto de que archivo esta
-void programa( struct nodoArchivo *miArchivo) {
+
+void programa(struct nodoArchivo* miArchivo) {
 
     //Area de inclusion 
     do {
@@ -519,15 +525,15 @@ void programa( struct nodoArchivo *miArchivo) {
                 obtoken();
                 //verificamos que lo que quiere incluir existe
                 struct nodoArchivo *incluir = NULL;
-                buscarArchivoTDS(&incluir,&tabla,valorCadena);
+                buscarArchivoTDS(&incluir, &tabla, valorCadena);
                 //Verificamos pro que le la primera pasada solo se registor
                 //pero no se sabia si existia o no
-                if(incluir == NULL){
+                if (incluir == NULL) {
                     printf("El archivo a incluir no se reconoce\n");
                     log_error(1);
                 }
                 if (token == puntoycoma) {
-                    printf("\tincluir %s\n",valorCadena);
+                    printf("\tincluir %s\n", valorCadena);
                     obtoken();
                 } else {
                     log_error(1); //se esperaba ;
@@ -545,17 +551,26 @@ void programa( struct nodoArchivo *miArchivo) {
             int tokenAux = token;
             obtoken();
             if (token == claseTok) {
+                int tokenAux2 = token;
                 obtoken();
                 if (token == ident) {
+                    struct clase *yoClase = NULL;
+                    obtenerClase(miArchivo, &yoClase, lex);
+                    if (yoClase == NULL) {
+                        printf("Error clase no registrad en la primera pasada\n");
+                        log_error(1);
+                    }
+                    printf("Soy la clase %s\n", yoClase->ident);
+
                     //verifica que la clase solo exita en este archivo
-                    if(evitarRedefinicionClase(lex, miArchivo,&tabla) >= 1){
-                        printf("Eesta clase exite en mas de un lugar\n");
+                    if (evitarRedefinicionClase(lex, miArchivo, &tabla) >= 1) {
+                        printf("Esta clase exite en mas de un lugar\n");
                         log_error(1); //la calse estaba definida
                     }
                     obtoken();
                     if (token == llaveI) {
                         obtoken();
-                        cuerpo();
+                        cuerpo(miArchivo, yoClase);
                         if (token == llaveF) {
                             printf("Clase bien escrita\n");
                             obtoken();
@@ -572,32 +587,29 @@ void programa( struct nodoArchivo *miArchivo) {
         }
     } while (token != -1);
 }
-/*
-void cuerpo() {
+
+void cuerpo(struct nodoArchivo* miArchivo, struct clase *clase) {
     if (token == llaveF) {
         printf("No tenia nada");
         return;
     }
-    if (token == publicaTok || token == privadoTok) {
-        obtoken();
-        if (token == arregloTok || token == objetoTok || token == archivoTok
-                || token == caracterTok || token == cadenaTok || token == enteroTok
-                || token == realTok || token == byteTok || token == booleanoTok) {
-            tipo();
-        } else {
-            if (token == ident) {
-                //Verifica si en lex esta guardada un ident de clase
-                //con la TDS
-                if (buscarClaseTDS(lex) == 1) {
-                    //significa que el ident leido es una clase
-                    obtoken();
-                    if (token == ident) {
-                        //Verificar si yaesta registrada 
-                        printf("Se tiene el atributo bien puesto");
+    do {
+        if (token == publicaTok || token == privadoTok) {
+            printf("Token de acceso listo\n");
+            obtoken();
+            if (token == arregloTok || token == objetoTok || token == archivoTok
+                    || token == caracterTok || token == cadenaTok || token == enteroTok
+                    || token == realTok || token == byteTok || token == booleanoTok) {
+                //tipo(); // no se llama por que ya se pregunto
+                obtoken();
+                if (token == ident) {
+                    struct atributo *atr = NULL;
+                    buscarAtributo(&atr, clase, lex);
+                    if (atr != NULL) {
                         obtoken();
                         if (token == igl) {
                             obtoken();
-                            expresion();
+                            //expresion();
                         }
 
                         do {
@@ -608,7 +620,7 @@ void cuerpo() {
                                     obtoken();
                                     if (token == igl) {
                                         obtoken();
-                                        expresion();
+                                        //expresion();
                                     }
                                 } else {
                                     log_error(1); //se esperaba un idnet de atributo
@@ -618,109 +630,84 @@ void cuerpo() {
 
                         if (token == puntoycoma) {
                             obtoken();
-                            printf("Declaracion bien escrita");
+                            printf("Declaracion bien escrita tipo primitivo \n");
+                        } else {
+                            printf("FAlra ;\n");
+                            log_error(1); //falta ;
                         }
+                    } else {
+                        log_error(1); //este atributo no se detecto en la primera pasada
+                    }
+                } else {
+                    log_error(1); //atributo mal escrito
+                }
+            } else {
+
+                //Verifica si en lex esta guardada un ident de clase
+                //con la TDS
+                if (tipo(miArchivo, clase) == 1) {
+                    if (token == ident) {
+                        //Verificar si yaesta registrada 
+                        struct atributo *atr = NULL;
+                        buscarAtributo(&atr, clase, lex);
+                        if (atr != NULL) {
+                            obtoken();
+                            if (token == igl) {
+                                obtoken();
+                                //expresion();
+                            }
+
+                            do {
+                                if (token == coma) {
+                                    obtoken();
+                                    if (token == ident) {
+                                        //Verificar si yaesta registrada 
+                                        obtoken();
+                                        if (token == igl) {
+                                            obtoken();
+                                            //expresion();
+                                        }
+                                    } else {
+                                        log_error(1); //se esperaba un idnet de atributo
+                                    }
+                                }
+                            } while (token != puntoycoma);
+
+                            if (token == puntoycoma) {
+                                obtoken();
+                                printf("Declaracion bien escrita tipo objeto\n");
+                            } else {
+                                printf("FAlra ;\n");
+                                log_error(1); //falta ;
+                            }
+                        } else {
+                            log_error(1); //este atributo no se detecto en la primera pasada
+                        }
+
                     } else {
                         log_error(1); //se esperava un ident para el atriburo
                     }
                 } else {
-                    //puede ser un metodo
-                    if (buscarMetodoTDS(clase) == 1) {
-                        metodo();
-                    } else {
-                        log_error(1); /// error desconocido culpa de carlos
-                    }
-                }
-            }
-        }
-    }
-
-}*/
-/*
-void metodo() {
-    if (token == ident) {
-        obtoken();
-        if (token == corcheteI) {
-            obtoken();
-            if (token == corcheteF) {
-                obtoken();
-                if (token == arregloTok || token == objetoTok || token == archivoTok
-                        || token == caracterTok || token == cadenaTok || token == enteroTok
-                        || token == realTok || token == byteTok || token == booleanoTok) {
-                    printf("La funcion estaba bien escrita\n");
-
-                }
-
-                if (token == ident) {
-                    if (buscarClaseTDS(lex) == 1) {
-                        printf("EL tipo de retorno es un objeto y valido");
-
-                    } else {
-                        printf("EL tipo de retorno es un objeto y no es valido");
-                        log_error(1); // NO exite el tipo de dato lex
-                    }
-                }
-                if (token != llaveI) {
+                    printf("Es metodo");
+                    metodo(miArchivo, clase);
                     obtoken();
-                }
-                bloque();
-            } else {
-                parametro();
-                while (token == coma) {
-                    obtoken();
-                    parametro();
-                }
-                if (token == corcheteF) {
-                    obtoken();
-                    if (token == arregloTok || token == objetoTok || token == archivoTok
-                            || token == caracterTok || token == cadenaTok || token == enteroTok
-                            || token == realTok || token == byteTok || token == booleanoTok) {
-                        printf("La funcion estaba bien escrita\n");
-
-                    }
-
-                    if (token == ident) {
-                        if (buscarClaseTDS(lex) == 1) {
-                            printf("EL tipo de retorno es un objeto y valido");
-
-                        } else {
-                            printf("EL tipo de retorno es un objeto y no es valido");
-                            log_error(1); // NO exite el tipo de dato lex
-                        }
-                    }
-                    if (token != llaveI) {
-                        obtoken();
-                    }
-                    bloque();
-                } else {
-                    log_error(1); // se esperaba cierre de corchete
                 }
 
             }
-        } else log_error(1);
-    } else log_error(1);
+        }
+
+    } while (token != -1);
 }
 
-void parametro() {
-    tipo();
-
-    if (token == por) {
-        obtoken();
-    }
-
-    if (token == ident) {
-        obtoken();
-    } else {
-        log_error(1); // Se esperaba un ident
-    }
-}
-
-void tipo() {
+int tipo(struct nodoArchivo *miArchivo, struct clase *clase) {
     switch (token) {
 
         case ident:
-            if (buscarClaseTDS(lex) == 1) {
-                printf("ES de tipo adecuedo");
+            printf("A preguntar por tipo obejto\n");
+            if (puedoUsarEsteTipo(lex, miArchivo, clase, &tabla) == 1) {
+                obtoken();
+                printf("Tipo Adecuado\n");
+                return 1;
             } else {
                 log_error(1); // se esperaba un identi de clase
             }
@@ -735,14 +722,91 @@ void tipo() {
         case booleanoTok:
         case arregloTok: //Caso dificil
             printf("ES de tipo primitivo");
+            obtoken();
+            return 1;
             break;
+        case llaveF: //especial para retorno
+            return 2;
         default:
+            return 0;
             log_error(1); //NO es un tipo de dato valido
     }
-    obtoken();
-
+    return 0;
 }
 
+void metodo(struct nodoArchivo* miArchivo, struct clase *clase) {
+    printf("Entrando a metodo\n");
+    if (token == ident) {
+        struct metodo *metodo = NULL;
+        buscarMetodo(&metodo, clase, lex);
+        if (metodo == NULL) {
+            printf("Declatacion de metodo no detectada en p1\n");
+            log_error(1); // declaracion mal escrita
+        }
+        obtoken();
+        if (token == corcheteI) {
+            obtoken();
+            if (token == corcheteF) {
+                obtoken();
+                int rs = tipo(miArchivo, clase);
+                if (rs == 1) {
+                    //tiene rotorno verificar si es el mismo
+                    if (metodo->tipoRetorno != token) {
+                        printf("Tipo de retono inesperado");
+                        log_error(1);
+                    }
+                }
+                printf("Metodo %s bien declarado \n", metodo->ident);
+                obtoken();
+                // bloque();
+            } else {
+                parametro(miArchivo, clase, metodo);
+                while (token == coma) {
+                    obtoken();
+                    parametro(miArchivo, clase, metodo);
+                }
+                if (token == corcheteF) {
+                    obtoken();
+                    int rs = tipo(miArchivo, clase);
+                    if (rs == 1) {
+                        //tiene rotorno verificar si es el mismo
+                        if (metodo->tipoRetorno != token) {
+                            printf("Tipo de retono inesperado");
+                            log_error(1);
+                        }
+                    }
+                     printf("Metodo %s con parametros bien declarado \n", metodo->ident);
+                    // bloque();
+                } else {
+                    log_error(1); // se esperaba cierre de corchete
+                }
+
+            }
+        } else log_error(1);
+    } else log_error(1);
+}
+
+void parametro(struct nodoArchivo *miArchivo, struct clase *clase, struct metodo *metodo) {
+    if (tipo(miArchivo, clase) == 1) {
+
+
+
+        if (token == por) {
+            obtoken();
+        }
+
+        if (token == ident) {
+            printf("Parametro %s detectado\n", lex);
+            obtoken();
+        } else {
+            log_error(1); // Se esperaba un ident
+
+        }
+
+    }
+}
+
+/*
 void bloque() {
     if (token == llaveI) {
         obtoken();
@@ -1381,4 +1445,4 @@ void instruccion_mostrar() {
     } else
        log_error(1); //no es el token sistema
 }
-*/
+ */

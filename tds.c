@@ -46,7 +46,7 @@ void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
 
     struct nodoArchivo *a = tAux->valor;
 
-    a->nombre = (char *) malloc(sizeof (char)* strlen(obtenerNombreBase(nombreArchivo)+ 1));
+    a->nombre = (char *) malloc(sizeof (char)* strlen(obtenerNombreBase(nombreArchivo) + 1));
     strcpy(a->nombre, obtenerNombreBase(nombreArchivo));
 
 
@@ -60,11 +60,11 @@ void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
 void instarIncluidosArchivo(char *incluido, struct nodoArchivo *miArchivo) {
     int i = 0;
     while (miArchivo->incluidos[i][0] != '\0' && ++i);
-   // printf("Se insertara en la posición %i\n", i);
+    // printf("Se insertara en la posición %i\n", i);
 
     free(miArchivo->incluidos[i]);
     miArchivo->incluidos = realloc(miArchivo->incluidos, sizeof (char *)*(i + 1));
-    miArchivo->incluidos[i] = (char *) malloc(sizeof (char)* strlen(obtenerNombreBase(incluido) +1 ));
+    miArchivo->incluidos[i] = (char *) malloc(sizeof (char)* strlen(obtenerNombreBase(incluido) + 1));
     strcpy(miArchivo->incluidos[i], obtenerNombreBase(incluido));
     miArchivo->incluidos[i + 1] = (char *) malloc(sizeof (char) * 1);
     miArchivo->incluidos[i + 1][0] = '\0';
@@ -77,60 +77,72 @@ void insertarTDSClase(struct nodoArchivo *archivo, char * nombre, int alcanze, s
 
     if (archivo->lsClase == NULL) {
         //POr que al principio no hay nada inicializado
-      //  printf("Creando espacio para la clase\n");
+        //  printf("Creando espacio para la clase\n");
         struct listaClase *ins;
         ins = (struct listaClase*) malloc(sizeof (struct listaClase));
         ins->sig = NULL;
         ins->clase = NULL;
         archivo->lsClase = ins;
-        //printf("Creado ... \n");
+        ins->clase = (struct clase *) malloc(sizeof (struct clase));
+        ins->clase->esLocal = (alcanze == localTok) ? TRUE : FALSE;
+        ins->clase->ident = (char *) malloc(sizeof (char) * strlen(nombre));
+        ins->clase->esClasePrincipal = 0;
+        ins->clase->lsAtributo = NULL;
+        ins->clase->lsMetodo = NULL;
+        strcpy(ins->clase->ident, nombre);
+
+        ins->clase->hash = hash;
+        hash++;
+        *clase = ins->clase;
+        printf("SE inserto primera clase en el archiv\n");
+        return;
     }
+    printf("SE inserto Z clase  en el archiv\n");
     //Algoritmo de insercion como tal
     struct listaClase *s = archivo->lsClase;
-    while (s->sig != NULL) s = s->sig;
-    if (s->clase != NULL) { //caso considerado acausa del primer if
-        //Significa que tengo que insertar el en siguiete
-      //  printf("Sera en la sigueinte\n");
-        struct listaClase *ins;
-        ins = (struct listaClase *) malloc(sizeof (struct listaClase));
-        ins->sig = NULL;
-        ins->clase = NULL;
-        s->sig = ins;
+    while (s->sig != 0) {
+        printf("Saltando %s\n", s->clase->ident);
         s = s->sig;
     }
-   // printf("Guardando clase\n");
-    s->clase = (struct clase *) malloc(sizeof (struct clase));
-    s->clase->esLocal = (alcanze == localTok) ? TRUE : FALSE;
-    s->clase->ident = (char *) malloc(sizeof (char) * strlen(nombre));
-    s->clase->esClasePrincipal = 0;
-    s->clase->lsAtributo = NULL;
-    s->clase->lsMetodo = NULL;
-    strcpy(s->clase->ident, nombre);
+    printf("Saltando %s\n", s->clase->ident);
+    struct listaClase *ins;
+    ins = (struct listaClase*) malloc(sizeof (struct listaClase));
+    ins->sig = NULL;
+    ins->clase = NULL;
+    s->sig = ins;
+    // printf("Guardando clase\n");
+    ins->clase = (struct clase *) malloc(sizeof (struct clase));
+    ins->clase->esLocal = (alcanze == localTok) ? TRUE : FALSE;
+    ins->clase->ident = (char *) malloc(sizeof (char) * strlen(nombre));
+    ins->clase->esClasePrincipal = 0;
+    ins->clase->lsAtributo = NULL;
+    ins->clase->lsMetodo = NULL;
+    strcpy(ins->clase->ident, nombre);
 
-    s->clase->hash = hash;
+    ins->clase->hash = hash;
     hash++;
 
-    *clase = s->clase;
+    *clase = s->sig->clase;
 
 }
 
-void insertarTDSAtributo(struct clase *clase, struct atributo *atributo){
-    if(clase->lsAtributo == NULL){
-        clase->lsAtributo =  (struct listaAtributo *) malloc(sizeof(struct listaAtributo));
+void insertarTDSAtributo(struct clase *clase, struct atributo *atributo) {
+    if (clase->lsAtributo == NULL) {
+        clase->lsAtributo = (struct listaAtributo *) malloc(sizeof (struct listaAtributo));
         clase->lsAtributo->atributo = atributo;
         clase->lsAtributo->sig = NULL;
-        printf("\n\t\t\tSe inserto el altributo %s\n",clase->lsAtributo->atributo->ident);
-    }else{
-       struct listaAtributo *ls =  clase->lsAtributo;
-       while(ls->sig != NULL) {
-           ls = ls->sig;
-       }
-       ls->sig =  (struct listaAtributo *) malloc(sizeof(struct listaAtributo));
-       ls->sig->atributo = atributo;
-       ls->sig->sig = NULL;
-       printf("\n\t\t\tSe inserto el altributo %s\n",ls->sig->atributo->ident);
+        printf("\n\t\t\tSe inserto el altributo %s\n", clase->lsAtributo->atributo->ident);
+    } else {
+        struct listaAtributo *ls = clase->lsAtributo;
+        while (ls->sig != NULL) {
+            ls = ls->sig;
+        }
+        ls->sig = (struct listaAtributo *) malloc(sizeof (struct listaAtributo));
+        ls->sig->atributo = atributo;
+        ls->sig->sig = NULL;
+        printf("\n\t\t\tSe inserto el altributo %s\n", ls->sig->atributo->ident);
     }
-     
+
 }
 
 void insertarTDSMetodo(struct clase *clase, struct metodo *metodo) {
@@ -153,52 +165,137 @@ void insertarTDSMetodo(struct clase *clase, struct metodo *metodo) {
 
 }
 
-void buscarArchivoTDS( struct nodoArchivo **archivo,tds *tabla ,char * buscado){
-     tds *s = tabla;
-     if(s == NULL){
-         *archivo = NULL;
-         return;
-     }
-     
-     int cmp = strcmp(obtenerNombreBase(buscado),s->valor->nombre);
-     //printf("Se esta comparando %s con %s %d\n",obtenerNombreBase(buscado),s->valor->nombre, cmp);
-     if(cmp == 0){
-        *archivo = s->valor;
-      //  printf("Se encontro el archivo\n");
-     }else{
-         if(cmp >0){
-            buscarArchivoTDS(archivo,s->dch ,buscado); 
-         }else{
-            buscarArchivoTDS( archivo,s->izq ,buscado);  
-         }
-     }
- }
+void buscarArchivoTDS(struct nodoArchivo **archivo, tds *tabla, char * buscado) {
+    tds *s = tabla;
+    if (s == NULL) {
+        *archivo = NULL;
+        return;
+    }
 
-int evitarRedefinicionClase(char *lex, struct nodoArchivo *miArchivo, tds *tabla){
-    if(tabla == NULL){
+    int cmp = strcmp(obtenerNombreBase(buscado), s->valor->nombre);
+    //printf("Se esta comparando %s con %s %d\n",obtenerNombreBase(buscado),s->valor->nombre, cmp);
+    if (cmp == 0) {
+        *archivo = s->valor;
+        //  printf("Se encontro el archivo\n");
+    } else {
+        if (cmp > 0) {
+            buscarArchivoTDS(archivo, s->dch, buscado);
+        } else {
+            buscarArchivoTDS(archivo, s->izq, buscado);
+        }
+    }
+}
+
+int evitarRedefinicionClase(char *lex, struct nodoArchivo *miArchivo, tds *tabla) {
+    if (tabla == NULL) {
         return 0;
-    }else{
+    } else {
         int drch = evitarRedefinicionClase(lex, miArchivo, tabla->dch);
         int izq = evitarRedefinicionClase(lex, miArchivo, tabla->izq);
-        
-        if(tabla->valor == NULL ){
+
+        if (tabla->valor == NULL) {
             return drch + izq;
         }
         int actual = 0;
         struct listaClase *s = tabla->valor->lsClase;
-        while(s != NULL){
-            if(strcmp(s->clase->ident,lex) == 0){
-                if(!(s->clase->esLocal == TRUE && tabla->valor != miArchivo )){
+        while (s != NULL) {
+            if (strcmp(s->clase->ident, lex) == 0) {
+                if (!(s->clase->esLocal == TRUE && tabla->valor != miArchivo)) {
                     actual++;
                 }
-                
+
             }
             s = s->sig;
         }
-        
-        if(tabla->valor == miArchivo){
+
+        if (tabla->valor == miArchivo) {
             actual--;
         }
-         return drch + izq + actual;
+        return drch + izq + actual;
     }
+}
+
+void obtenerClase(struct nodoArchivo *miArchivo, struct clase ** clase, char *lex) {
+    struct listaClase *ls = miArchivo->lsClase;
+    if (ls == NULL) {
+        *clase = NULL;
+        return;
+    }
+
+    while (ls->sig != NULL) {
+       // printf("Comparando %s, %s \n", ls->clase->ident, lex);
+        if (strcmp(ls->clase->ident, lex) == 0) {
+            *clase = ls->clase;
+            return;
+        }
+        ls = ls->sig;
+    }
+
+    if (strcmp(ls->clase->ident, lex) == 0) {
+        *clase = ls->clase;
+        return;
+    }
+
+    *clase = NULL;
+}
+
+int puedoUsarEsteTipo(char *buscado, struct nodoArchivo *miArchivo, struct clase *clase, tds *tabla) {
+    //SE busca en el Archivo actula
+    struct clase * resultado = NULL;
+    obtenerClase(miArchivo, &resultado, buscado);
+    if (resultado != NULL) {
+        return 1;
+    }
+
+    //Se busca en los archivos que se incluyeron
+    int i = 0;
+    while (miArchivo->incluidos[i][0] != '\0') {
+        struct nodoArchivo *archivo = NULL;
+        buscarArchivoTDS(&archivo, tabla, miArchivo->incluidos[i]);
+        struct clase * resultado = NULL;
+        obtenerClase(miArchivo, &resultado, buscado);
+        if (resultado != NULL) {
+            if (resultado->esLocal == TRUE)
+                return 0;
+            return 1;
+        }
+        i++;
+    }
+    return 0;
+}
+
+void buscarAtributo(struct atributo **atr, struct clase *clase, char *buscado) {
+    if(clase == NULL){
+        *atr = NULL;
+        return;
+    }
+    
+    
+     struct listaAtributo *ls = clase->lsAtributo;
+     
+     while(ls!= NULL){
+         if(strcmp(ls->atributo->ident,buscado) == 0 ){
+             *atr = ls->atributo;
+             return;
+         }
+         ls = ls->sig;
+     }
+     
+     *atr = NULL;
+    
+}
+
+void buscarMetodo(struct metodo **metodo,struct clase* clase, char * buscado){
+    
+    struct listaMetodo *ls = clase->lsMetodo;
+    
+    while(ls != NULL){
+        if(strcmp(ls->metodo->ident,buscado) == 0){
+            *metodo =  ls->metodo;
+            return;
+        }
+        ls = ls->sig;
+    }
+    *metodo  == NULL;
+    
 }
