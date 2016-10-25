@@ -173,3 +173,32 @@ void buscarArchivoTDS( struct nodoArchivo **archivo,tds *tabla ,char * buscado){
          }
      }
  }
+
+int evitarRedefinicionClase(char *lex, struct nodoArchivo *miArchivo, tds *tabla){
+    if(tabla == NULL){
+        return 0;
+    }else{
+        int drch = evitarRedefinicionClase(lex, miArchivo, tabla->dch);
+        int izq = evitarRedefinicionClase(lex, miArchivo, tabla->izq);
+        
+        if(tabla->valor == NULL ){
+            return drch + izq;
+        }
+        int actual = 0;
+        struct listaClase *s = tabla->valor->lsClase;
+        while(s != NULL){
+            if(strcmp(s->clase->ident,lex) == 0){
+                if(!(s->clase->esLocal == TRUE && tabla->valor != miArchivo )){
+                    actual++;
+                }
+                
+            }
+            s = s->sig;
+        }
+        
+        if(tabla->valor == miArchivo){
+            actual--;
+        }
+         return drch + izq + actual;
+    }
+}
