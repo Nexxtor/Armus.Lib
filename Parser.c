@@ -229,8 +229,8 @@ void cuerpoP1(struct clase *clase) {
                                 || token == caracterTok || token == cadenaTok || token == enteroTok
                                 || token == realTok || token == byteTok || token == booleanoTok || token == ident) {
                             printf("\t\t\t y con retorno %d\n", token);
-                            metodo->tipoRetorno = -1;
-                            metodo->esFuncion = -1;
+                            metodo->tipoRetorno =  token; //Cambiar esto por el tipo en mayusculas
+                            metodo->esFuncion = TRUE;
                         } else {
                             if (token == llaveI) countLlaveI++;
                             if (token == llaveF) countLlaveI--;
@@ -241,25 +241,33 @@ void cuerpoP1(struct clase *clase) {
                         //Preparamos el espacio para los paramentros
                         struct listaAtributo *parametros
                                 = (struct listaAtributo *) malloc(sizeof (struct listaAtributo));
+                        metodo->parametros = parametros;
+                        metodo->parametros->sig = NULL;
                         int i = 0;
                         do {
+                            struct atributo *parametroX = (struct atributo *) malloc(sizeof (struct atributo));
                             if (i == 1) {
                                 obtoken();
+                                //Es el 2 o mas
+                                parametros->sig = (struct listaAtributo *) malloc(sizeof (struct listaAtributo));
+                                parametros = parametros->sig;
+                                parametros->sig = NULL;
+                                
                             }
-                            struct atributo *parametro = (struct atributo *) malloc(sizeof (struct atributo));
-                            parametro->parametro = TRUE;
-
+                            
+                            parametros->atributo =  parametroX;
+                            
                             printf("\t\t\tSe detecto parametro de tipo ");
-                            tipoDP1(parametro);
+                            tipoDP1(parametroX);
 
                             if (token == por) {
                                 printf(" es por referencia ");
-                                parametro->esPorReferencia = TRUE;
+                                parametroX->esPorReferencia = TRUE;
                                 obtoken();
                             }
 
                             if (token == ident) {
-                                parametro->ident = (char *) malloc(sizeof (char) * strlen(lex) + 1);
+                                parametroX->ident = (char *) malloc(sizeof (char) * strlen(lex) + 1);
                                 obtoken();
                                 i = 1;
                                 printf("Se inserta el parametro \n");
@@ -274,7 +282,7 @@ void cuerpoP1(struct clase *clase) {
                             if (token == arregloTok || token == objetoTok || token == archivoTok
                                     || token == caracterTok || token == cadenaTok || token == enteroTok
                                     || token == realTok || token == byteTok || token == booleanoTok || token == ident) {
-                                printf("\t\t\t y con retorno %d", token);
+                                printf("\t\t\t y con retorno %d\n", token);
                                 metodo->tipoRetorno = -1;
                                 metodo->esFuncion = -1;
                             } else {
