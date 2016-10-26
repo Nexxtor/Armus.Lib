@@ -12,6 +12,8 @@ extern char *valorCadena;
 extern char valorCaracter;
 extern int simbolo;
 extern FILE *tokenList;
+extern int LineaActual;
+extern int PosicionLineaActual;
 
 int getLine(char s[], int lim);
 void obtoken();

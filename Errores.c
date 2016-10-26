@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "Errores.h"
 #include <jni.h>
+#include "Standar.h"
 char *errores[13] = {
     "000 Error importante: un archivo no pudo ser abierto \n",
     "001 Error: existe un enter entre incluir y \" \n",
@@ -30,5 +32,8 @@ void log_error(int error){
         return;
     }
     fprintf(f,"%s",errores[1]);
+
     fclose(f);
+    printf("Error %d en la linea %d posicion %d",error, LineaActual,PosicionLineaActual);
+    exit(0);
 }

@@ -129,7 +129,8 @@ int pasada2(char **lsfiles, int cant) {
         fin_de_archivo = 0;
         offset = -1;
         ll = 0;
-
+        LineaActual =0;
+        PosicionLineaActual = 0;
         struct nodoArchivo *valor = NULL;
         buscarArchivoTDS(&valor, &tabla, lsfiles[i]);
         printf("Archivo %s \n", lsfiles[i]);
@@ -767,7 +768,7 @@ int tipo(struct nodoArchivo *miArchivo, struct clase *clase) {
                 //  printf("Tipo Adecuado\n");
                 return 1;
             } else {
-                log_error(24); // se esperaba un identi de clase
+                return 0;
             }
             break;
         case objetoTok:
@@ -987,7 +988,7 @@ void instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
                 if (token == asignacion) {
                     printf("Se esta haciendo una asignacion\n");
                     obtoken();
-                    asignacionf();
+                    expresion();
                     if (token == puntoycoma) {
                         obtoken();
                         printf("EStaba escrita bien la asgnacion\n");
@@ -1628,6 +1629,7 @@ void instruccion_es() {
                     }
                     break;
                 case mostrarTok:
+                    obtoken();
                     if (token == corcheteI) {
                         obtoken();
                         expresion();
@@ -1643,20 +1645,20 @@ void instruccion_es() {
                                 log_error(1); //Se esperaba punto y coma
                             }
                         } else {
-                            log_error(1); // se esperaba corchete de cierre
+                            log_error(2); // se esperaba corchete de cierre
                         }
                     } else {
-                        log_error(1); // se esperaba corchet ede apartura
+                        log_error(3); // se esperaba corchet ede apartura
                     }
                     break;
                 default:
-                    log_error(1); //se esperaba un token de ontener o mostrar
+                    log_error(4); //se esperaba un token de ontener o mostrar
             }
         } else {
-            log_error(1); // se esperaba un punto
+            log_error(5); // se esperaba un punto
         }
     } else {
-        log_error(1); //se esperaba el token sistema
+        log_error(6); //se esperaba el token sistema
     }
 }
 
