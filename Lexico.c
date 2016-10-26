@@ -11,7 +11,7 @@ arbol *lexpal;
 enum simbolo token;
 
 //se define e inicializa la tabla de tokens de palabras reservadas
-enum simbolo tokpal[MAXPAL] = {miTok, siTok, byteTok, realTok, sinoTok, casoTok, paraTok, vacioTok, hacerTok,
+enum simbolo tokpal[MAXPAL] = { siTok, byteTok, realTok, sinoTok, casoTok, paraTok, vacioTok, hacerTok,
     abrirTok, mayorTok, menorTok, esParTok, claseTok, falsoTok, enteroTok, cadenaTok, objetoTok,
     probarTok, romperTok, quitarTok, cerrarTok, moduloTok, archivoTok, defectoTok, sistemaTok,
     mostrarTok, publicaTok, privadoTok, arregloTok, agregarTok, obtenerTok, cuantosTok, volcadoTok,
@@ -24,7 +24,7 @@ enum simbolo tokpal[MAXPAL] = {miTok, siTok, byteTok, realTok, sinoTok, casoTok,
 enum simbolo espec[255];
 
 void inicializarArbolPalabras() {
-    char *lexPalAux[MAXPAL] = {"mi","si", "byte", "real", "sino", "caso", "para", "vacio", "hacer",
+    char *lexPalAux[MAXPAL] = {"si", "byte", "real", "sino", "caso", "para", "vacio", "hacer",
         "abrir", "mayor", "menor", "esPar", "clase", "falso", "entero", "cadena", "Objeto",
         "probar", "romper", "quitar", "cerrar", "modulo", "Archivo", "defecto", "Sistema",
         "mostrar", "publica", "privada", "Arreglo", "agregar", "obtener", "cuantos", "volcado",

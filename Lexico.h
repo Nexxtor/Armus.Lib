@@ -14,7 +14,7 @@ romperTok,mientrasTok,paraTok,hacerTok,paracadaTok,sistemaTok,obtenerEnteroTok,o
 obtenerCaracterTok,mostrarTok,publicaTok,privadoTok,retornarTok,arregloTok,agregarTok,obtenerTok,cuantosTok,
 quitarTok,abrirTok,leerLineaTok,volcadoTok,cerrarTok,concatenarTok,parteEnteraTok,compararTok,mayorTok,menorTok,
 esParTok,decimalBinTok,potenciaTok,absolutoTok,moduloTok,longitudCadenaTok,claseTok,incluirTok,obtenerBooleanoTok,
-falsoTok,verdaderoTok,miTok,datoCadena,datoCaracter,localTok,dosPuntos}; //definido aquí en el encabezado
+falsoTok,verdaderoTok,datoCadena,datoCaracter,localTok,dosPuntos}; //definido aquí en el encabezado
 
 extern enum simbolo token;
 

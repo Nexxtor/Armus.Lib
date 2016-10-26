@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "Errores.h"
-
+#include <jni.h>
 char *errores[13] = {
     "000 Error importante: un archivo no pudo ser abierto \n",
     "001 Error: existe un enter entre incluir y \" \n",
@@ -29,7 +29,6 @@ void log_error(int error){
         printf("Verifique los permisos sobre el directorio\n");
         return;
     }
-    fprintf(f,"%s",errores[error]);
+    fprintf(f,"%s",errores[1]);
     fclose(f);
 }
-

@@ -164,11 +164,9 @@ void obtoken() {
     //quitar blancos, caracter de cambio de línea y tabuladores
     while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
 
-    if (ch == '/') {
-        printf("-------------- Encontre un barra\n");
+    if (ch == '/') {        
         ch = obtch();
         if (ch == '/') {
-            printf("-------------- Encontre un barra 2\n");
             ch = obtch();
             while (ch != '\n'){
                 ch = obtch();
