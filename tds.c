@@ -200,9 +200,9 @@ int evitarRedefinicionClase(char *lex, struct nodoArchivo *miArchivo, tds *tabla
         struct listaClase *s = tabla->valor->lsClase;
         while (s != NULL) {
             if (strcmp(s->clase->ident, lex) == 0) {
-                if (!(s->clase->esLocal == TRUE && tabla->valor != miArchivo)) {
+                /*if (!(s->clase->esLocal == TRUE && tabla->valor != miArchivo)) {*/
                     actual++;
-                }
+                //}
 
             }
             s = s->sig;
@@ -270,18 +270,18 @@ void buscarAtributo(struct atributo **atr, struct clase *clase, char *buscado) {
         return;
     }
     
-    
-     struct listaAtributo *ls = clase->lsAtributo;
      
+     struct listaAtributo *ls = clase->lsAtributo;
+     int  i = 0;
      while(ls!= NULL){
+         //printf("Comparando %s,%s\n",ls->atributo->ident,buscado);
          if(strcmp(ls->atributo->ident,buscado) == 0 ){
              *atr = ls->atributo;
-             return;
+             i++;
          }
          ls = ls->sig;
      }
-     
-     *atr = NULL;
+     if(i != 1) *atr = NULL;
     
 }
 
@@ -289,13 +289,14 @@ void buscarMetodo(struct metodo **metodo,struct clase* clase, char * buscado){
     
     struct listaMetodo *ls = clase->lsMetodo;
     
+    int i = 0;
     while(ls != NULL){
         if(strcmp(ls->metodo->ident,buscado) == 0){
             *metodo =  ls->metodo;
-            return;
+            i++;
         }
         ls = ls->sig;
     }
-    *metodo  == NULL;
+    if(i != 1) *metodo  = NULL;
     
 }
