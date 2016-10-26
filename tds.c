@@ -201,7 +201,7 @@ int evitarRedefinicionClase(char *lex, struct nodoArchivo *miArchivo, tds *tabla
         while (s != NULL) {
             if (strcmp(s->clase->ident, lex) == 0) {
                 /*if (!(s->clase->esLocal == TRUE && tabla->valor != miArchivo)) {*/
-                    actual++;
+                actual++;
                 //}
 
             }
@@ -223,7 +223,7 @@ void obtenerClase(struct nodoArchivo *miArchivo, struct clase ** clase, char *le
     }
 
     while (ls->sig != NULL) {
-       // printf("Comparando %s, %s \n", ls->clase->ident, lex);
+        // printf("Comparando %s, %s \n", ls->clase->ident, lex);
         if (strcmp(ls->clase->ident, lex) == 0) {
             *clase = ls->clase;
             return;
@@ -265,38 +265,198 @@ int puedoUsarEsteTipo(char *buscado, struct nodoArchivo *miArchivo, struct clase
 }
 
 void buscarAtributo(struct atributo **atr, struct clase *clase, char *buscado) {
-    if(clase == NULL){
+    if (clase == NULL) {
         *atr = NULL;
         return;
     }
-    
-     
-     struct listaAtributo *ls = clase->lsAtributo;
-     int  i = 0;
-     while(ls!= NULL){
-         //printf("Comparando %s,%s\n",ls->atributo->ident,buscado);
-         if(strcmp(ls->atributo->ident,buscado) == 0 ){
-             *atr = ls->atributo;
-             i++;
-         }
-         ls = ls->sig;
-     }
-     if(i != 1) *atr = NULL;
-    
-}
 
-void buscarMetodo(struct metodo **metodo,struct clase* clase, char * buscado){
-    
-    struct listaMetodo *ls = clase->lsMetodo;
-    
+
+    struct listaAtributo *ls = clase->lsAtributo;
     int i = 0;
-    while(ls != NULL){
-        if(strcmp(ls->metodo->ident,buscado) == 0){
-            *metodo =  ls->metodo;
+    while (ls != NULL) {
+        //printf("Comparando %s,%s\n",ls->atributo->ident,buscado);
+        if (strcmp(ls->atributo->ident, buscado) == 0) {
+            *atr = ls->atributo;
             i++;
         }
         ls = ls->sig;
     }
-    if(i != 1) *metodo  = NULL;
-    
+    if (i != 1) *atr = NULL;
+
+}
+
+void buscarMetodo(struct metodo **metodo, struct clase* clase, char * buscado) {
+
+    struct listaMetodo *ls = clase->lsMetodo;
+
+    int i = 0;
+    while (ls != NULL) {
+        if (strcmp(ls->metodo->ident, buscado) == 0) {
+            *metodo = ls->metodo;
+            i++;
+        }
+        ls = ls->sig;
+    }
+    if (i != 1) *metodo = NULL;
+
+}
+
+int sePuedeUsarComoParametro(struct clase *clase, struct metodo *metodo, char *buscado) {
+    //Se busca en los atributos de la clase a la que perteneces
+    struct listaAtributo *ls = clase->lsAtributo;
+    while (ls != NULL) {
+        //DE entrada esta intenata redeficniar un atributo
+        if (strcmp(ls->atributo->ident, buscado) == 0) {
+            printf("En clase\n");
+            return 0;
+        }
+        ls = ls->sig;
+    }
+    //Ok no redefine atributos pero redefine paramentros
+    int i = 0;
+    ls = metodo->parametros;
+    while (ls != NULL) {
+        //DE entrada esta intenata redeficniar un atributo
+        //printf("Comparando %s,%s\n",ls->atributo->ident, buscado);
+        if (strcmp(ls->atributo->ident, buscado) == 0) {
+            i++;
+        }
+        ls = ls->sig;
+    }
+    if (i == 1) return 1; //Estaba solo una vez
+    printf("En parametor %d\n", i);
+    return 0; //Esta mas de una vez
+
+}
+
+void insertarDefinicionLocal(struct metodo * metodo, struct atributo *local) {
+    struct listaAtributo *ls = metodo->locales;
+    if (ls == NULL) {
+        metodo->locales = (struct listaAtributo *) malloc(sizeof (struct listaAtributo));
+        metodo->locales->atributo = local;
+        metodo->locales->sig = NULL;
+        return;
+    }
+
+    while (ls->sig != NULL) {
+        ls = ls->sig;
+    }
+
+    ls->sig = (struct listaAtributo *) malloc(sizeof (struct listaAtributo));
+    ls->sig->sig = NULL;
+    ls->sig->atributo = local;
+
+}
+
+int evitarRedefinicionBloque(struct clase *clase, struct metodo *metodo, char *buscado) {
+    //Buscamos primero en local
+    struct listaAtributo *ls = metodo->locales;
+    int i = 1;
+    printf("Locales \n");
+    while (ls != NULL) {
+        printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
+        if (strcmp(ls->atributo->ident, buscado) == 0) {
+            i++;
+        }
+        ls = ls->sig;
+    }
+
+    //Buscamos en parametros
+    ls = metodo->parametros;
+    printf("Paramentros \n");
+    while (ls != NULL) {
+        printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
+        if (strcmp(ls->atributo->ident, buscado) == 0) {
+            i++;
+        }
+        ls = ls->sig;
+    }
+    //Buscamos en atributo 
+    printf("Atributos \n");
+    ls = clase->lsAtributo;
+    while (ls != NULL) {
+        printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
+        if (strcmp(ls->atributo->ident, buscado) == 0) {
+            i++;
+        }
+        ls = ls->sig;
+    }
+
+    return i;
+}
+
+int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado, struct atributo **atr) {
+    //Buscamos primero en local
+    struct listaAtributo *ls = metodo->locales;
+    printf("Locales \n");
+    while (ls != NULL) {
+        printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
+        if (strcmp(ls->atributo->ident, buscado) == 0) {
+            if (ls->atributo->esPrimitivo == 0) {
+                *atr = ls->atributo;
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        ls = ls->sig;
+    }
+
+    //Buscamos en parametros
+    ls = metodo->parametros;
+    printf("Paramentros \n");
+    while (ls != NULL) {
+        printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
+        if (strcmp(ls->atributo->ident, buscado) == 0) {
+            if (ls->atributo->esPrimitivo == 0) {
+                *atr = ls->atributo;
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        ls = ls->sig;
+    }
+    //Buscamos en atributo 
+    printf("Atributos \n");
+    ls = clase->lsAtributo;
+    while (ls != NULL) {
+        printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
+        if (strcmp(ls->atributo->ident, buscado) == 0) {
+            if (ls->atributo->esPrimitivo == 0) {
+                *atr = ls->atributo;
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        ls = ls->sig;
+    }
+
+    return 0;
+}
+
+void buscarClaseTDS(struct clase** clase, tds *tabla, char * buscado) {
+    if (tabla == NULL) {
+        *clase = NULL;
+    } else {
+        tds *s = tabla;
+        struct clase * claseTemp;
+        obtenerClase(s->valor, &claseTemp, buscado);
+        if (claseTemp != NULL) {
+            *clase = claseTemp;
+            return;
+        } else {
+             buscarClaseTDS(&claseTemp,s->izq, buscado);
+            if (claseTemp != NULL) {
+                *clase = claseTemp;
+                return;
+            }
+
+             buscarClaseTDS(&claseTemp,s->dch, buscado);
+
+            *clase = claseTemp;
+
+        }
+    }
 }

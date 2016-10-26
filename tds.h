@@ -4,7 +4,7 @@
  *
  * Created on 21 de octubre de 2016, 10:20 PM
  */
-
+#include "Lexico.h"
 #ifndef TDS_H
 #define TDS_H
 
@@ -15,7 +15,7 @@ extern "C" {
 #define FALSE 0
 
     enum tipoDato {
-        VACIO, ENTERO, REAL, CADENA, CARACTER, BOOLEANO, OBJETO, ARREGLO, ARCHIVO, BYTE
+        VACIO = vacioTok, ENTERO = enteroTok, REAL = realTok, CADENA = cadenaTok, CARACTER = caracterTok, BOOLEANO = booleanoTok, OBJETO = objetoTok, ARREGLO = arregloTok, ARCHIVO = archivoTok, BYTE = byteTok
     };
 
     // los comentarios con * es por que realmente no se a tomado la decision
@@ -44,6 +44,7 @@ extern "C" {
     struct metodo {
         char *ident;
         struct listaAtributo *parametros; // se reutiliza listaAtributo pues es justo lo que se quiere guardar
+        struct listaAtributo *locales;
         enum tipoDato tipoRetorno;
         int esFuncion;
     };
@@ -96,6 +97,11 @@ extern "C" {
     int puedoUsarEsteTipo(char *lex,struct nodoArchivo *miArchivo, struct clase *clase,tds *tabla);
     void buscarAtributo(struct atributo **atr, struct clase *clase,char *buscado);
     void buscarMetodo(struct metodo **metodo,struct clase* clase, char * bucada);
+    int sePuedeUsarComoParametro(struct clase *clase, struct metodo *metodo, char *buscado);
+    void insertarDefinicionLocal(struct metodo * metodo, struct atributo *loca);
+    int evitarRedefinicionBloque(struct clase *clase, struct metodo *metodo,char *buscado);
+    int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado,struct atributo **atr);
+    void buscarClaseTDS(struct clase** clase, tds *tabla, char * buscado) ;
 #ifdef __cplusplus
 }
 #endif

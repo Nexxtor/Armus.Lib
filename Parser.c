@@ -49,7 +49,6 @@ void instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, stru
 void instruccion_hacer(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo);
 void instruccion_paraCada(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo);
 
-
 JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
 (JNIEnv *env, jobject obj, jobjectArray jsLsFile) {
 
@@ -129,7 +128,7 @@ int pasada2(char **lsfiles, int cant) {
         fin_de_archivo = 0;
         offset = -1;
         ll = 0;
-        LineaActual =0;
+        LineaActual = 0;
         PosicionLineaActual = 0;
         struct nodoArchivo *valor = NULL;
         buscarArchivoTDS(&valor, &tabla, lsfiles[i]);
@@ -311,6 +310,7 @@ void cuerpoP1(struct clase *clase) {
 
                             if (token == ident) {
                                 parametroX->ident = (char *) malloc(sizeof (char) * strlen(lex) + 1);
+                                strcpy(parametroX->ident, lex);
                                 obtoken();
                                 i = 1;
                                 printf("Se inserta el parametro \n");
@@ -454,6 +454,7 @@ void tipoDP1(struct atributo *atributo) {
             atributo->tipo = BOOLEANO;
             break;
         case arregloTok: //Caso dificil
+            atributo->esPrimitivo = 0;
             printf(" Arreglo que almacena de tipo <");
             obtoken();
             if (token == mnr) {
@@ -887,8 +888,13 @@ void parametro(struct nodoArchivo *miArchivo, struct clase *clase, struct metodo
 
         if (token == ident) {
             printf("Parametro %s detectado\n", lex);
-            //Falta verificar
-            obtoken();
+            if (1 == sePuedeUsarComoParametro(clase, metodo, lex)) {
+                obtoken();
+            } else {
+                printf("Se esta redefiniendo paramentro");
+                log_error(1); //se esta redefiniedo parametro
+
+            }
         } else {
             log_error(18); // Se esperaba un ident
 
@@ -905,7 +911,13 @@ void bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *m
 
             do {
                 int rs;
+                   char *claseName =  (char * )malloc(sizeof(char )* strlen(lex)+ 1);
+                strcpy(claseName,lex);
+                printf("Lex leido %s\n");
+                    int tokenTipo = token;
                 rs = tipo(miArchivo, clase);
+            
+             
                 if (rs == 0) {
                     seguir = 0;
                     break;
@@ -916,25 +928,69 @@ void bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *m
                 }
                 if (rs == 1) {
                     if (token == ident) {
-                        printf("\nSe detecto declaracion");
-                        obtoken();
-                        if (token == asignacion) {
-                            obtoken();
-                            expresion();
-                        }
-                        while (token == coma) {
-                            obtoken();
-                            if (token == ident) {
-                                printf(" Se detecto declaracion misma linea");
-                                obtoken();
-                                if (token == asignacion) {
-                                    obtoken();
-                                    expresion();
+                        if (evitarRedefinicionBloque(clase, metodo, lex) <= 1) {
+                            printf("\n\n\nSe detecto declaracion");
+                            struct atributo *atr = (struct atributo *) malloc(sizeof (struct atributo));
+                            atr->tipo = tokenTipo;
+                            atr->esPrimitivo = 1;
+                            if (tokenTipo == ident) {
+                                atr->tipo = OBJETO;
+                                atr->esPrimitivo = 0;
+                                struct clase *clasePapa =  NULL;
+                                buscarClaseTDS(&clasePapa,&tabla,claseName);
+                                if(clasePapa == NULL){
+                                    printf("NO se encontro una clase\n");
+                                    log_error(-23);
+                                }else{
+                                    atr->hash = clasePapa->hash;
                                 }
-                                printf("\n");
-                            } else {
-                                log_error(18);
                             }
+                            atr->ident = (char *) malloc(sizeof (char) * strlen(lex) + 1);
+                            strcpy(atr->ident, lex);
+
+                            //SI es de tipo objeto ir a buscar el hash de la clase
+                            //Y asignarle un hasd de instancia
+                            insertarDefinicionLocal(metodo, atr);
+                            obtoken();
+                            if (token == asignacion) {
+                                obtoken();
+                                expresion();
+                            }
+                            while (token == coma) {
+                                obtoken();
+                                if (token == ident) {
+                                    if (evitarRedefinicionBloque(clase, metodo, lex) <= 1) {
+                                        struct atributo *atr = (struct atributo *) malloc(sizeof (struct atributo));
+                                        atr->tipo = tokenTipo;
+                                        atr->esPrimitivo = 1;
+                                        if (tokenTipo == ident) {
+                                            atr->tipo = OBJETO;
+                                            atr->esPrimitivo = 0;
+                                        }
+                                        atr->ident = (char *) malloc(sizeof (char) * strlen(lex) + 1);
+                                        strcpy(atr->ident, lex);
+
+                                        //SI es de tipo objeto ir a buscar el hash de la clase
+                                        //Y asignarle un hasd de instancia
+                                        insertarDefinicionLocal(metodo, atr);
+                                        printf(" Se detecto declaracion misma linea");
+                                        obtoken();
+                                        if (token == asignacion) {
+                                            obtoken();
+                                            expresion();
+                                        }
+                                        printf("\n");
+                                    } else {
+                                        printf("Esta intentando redefinir un parametro o atributo\n");
+                                        log_error(-11);
+                                    }
+                                } else {
+                                    log_error(18);
+                                }
+                            }
+                        } else {
+                            printf("Esta intentando redefinir un parametro o atributo\n");
+                            log_error(-11);
                         }
                     } else {
                         log_error(18);
@@ -959,9 +1015,14 @@ void bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *m
 }
 
 void instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo) {
+    int es0 = 0;
+    struct atributo *atr;
     switch (token) {
         case ident:
+           
+            es0 = esObjeto(clase,metodo,lex,&atr);
             obtoken();
+            
             //Es una llamada a metodo de una clase
             if (token == punto) {
                 obtoken();
@@ -974,13 +1035,19 @@ void instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
                         log_error(1); //se eperaba punto y coma
                     }
                 } else {
-                    //verificar si el identificador que tengo es de metodo
-                    llamada_metodo();
-                    if (token == puntoycoma) {
-                        obtoken();
-                        printf("EStaba escrita bien la llamada a metodo\n");
-                    } else {
-                        log_error(14); //se esperaba un punto y coma
+                    struct clase* actual;
+                    if(es0 == 1){
+                        //obtenerClase(miArchivo, struct clase ** clase, char *lex)
+                        llamada_metodo();
+                        if (token == puntoycoma) {
+                            obtoken();
+                            printf("EStaba escrita bien la llamada a metodo\n");
+                        } else {
+                            log_error(14); //se esperaba un punto y coma
+                        }
+                    }else{
+                        printf("Se esta inentando llamar a metodo o propiedad a un varible primtiva\n");
+                        log_error(-50); //se esperaba un punto y coma
                     }
                 }
             } else {
@@ -1803,7 +1870,7 @@ void instruccion_paraCada(struct nodoArchivo* miArchivo, struct clase *clase, st
         obtoken();
         if (token == corcheteI) {
             obtoken();
-            tipo(miArchivo,clase);
+            tipo(miArchivo, clase);
             if (token == ident) {
                 //verificar si exites
                 obtoken();
@@ -1816,7 +1883,7 @@ void instruccion_paraCada(struct nodoArchivo* miArchivo, struct clase *clase, st
                             obtoken();
                             if (token == llaveI) {
                                 obtoken();
-                                 instruccion(miArchivo, clase, metodo);
+                                instruccion(miArchivo, clase, metodo);
                                 if (token == llaveF) {
                                     obtoken();
                                 } else
