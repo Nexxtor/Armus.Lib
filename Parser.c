@@ -89,9 +89,17 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
 
 int pasada1(char **lsfiles, int cant) {
     int i;
+         FILE * f;  
+        f=fopen("log.txt","w");
+        fprintf(f,"");
+        fclose(f);
     clearScanner();
     //Hacerlo con cada archivo
     for (i = 0; i < cant; i++) {
+        FILE * f;  
+        f=fopen("log.txt","a");
+        fprintf(f,"%s\n",lsfiles[i]);
+        fclose(f);
         fp = fopen(lsfiles[i], "r");
         if (fp == NULL) {
             return -1; //panico si no se puede abrir el archivo
@@ -117,8 +125,16 @@ int pasada2(char **lsfiles, int cant) {
     printf("------------------------------------------------------\n");
     int i;
     clearScanner();
+             FILE * f;  
+        f=fopen("log.txt","w");
+        fprintf(f,"");
+        fclose(f);
     //Hacerlo con cada archivo
     for (i = 0; i < cant; i++) {
+        FILE * f;  
+        f=fopen("log.txt","a");
+        fprintf(f,"%s\n",lsfiles[i]);
+        fclose(f);
         fp = fopen(lsfiles[i], "r");
         if (fp == NULL) {
             return -1; //panico si no se puede abrir el archivo
