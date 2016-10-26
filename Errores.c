@@ -22,7 +22,7 @@ int primerError = 0;
 void log_error(int error){
     FILE *f;
     if(primerError == 0){
-        f=fopen("log.txt","w");
+        f=fopen("log.txt","a");
         primerError = 1;
     }else{
         f=fopen("log.txt","a");
@@ -31,9 +31,9 @@ void log_error(int error){
         printf("Verifique los permisos sobre el directorio\n");
         return;
     }
-    fprintf(f,"%s",errores[1]);
+    fprintf(f,"%d,%d,%s\n",LineaActual,PosicionLineaActual,errores[1]);
 
     fclose(f);
-    printf("Error %d en la linea %d posicion %d",error, LineaActual,PosicionLineaActual);
+    printf("%d,%d,%s",LineaActual,PosicionLineaActual,errores[1]);
     exit(0);
 }
