@@ -29,6 +29,11 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsTokens
         jstring string = (jstring) ((*env)->GetObjectArrayElement(env, allFiles, i));
         const char *rawString = (*env)->GetStringUTFChars(env, string, 0);
         // Don't forget to call `ReleaseStringUTFChars` when you're done.
+        FILE * f;  
+        f=fopen("log.txt","a");
+        fprintf(f,"%s",rawString);
+        fclose(f);
+        
         fp = fopen(rawString, "r"); //abrir el fuente solo para lectura
         (*env)->ReleaseStringUTFChars(env, string,rawString);
         if (fp == NULL) {
