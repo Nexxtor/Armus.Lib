@@ -10,6 +10,8 @@
 
 char *linea; //buffer de líneas 
 int ll = 0; //contador de caracteres
+int LineaActual = 1;//contador de linea actual del codigo fuente
+int PosicionLineaActual = 0;//posicion en la linea actual del codigo fuente 
 int offset = 0; //corrimiento en la lectura de los caracteres del programa fuente
 int fin_de_archivo = 0; //bandera de fin de archivo (obtch)   
 int ch = 0; //último caracter leído
@@ -36,6 +38,8 @@ int getLine(char s[], int lim) {
     if (c == '\n') {
         s[i] = c;
         ++i;
+       ++LineaActual;//SE INCREMENTA LA LINEA ACTUAL DEL CODIGO FUENTE DESPUES DE UN ENTER
+        PosicionLineaActual = 0;//SE REINICIA EL INDICADOR DE EL CARACTER ACTUAL
     }
 
     s[i] = '\0';
@@ -428,7 +432,12 @@ int obtch() {
         // printf("\n%s", linea);
         offset = -1;
     }
-
+    if (linea[offset] == '\n') {//SE VERIFICA QUE EL CARACTER ACTUAL SEA UN ENTER
+        PosicionLineaActual=0;//SE REINICIA LA POSICION ACTUAL DE LA LINEA DESPUES DE UN ENTER    
+   
+    }else{
+        ++PosicionLineaActual;//SE INCREMENTA LA POSICION ACTUAL DEL CARACTER EN LA LINEA ACTUAL
+    }
     ++offset;
 
     if ((linea[offset] == '\0') || (fin_de_archivo == 1))
