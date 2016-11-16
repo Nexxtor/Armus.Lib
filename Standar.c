@@ -176,6 +176,8 @@ void obtoken() {
                 ch = obtch();
             }
             ch = obtch();
+            obtoken();
+            return;
         } else {
             if (ch == '*') {
                 ch = obtch();
@@ -190,12 +192,13 @@ void obtoken() {
 
                     if (fin_de_archivo == 1) {
                         log_error(11); //mal cometario de bloque
-                        printf("NUlo en comentario");
                         token = nulo;
                         return;
                     }
                 }
                 ch = obtch();
+                obtoken();
+                return;
             } else {
                 token = espec['/'];
                 return;
@@ -204,7 +207,7 @@ void obtoken() {
     }
 
      //quitar blancos, caracter de cambio de línea y tabuladores
-    while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
+    //while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
 
     if (ch == '\0') {
         printf("SE termino el archivo\n");
@@ -329,9 +332,9 @@ void obtoken() {
                         }
                         valorCadena[i] = '\0';
 
-                        printf("Valor cadena = %s\n", valorCadena);
+                        /*printf("Valor cadena = %s\n", valorCadena);
                         printf("\n fin de archiv0 %d", fin_de_archivo);
-                        printf("caracter ultimo %c valor entero %d\n",ch,ch);
+                        printf("caracter ultimo %c valor entero %d\n",ch,ch);*/
 
                         if (i > MAX_CADENA)
                             log_error(10); //se paso del tamaño de la cadena 
