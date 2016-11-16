@@ -64,21 +64,20 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
     for (i = 0; i < cant; i++) {
         jstring string = (jstring) ((*env)->GetObjectArrayElement(env, jsLsFile, i));
         const char *file = (*env)->GetStringUTFChars(env, string, 0);
-
         lsfiles[i] = file;
         jstrings[i] = &string;
-        printf("%s\n", lsfiles[i]);
     }
 
     tabla.izq = NULL;
     tabla.dch = NULL;
     tabla.valor = NULL;
 
-    //    tds *incioTDS = &tabla;
+    if (!pasada1(lsfiles, cant)) {
+        return NULL; // COnveritri arreglo y retornar
+    }
 
-    int a = pasada1(lsfiles, cant);
     int b = pasada2(lsfiles, cant);
-    printf("%d\n", a);
+
     //Relase Java things
     for (i = 0; i < cant; i++) {
         (*env)->ReleaseStringUTFChars(env, *((jstring *) jstrings[i]), lsfiles[i]);
@@ -89,17 +88,22 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
 
 int pasada1(char **lsfiles, int cant) {
     int i;
-         FILE * f;  
-        f=fopen("log.txt","w");
-        fprintf(f,"");
-        fclose(f);
+
+    FILE * f;
+    f = fopen("log.txt", "w");
+    fprintf(f, "");
+    fclose(f);
+
     clearScanner();
+
     //Hacerlo con cada archivo
     for (i = 0; i < cant; i++) {
-        FILE * f;  
-        f=fopen("log.txt","a");
-        fprintf(f,"%s\n",lsfiles[i]);
+
+        FILE * f;
+        f = fopen("log.txt", "a");
+        fprintf(f, "%s\n", lsfiles[i]);
         fclose(f);
+
         fp = fopen(lsfiles[i], "r");
         if (fp == NULL) {
             return -1; //panico si no se puede abrir el archivo
@@ -109,12 +113,14 @@ int pasada1(char **lsfiles, int cant) {
         fin_de_archivo = 0;
         offset = -1;
         ll = 0;
+        LineaActual = 0;
+        PosicionLineaActual = 0;
         struct nodoArchivo *miArchivo;
         instarArchivoTDS(lsfiles[i], &tabla, &miArchivo);
 
-        // printf("Se Inserto %s\n", miArchivo->nombre);
         obtoken();
         programaP1(miArchivo);
+
         fclose(fp);
         fp = NULL;
     }
@@ -125,15 +131,15 @@ int pasada2(char **lsfiles, int cant) {
     printf("------------------------------------------------------\n");
     int i;
     clearScanner();
-             FILE * f;  
-        f=fopen("log.txt","w");
-        fprintf(f,"");
-        fclose(f);
+    FILE * f;
+    f = fopen("log.txt", "w");
+    fprintf(f, "");
+    fclose(f);
     //Hacerlo con cada archivo
     for (i = 0; i < cant; i++) {
-        FILE * f;  
-        f=fopen("log.txt","a");
-        fprintf(f,"%s\n",lsfiles[i]);
+        FILE * f;
+        f = fopen("log.txt", "a");
+        fprintf(f, "%s\n", lsfiles[i]);
         fclose(f);
         fp = fopen(lsfiles[i], "r");
         if (fp == NULL) {
@@ -148,11 +154,10 @@ int pasada2(char **lsfiles, int cant) {
         PosicionLineaActual = 0;
         struct nodoArchivo *valor = NULL;
         buscarArchivoTDS(&valor, &tabla, lsfiles[i]);
-        printf("Archivo %s \n", lsfiles[i]);
+        // printf("Archivo %s \n", lsfiles[i]);
         if (valor == NULL) {
-            printf("EL ARCHIVO NO SE REGISTRO BIEN PANICO TOTAL LA SEGUNDA PASADA PROBABLEMETE FUE EJECUTADA DE FORMA INDEPENDIENTO O SE CAMBIARON LA LISTA DE ARCHIVOS");
-            log_error(1);
-
+            //printf("EL ARCHIVO NO SE REGISTRO BIEN PANICO TOTAL LA SEGUNDA PASADA PROBABLEMETE FUE EJECUTADA DE FORMA INDEPENDIENTO O SE CAMBIARON LA LISTA DE ARCHIVOS");
+            log_error(40);
         }
         obtoken();
         programa(valor);
@@ -182,10 +187,10 @@ void programaP1(struct nodoArchivo *archivo) {
                     instarIncluidosArchivo(valorCadena, archivo);
                     obtoken();
                 } else {
-                    log_error(2); // falto punto y coma;
+                    log_error(14); // falto punto y coma;
                 }
             } else {
-                log_error(1); // No esta bien escrita la cadena;
+                log_error(15); // No esta bien escrita la cadena;
             }
         }
     } while (token == incluirTok);
@@ -209,7 +214,7 @@ void programaP1(struct nodoArchivo *archivo) {
                     struct clase *claseActual;
                     insertarTDSClase(archivo, lex, tokeAux, &claseActual);
 
-                    printf("Se inserto la clase %s con hash %d\n", claseActual->ident, claseActual->hash);
+                    //printf("Se inserto la clase %s con hash %d\n", claseActual->ident, claseActual->hash);
                     //Aunque no interese mucho que esta 100% bien 
                     // escrita si tiene que usar { cuerpo }
                     // para poder detectar todas las clases
@@ -218,30 +223,26 @@ void programaP1(struct nodoArchivo *archivo) {
                     obtoken();
                     if (token == llaveI) {
                         obtoken();
-                        printf("\tRevisando el cuerpo\n");
+                        //printf("\tRevisando el cuerpo\n");
                         cuerpoP1(claseActual);
                         if (token == llaveF) {
-                            printf("\tClase bien escrita\n");
+                            // printf("\tClase bien escrita\n");
                             obtoken();
                         } else {
-                            log_error(1); //falto llave de cierre
+                            log_error(22); //falto llave de cierre
                         }
                     } else {
-                        log_error(1); //falta llave de apertura
+                        log_error(21); //falta llave de apertura
                     }
+                } else {
+                    log_error(18); //Falta indentificador
                 }
             } else {
-                //Es ambiguo en este punto por eso se da los 
-                //dos mensaje por que no se logra adivinar 
-                //la intencion del programador
-                if (tokeAux == publicaTok) {
-                    log_error(1); // esta declarando una propiedad o metodo
-                    // fuera de la clase  
-                }
-
-                log_error(1); // no puso la palabra clabe clase         
+                log_error(17); // no puso la palabra clave clase         
             }
         } while (token != -1);
+    } else {
+        log_error(16);
     }
 }
 
@@ -250,7 +251,7 @@ void cuerpoP1(struct clase *clase) {
     // Se disminuira cuando se cierre
     int countLlaveI = 0;
     if (token == llaveF) {
-        printf("\tClase vacia no se avanzara un token\n");
+        //printf("\tClase vacia no se avanzara un token\n");
         return;
     }
     do {
@@ -269,7 +270,7 @@ void cuerpoP1(struct clase *clase) {
                 if (token == corcheteI) {
                     propiedad = 0;
                     //Ok es un metodo
-                    printf("\t\tRegistrando metodo %s\n", nombre);
+                    // printf("\t\tRegistrando metodo %s\n", nombre);
                     struct metodo *metodo;
                     metodo = (struct metodo*) malloc(sizeof (struct metodo));
                     metodo->ident = (char *) malloc(sizeof (char)*strlen(nombre) + 1);
@@ -281,12 +282,12 @@ void cuerpoP1(struct clase *clase) {
                     if (token == corcheteF) {
                         //metodo sin parametros
                         metodo->parametros = NULL;
-                        printf("\t\t\t sin parametros \n");
+                        //printf("\t\t\t sin parametros \n");
                         obtoken();
                         if (token == arregloTok || token == objetoTok || token == archivoTok
                                 || token == caracterTok || token == cadenaTok || token == enteroTok
                                 || token == realTok || token == byteTok || token == booleanoTok || token == ident) {
-                            printf("\t\t\t y con retorno %d\n", token);
+                            //printf("\t\t\t y con retorno %d\n", token);
                             metodo->tipoRetorno = token; //Cambiar esto por el tipo en mayusculas
                             metodo->esFuncion = TRUE;
                         } else {
@@ -315,11 +316,11 @@ void cuerpoP1(struct clase *clase) {
 
                             parametros->atributo = parametroX;
 
-                            printf("\t\t\tSe detecto parametro de tipo ");
+                            //printf("\t\t\tSe detecto parametro de tipo ");
                             tipoDP1(parametroX);
 
                             if (token == por) {
-                                printf(" es por referencia ");
+                                // printf(" es por referencia ");
                                 parametroX->esPorReferencia = TRUE;
                                 obtoken();
                             }
@@ -329,10 +330,10 @@ void cuerpoP1(struct clase *clase) {
                                 strcpy(parametroX->ident, lex);
                                 obtoken();
                                 i = 1;
-                                printf("Se inserta el parametro \n");
+                                //printf("Se inserta el parametro \n");
                             } else {
-                                log_error(1); // Se esperaba un ident
-                                printf("Error \n");
+                                log_error(18); // Se esperaba un ident
+                                //printf("Error \n");
                             }
                         } while (token == coma);
 
@@ -341,34 +342,33 @@ void cuerpoP1(struct clase *clase) {
                             if (token == arregloTok || token == objetoTok || token == archivoTok
                                     || token == caracterTok || token == cadenaTok || token == enteroTok
                                     || token == realTok || token == byteTok || token == booleanoTok || token == ident) {
-                                printf("\t\t\t y con retorno %d\n", token);
+                                // printf("\t\t\t y con retorno %d\n", token);
                                 metodo->tipoRetorno = token;
                                 metodo->esFuncion = -1;
                             } else {
                                 if (token == llaveI) countLlaveI++;
                                 if (token == llaveF) countLlaveI--;
                             }
-                            printf("\t\t\ty esta bien escrito\n");
+                            //printf("\t\t\ty esta bien escrito\n");
                         } else {
-                            log_error(1); // si esperaba corchete de cierre
+                            log_error(31); // si esperaba corchete de cierre
                         }
                     }
 
 
                 }
-
-            }
+            } 
 
             //Es propiedad
             if (propiedad == 2 || propiedad == 1) {
-                printf("\t\tPropiedad de tipo");
+                // printf("\t\tPropiedad de tipo");
 
                 struct atributo *atributo = (struct atributo*) malloc(sizeof (struct atributo));
                 atributo->alcanze = alcanze;
                 //ES un propieda cuyo tipo es un objeto
                 if (propiedad == 2) {
                     //En la version completa buscar el hashClase
-                    printf(" %s que es un objeto ", nombre);
+                    // printf(" %s que es un objeto ", nombre);
                     atributo->esPrimitivo = 0;
                     atributo->tipo = OBJETO;
 
@@ -381,7 +381,7 @@ void cuerpoP1(struct clase *clase) {
 
 
                 if (token == ident) {
-                    printf("El nombre es %s ", lex);
+                    // printf("El nombre es %s ", lex);
                     atributo->ident = (char *) malloc(sizeof (char)* strlen(lex) + 1);
                     strcpy(atributo->ident, lex);
                     insertarTDSAtributo(clase, atributo);
@@ -403,10 +403,10 @@ void cuerpoP1(struct clase *clase) {
                                 //tenemos que hacer
 
                                 strcpy(atributo2->ident, lex);
-                                printf("\t\t luego esta %s ", lex);
+                                //printf("\t\t luego esta %s ", lex);
                                 insertarTDSAtributo(clase, atributo2);
                             } else {
-                                log_error(1);
+                                log_error(18);
                             }
                         }
                         if (token == puntoycoma) {
@@ -414,8 +414,12 @@ void cuerpoP1(struct clase *clase) {
                         }
                         obtoken();
                     } while (token != puntoycoma && token != -1);
-                    printf("\n");
+                    if (token == -1) {
+                        log_error(14);
+                    }
 
+                } else {
+                    log_error(18);
                 }
             }
 
@@ -424,7 +428,11 @@ void cuerpoP1(struct clase *clase) {
         if (token == llaveI) countLlaveI++;
         if (token == llaveF) countLlaveI--;
 
-    } while (countLlaveI >= 0);
+    } while (countLlaveI >= 0 && token != -1);
+
+    if (token == -1) {
+        log_error(39);
+    }
 }
 
 void tipoDP1(struct atributo *atributo) {
@@ -471,7 +479,7 @@ void tipoDP1(struct atributo *atributo) {
             break;
         case arregloTok: //Caso dificil
             atributo->esPrimitivo = 0;
-            printf(" Arreglo que almacena de tipo <");
+            //printf(" Arreglo que almacena de tipo <");
             obtoken();
             if (token == mnr) {
                 struct atributo *valor = (struct atributo*) malloc(sizeof (struct atributo));
@@ -490,15 +498,17 @@ void tipoDP1(struct atributo *atributo) {
                         //Contiene un elememto basico wii
                         atributo->tipoContenidoArreglo = valor->tipo;
                     }
-                    printf(">. ");
+                    //printf(">. ");
                 } else {
-                    log_error(1); //se esperaba cierre
+                    log_error(26); //se esperaba cierre
                 }
+            } else {
+                log_error(25);
             }
             break;
         default:
-            printf("Error en tipo \n");
-            log_error(1); //NO es un tipo de dato valido
+            // printf("Error en tipo \n");
+            log_error(27); //NO es un tipo de dato valido
     }
     obtoken();
 
@@ -907,9 +917,7 @@ void parametro(struct nodoArchivo *miArchivo, struct clase *clase, struct metodo
             if (1 == sePuedeUsarComoParametro(clase, metodo, lex)) {
                 obtoken();
             } else {
-                printf("Se esta redefiniendo paramentro");
-                log_error(1); //se esta redefiniedo parametro
-
+                log_error(41); //se esta redefiniedo parametro
             }
         } else {
             log_error(18); // Se esperaba un ident
@@ -927,13 +935,13 @@ void bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *m
 
             do {
                 int rs;
-                   char *claseName =  (char * )malloc(sizeof(char )* strlen(lex)+ 1);
-                strcpy(claseName,lex);
+                char *claseName = (char *) malloc(sizeof (char)* strlen(lex) + 1);
+                strcpy(claseName, lex);
                 printf("Lex leido %s\n");
-                    int tokenTipo = token;
+                int tokenTipo = token;
                 rs = tipo(miArchivo, clase);
-            
-             
+
+
                 if (rs == 0) {
                     seguir = 0;
                     break;
@@ -952,12 +960,12 @@ void bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *m
                             if (tokenTipo == ident) {
                                 atr->tipo = OBJETO;
                                 atr->esPrimitivo = 0;
-                                struct clase *clasePapa =  NULL;
-                                buscarClaseTDS(&clasePapa,&tabla,claseName);
-                                if(clasePapa == NULL){
+                                struct clase *clasePapa = NULL;
+                                buscarClaseTDS(&clasePapa, &tabla, claseName);
+                                if (clasePapa == NULL) {
                                     printf("NO se encontro una clase\n");
                                     log_error(-23);
-                                }else{
+                                } else {
                                     atr->hash = clasePapa->hash;
                                 }
                             }
@@ -1035,10 +1043,10 @@ void instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
     struct atributo *atr;
     switch (token) {
         case ident:
-           
-            es0 = esObjeto(clase,metodo,lex,&atr);
+
+            es0 = esObjeto(clase, metodo, lex, &atr);
             obtoken();
-            
+
             //Es una llamada a metodo de una clase
             if (token == punto) {
                 obtoken();
@@ -1048,11 +1056,11 @@ void instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
                     if (token == puntoycoma) {
                         obtoken();
                     } else {
-                        log_error(1); //se eperaba punto y coma
+                        log_error(14); //se eperaba punto y coma
                     }
                 } else {
                     struct clase* actual;
-                    if(es0 == 1){
+                    if (es0 == 1) {
                         //obtenerClase(miArchivo, struct clase ** clase, char *lex)
                         llamada_metodo();
                         if (token == puntoycoma) {
@@ -1061,7 +1069,7 @@ void instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
                         } else {
                             log_error(14); //se esperaba un punto y coma
                         }
-                    }else{
+                    } else {
                         printf("Se esta inentando llamar a metodo o propiedad a un varible primtiva\n");
                         log_error(-50); //se esperaba un punto y coma
                     }
@@ -1349,7 +1357,7 @@ void llamada_metodo() {
                         obtoken();
                         printf("BUena llamada a metodo 2\n");
                     } else {
-                        log_error(1); //se espera un ident
+                        log_error(18); //se espera un ident
                     }
                 } else {
                     expresion();
@@ -1363,7 +1371,7 @@ void llamada_metodo() {
                         if (token == ident) {
                             obtoken();
                         } else {
-                            log_error(1); //se espera un ident
+                            log_error(18); //se espera un ident
                         }
                     } else {
                         expresion();
@@ -1374,12 +1382,12 @@ void llamada_metodo() {
                     printf("BUena llamada a metodo\n");
                     obtoken();
                 } else {
-                    log_error(1); //Falta corchete F
+                    log_error(31); //Falta corchete F
                 }
             }
 
         } else {
-            log_error(1); //falta corchete de apertura
+            log_error(29); //falta corchete de apertura
         }
     } else {
         funcion_arreglo();
@@ -1468,7 +1476,7 @@ void termino() {
             factor();
         } while (token == por || token == barra);
     }
-    printf("\nTerminio termino");
+    //printf("\nTerminio termino");
 }
 
 void factor() {
@@ -1478,7 +1486,7 @@ void factor() {
 
     if (token == numeroEntero || token == numeroReal) {
         obtoken();
-        printf("\n\tEncontre un numero\n");
+        //printf("\n\tEncontre un numero\n");
         return;
     }
     if (token == parentI) {
@@ -1486,10 +1494,10 @@ void factor() {
         expresion_numerica();
         if (token == parentF) {
             obtoken();
-            printf("Se encontro una expresion numerica con parentesis\n");
+            //printf("Se encontro una expresion numerica con parentesis\n");
             return;
         } else {
-            log_error(1); //se esperaba un token de cierre
+            log_error(42); //se esperaba un token de cierre
         }
     }
 
@@ -1509,7 +1517,7 @@ void factor() {
         //obtoken();
         //FALTA LLAMADA A METODO O IDENT (TDS)
     }
-    log_error(1); //se esperaba un factor
+    log_error(43); //se esperaba un factor
 
 }
 
@@ -1530,10 +1538,10 @@ void funcion_num_numcad() {
                         if (token == corcheteF) {
                             obtoken();
                         } else {
-                            log_error(1); //Se esperaba corchete de cierre
+                            log_error(31); //Se esperaba corchete de cierre
                         }
                     } else {
-                        log_error(1); //Se esperaba corchet apertura
+                        log_error(29); //Se esperaba corchet apertura
                     }
                     break;
                 case mayorTok:
@@ -1550,13 +1558,13 @@ void funcion_num_numcad() {
                             if (token == corcheteF) {
                                 obtoken();
                             } else {
-                                log_error(1); //Se esperaba corchete de cierre
+                                log_error(31); //Se esperaba corchete de cierre
                             }
                         } else {
-                            log_error(1); //falto coma
+                            log_error(36); //falto coma
                         }
                     } else {
-                        log_error(1); //Se esperaba corchet apertura
+                        log_error(29); //Se esperaba corchet apertura
                     }
                     break;
                 case longitudCadenaTok:
@@ -1567,10 +1575,10 @@ void funcion_num_numcad() {
                         if (token == corcheteF) {
                             obtoken();
                         } else {
-                            log_error(1); //Se esperaba corchete de cierre
+                            log_error(31); //Se esperaba corchete de cierre
                         }
                     } else {
-                        log_error(1); //Se esperaba corchet apertura
+                        log_error(29); //Se esperaba corchet apertura
                     }
                     break;
                 case compararTok:
@@ -1584,24 +1592,24 @@ void funcion_num_numcad() {
                             if (token == corcheteF) {
                                 obtoken();
                             } else {
-                                log_error(1); //Se esperaba corchete de cierre
+                                log_error(31); //Se esperaba corchete de cierre
                             }
                         } else {
-                            log_error(1); //falto coma
+                            log_error(36); //falto coma
                         }
                     } else {
-                        log_error(1); //Se esperaba corchet apertura
+                        log_error(29); //Se esperaba corchet apertura
                     }
                     break;
                 default:
-                    log_error(1); // se esperaba llamada a sistema;
+                    log_error(44); // se esperaba llamada a sistema;
                     break;
             }
         } else {
-            log_error(1); // se esperaba un punto
+            log_error(45); // se esperaba un punto
         }
     } else {
-        log_error(1); //Se esperaba palabra reservada sistema
+        log_error(46); //Se esperaba palabra reservada sistema
     }
 }
 
@@ -1619,15 +1627,15 @@ void instruccion_mientras(struct nodoArchivo* miArchivo, struct clase *clase, st
                     if (token == llaveF)
                         obtoken();
                     else
-                        log_error(1); //no esta }
+                        log_error(22); //no esta }
                 } else
-                    log_error(1); //no esta {
+                    log_error(21); //no esta {
             } else
-                log_error(1); //no esta el ]
+                log_error(31); //no esta el ]
         } else
-            log_error(1); //no esta el [
+            log_error(29); //no esta el [
     } else
-        log_error(1); // no es el token mientras       
+        log_error(47); // no es el token mientras       
 }
 
 void instruccion_romper() {
@@ -1636,9 +1644,9 @@ void instruccion_romper() {
         if (token == puntoycoma)
             obtoken();
         else
-            log_error(1); //no esta el ;
+            log_error(14); //no esta el ;
     } else
-        log_error(1); // no esta el token romper
+        log_error(48); // no esta el token romper
 }
 
 void funcion_arreglo() {
@@ -1654,10 +1662,10 @@ void funcion_arreglo() {
                     printf("funcion arreglo ok\n");
                     return;
                 } else {
-                    log_error(1); //se esperaba corchete de cierre
+                    log_error(31); //se esperaba corchete de cierre
                 }
             } else {
-                log_error(1); //se esperaba corchete de apertura
+                log_error(29); //se esperaba corchete de apertura
             }
             break;
         case cuantosTok:
@@ -1666,16 +1674,16 @@ void funcion_arreglo() {
                 obtoken();
                 if (token == corcheteF) {
                     obtoken();
-                    printf("funcion cuantos ok\n");
+                    //printf("funcion cuantos ok\n");
                     return;
                 } else {
-                    log_error(1); //se esperaba corchete de cierre
+                    log_error(31); //se esperaba corchete de cierre
                 }
             } else {
-                log_error(1); //se esperaba corchete de apertura
+                log_error(29); //se esperaba corchete de apertura
             }
             break;
-        default: log_error(1); //no es una funcion arreglo
+        default: log_error(49); //no es una funcion arreglo
     }
 }
 
@@ -1699,16 +1707,16 @@ void instruccion_es() {
                                 if (token == puntoycoma) {
                                     obtoken();
                                 } else {
-                                    log_error(1); //Se esperaba punto y coma
+                                    log_error(14); //Se esperaba punto y coma
                                 }
                             } else {
-                                log_error(1); // se esperaba corchete de cierre
+                                log_error(31); // se esperaba corchete de cierre
                             }
                         } else {
-                            log_error(1); //se esperaba indentificador
+                            log_error(18); //se esperaba indentificador
                         }
                     } else {
-                        log_error(1); // se esperaba corchet ede apartura
+                        log_error(29); // se esperaba corchete de apertura
                     }
                     break;
                 case mostrarTok:
@@ -1725,7 +1733,7 @@ void instruccion_es() {
                             if (token == puntoycoma) {
                                 obtoken();
                             } else {
-                                log_error(1); //Se esperaba punto y coma
+                                log_error(14); //Se esperaba punto y coma
                             }
                         } else {
                             log_error(2); // se esperaba corchete de cierre
@@ -1763,7 +1771,7 @@ void instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, stru
                                 obtoken();
                                 instruccion(miArchivo, clase, metodo);
                             } else {
-                                log_error(1); //faltan :
+                                log_error(50); //faltan :
                             }
                         }
                         if (token == defectoTok) {
@@ -1772,22 +1780,22 @@ void instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, stru
                                 obtoken();
                                 instruccion(miArchivo, clase, metodo);
                             } else
-                                log_error(1); //falta :
+                                log_error(50); //falta :
                         }
                         if (token == llaveF) {
                             obtoken();
                         } else
-                            log_error(1); //falta}
+                            log_error(22); //falta }
                     } else
-                        log_error(1); //falta caso
+                        log_error(51); //falta caso
                 } else
-                    log_error(1); //falta {
+                    log_error(21); //falta {
             } else
-                log_error(1); //falta]
+                log_error(31); //falta ]
         } else
-            log_error(1); //falta [
+            log_error(29); //falta [
     } else
-        log_error(1); //falta probar
+        log_error(52); //falta probar
 }
 
 void instruccion_para(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo) {
@@ -1818,34 +1826,34 @@ void instruccion_para(struct nodoArchivo* miArchivo, struct clase *clase, struct
                                         if (token == llaveF) {
                                             obtoken();
                                         } else {
-                                            log_error(1); //falta }
+                                            log_error(22); //falta }
                                         }
                                     } else {
-                                        log_error(1); // falta el ;   
+                                        log_error(14); // falta el ;   
                                     }
                                 }
                             } else {
-                                log_error(1); //falta]
+                                log_error(31); //falta ]
                             }
                         } else {
-                            log_error(1); //falta,
+                            log_error(36); //falta ,
                         }
                     } else {
-                        log_error(1); //falta ,
+                        log_error(36); //falta ,
                     }
                 } else {
-                    log_error(1); //falta =
+                    log_error(32); //falta =
                 }
             } else {
-                log_error(1); //no es un identificador
+                log_error(18); //no es un identificador
             }
         } else {
 
 
-            log_error(1); //no es [
+            log_error(29); //no es [
         }
     } else {
-        log_error(1); //no es la palabra para
+        log_error(53); //no es la palabra para
     }
 }
 
@@ -1867,17 +1875,17 @@ void instruccion_hacer(struct nodoArchivo* miArchivo, struct clase *clase, struc
                             if (token == puntoycoma)
                                 obtoken();
                             else
-                                log_error(1); //falta ;
+                                log_error(14); //falta ;
                         } else
-                            log_error(1); //falta ]
+                            log_error(31); //falta ]
                     } else
-                        log_error(1); //falta[
+                        log_error(29); //falta [
                 } else
-                    log_error(1); //falta token mientras
+                    log_error(47); //falta token mientras
             } else
-                log_error(1); //falta }
+                log_error(22); //falta }
         } else
-            log_error(1); //falta {
+            log_error(21); //falta {
     }
 }
 
@@ -1903,20 +1911,20 @@ void instruccion_paraCada(struct nodoArchivo* miArchivo, struct clase *clase, st
                                 if (token == llaveF) {
                                     obtoken();
                                 } else
-                                    log_error(1); //falta }
+                                    log_error(22); //falta }
                             } else
-                                log_error(1); //falta {
+                                log_error(21); //falta {
                         } else
-                            log_error(1); //falta]
+                            log_error(31); //falta ]
                     } else
-                        log_error(1); //no es un identificador
+                        log_error(18); //no es un identificador
                 } else
-                    log_error(1); //falta ,
+                    log_error(36); //falta ,
             } else
-                log_error(1); // no es un identificador
+                log_error(18); // no es un identificador
         } else
-            log_error(1); // no esta el [
+            log_error(29); // no esta el [
     } else
-        log_error(1); //no esta token paracada 
+        log_error(54); //no esta token paracada 
 
 }
