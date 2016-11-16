@@ -86,7 +86,7 @@ void imprime_token() {
         "quitarTok", "abrirTok", "leerLineaTok", "volcadoTok", "cerrarTok", "concatenarTok",
         "parteEnteraTok", "compararTok", "mayorTok", "menorTok", "esParTok", "decimalBinTok",
         "potenciaTok", "absolutoTok", "moduloTok", "longitudCadenaTok", "claseTok", "incluirTok",
-        "obtenerBooleanoTok", "falsoTok", "verdaderoTok", "miTok", "datoCadena", "datoCaracter", "localTok"};
+        "obtenerBooleanoTok", "falsoTok", "verdaderoTok", "datoCadena", "datoCaracter", "localTok"};
 
     if (token != comentario) {
         switch (token) {
@@ -329,9 +329,9 @@ void obtoken() {
                         }
                         valorCadena[i] = '\0';
 
-                        /*printf("Valor cadena = %s\n", valorCadena);
+                        printf("Valor cadena = %s\n", valorCadena);
                         printf("\n fin de archiv0 %d", fin_de_archivo);
-                        printf("caracter ultimo %c valor entero %d\n",ch,ch);*/
+                        printf("caracter ultimo %c valor entero %d\n",ch,ch);
 
                         if (i > MAX_CADENA)
                             log_error(10); //se paso del tamaño de la cadena 
