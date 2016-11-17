@@ -69,18 +69,26 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
     tabla.dch = NULL;
     tabla.valor = NULL;
 
-    if (!pasada1(lsfiles, cant)) {
-        return NULL; // COnveritri arreglo y retornar
+    if (pasada1(lsfiles, cant)) {
+        if (pasada2(lsfiles, cant)) {
+            return NULL; // Sin errores
+        }   
     }
 
-    int b = pasada2(lsfiles, cant);
-
+    jobjectArray errores;
+    
+    errores = (*env)->NewObjectArray(env,primerError,
+            (*env)->FindClass(env,"java/lang/String"),NULL);
+    int j;
+    for(j = 0; j < primerError ; j ++){
+        (*env)->SetObjectArrayElement(env,errores,j,(*env)->NewStringUTF(env,erroresEncontrados[j]));
+    }
     //Relase Java things
     for (i = 0; i < cant; i++) {
         (*env)->ReleaseStringUTFChars(env, *((jstring *) jstrings[i]), lsfiles[i]);
     }
 
-    return NULL;
+    return errores;
 }
 
 int pasada1(char **lsfiles, int cant) {
@@ -161,7 +169,7 @@ int pasada2(char **lsfiles, int cant) {
             log_error(40);
         }
         obtoken();
-        if(!programa(valor)){
+        if (!programa(valor)) {
             fclose(fp);
             fp = NULL;
             return 0;
@@ -667,7 +675,7 @@ int programa(struct nodoArchivo* miArchivo) {
                     obtoken();
                     if (token == llaveI) {
                         obtoken();
-                        if(!cuerpo(miArchivo, yoClase)){
+                        if (!cuerpo(miArchivo, yoClase)) {
                             return 0;
                         }
                         if (token == llaveF) {
@@ -722,7 +730,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase) {
                         if (token == asignacion) {
                             printf("\t\tSe le esta asignando un valor a %s \n", atr->ident);
                             obtoken();
-                            if(!expresion()){
+                            if (!expresion()) {
                                 return 0;
                             }
                         }
@@ -739,7 +747,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase) {
                                         if (token == asignacion) {
                                             printf("\t\tSe le esta asignando un valor a %s \n", atrAux->ident);
                                             obtoken();
-                                            if(!expresion()){
+                                            if (!expresion()) {
                                                 return 0;
                                             }
                                         }
@@ -782,7 +790,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase) {
                             obtoken();
                             if (token == asignacion) {
                                 obtoken();
-                                if(!expresion()){
+                                if (!expresion()) {
                                     return 0;
                                 }
                             }
@@ -798,7 +806,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase) {
                                             obtoken();
                                             if (token == asignacion) {
                                                 obtoken();
-                                                if(!expresion()){
+                                                if (!expresion()) {
                                                     return 0;
                                                 }
                                             }
@@ -885,7 +893,7 @@ int tipo(struct nodoArchivo *miArchivo, struct clase *clase) {
             obtoken();
             if (token == mnr) {
                 obtoken();
-                if(!tipo(miArchivo, clase)){
+                if (!tipo(miArchivo, clase)) {
                     return 0;
                 }
                 if (token == myr) {
@@ -1069,7 +1077,7 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
                             obtoken();
                             if (token == asignacion) {
                                 obtoken();
-                                if(!expresion()){
+                                if (!expresion()) {
                                     return 0;
                                 }
                             }
@@ -1094,7 +1102,7 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
                                         obtoken();
                                         if (token == asignacion) {
                                             obtoken();
-                                            if(!expresion()){
+                                            if (!expresion()) {
                                                 return 0;
                                             }
                                         }
@@ -1125,7 +1133,7 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
             }
             obtoken();
         } while (seguir == 1);
-        if(!instruccion(miArchivo, clase, metodo)){
+        if (!instruccion(miArchivo, clase, metodo)) {
             return 0;
         }
         if (token == llaveF) {
@@ -1156,7 +1164,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                 obtoken();
                 if (token == abrirTok || token == leerLineaTok
                         || token == volcadoTok || token == cerrarTok) {
-                    if(!funcion_archivo()){
+                    if (!funcion_archivo()) {
                         return 0;
                     }
                     if (token == puntoycoma) {
@@ -1169,7 +1177,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                     struct clase* actual;
                     if (es0 == 1) {
                         //obtenerClase(miArchivo, struct clase ** clase, char *lex)
-                        if(!llamada_metodo()){
+                        if (!llamada_metodo()) {
                             return 0;
                         }
                         if (token == puntoycoma) {
@@ -1190,7 +1198,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                 if (token == asignacion) {
                     printf("Se esta haciendo una asignacion\n");
                     obtoken();
-                    if(!expresion()){
+                    if (!expresion()) {
                         return 0;
                     }
                     if (token == puntoycoma) {
@@ -1204,50 +1212,50 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
             }
             break;
         case romperTok:
-            if(!instruccion_romper()){
+            if (!instruccion_romper()) {
                 return 0;
             }
             printf("SE encontro romper\n");
             break;
         case siTok:
-            if(!instruccion_si(miArchivo, clase, metodo)){
+            if (!instruccion_si(miArchivo, clase, metodo)) {
                 return 0;
             }
             //printf("SE encontro si\n");
             break;
         case probarTok:
-            if(!instruccion_probar(miArchivo, clase, metodo)){
+            if (!instruccion_probar(miArchivo, clase, metodo)) {
                 return 0;
             }
             break;
         case mientrasTok:
-            if(!instruccion_mientras(miArchivo, clase, metodo)){
+            if (!instruccion_mientras(miArchivo, clase, metodo)) {
                 return 0;
             }
             break;
         case paraTok:
-            if(!instruccion_para()){
+            if (!instruccion_para()) {
                 return 0;
             }
             break;
         case hacerTok:
-            if(!instruccion_hacer(miArchivo, clase, metodo)){
+            if (!instruccion_hacer(miArchivo, clase, metodo)) {
                 return 0;
             }
             break;
         case paracadaTok:
-            if(!instruccion_paraCada(miArchivo, clase, metodo)){
+            if (!instruccion_paraCada(miArchivo, clase, metodo)) {
                 return 0;
             }
             break;
         case sistemaTok:
-            if(!instruccion_es()){
+            if (!instruccion_es()) {
                 return 0;
             }
             break;
         case retornarTok:
             obtoken();
-            if(!expresion()){
+            if (!expresion()) {
                 return 0;
             }
             if (token == puntoycoma) {
@@ -1268,7 +1276,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
             break;
 
     }
-    if(!instruccion(miArchivo, clase, metodo)){
+    if (!instruccion(miArchivo, clase, metodo)) {
         return 0;
     }
     return 1;
@@ -1282,21 +1290,21 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
             printf("se encontro corcheteI\n");
             obtoken();
             printf("a entrar a expresion numerica\n");
-            if(!expresion()){
+            if (!expresion()) {
                 return 0;
             }
             if (token == coma) {
                 printf("\nEncontre una coma\n");
                 obtoken();
 
-                if(!asignacionf()){
+                if (!asignacionf()) {
                     return 0;
                 }
                 printf("\nRegrese de asignacion en si corto\n");
                 if (token == coma) {
                     printf("\nEncontre segunda coma\n");
                     obtoken();
-                    if(!asignacionf()){
+                    if (!asignacionf()) {
                         return 0;
                     }
                     printf("\nRegrese de 2 asignacion en si corto\n");
@@ -1324,7 +1332,7 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                     obtoken();
                     if (token == llaveI) {
                         obtoken();
-                        if(!instruccion(miArchivo, clase, metodo)){
+                        if (!instruccion(miArchivo, clase, metodo)) {
                             return 0;
                         }
                         if (token == llaveF) {
@@ -1335,7 +1343,7 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                                 if (token == llaveI) {
                                     printf("Sino llaveI OK\n");
                                     obtoken();
-                                    if(!instruccion(miArchivo, clase, metodo)){
+                                    if (!instruccion(miArchivo, clase, metodo)) {
                                         return 0;
                                     }
                                     if (token == llaveF) {
@@ -1386,7 +1394,7 @@ int asignacionf() {
         if (token == asignacion) {
             printf("\nEncontre un  = \n");
             obtoken();
-            if(!expresion()){
+            if (!expresion()) {
                 return 0;
             }
         } else {
@@ -1405,12 +1413,12 @@ int funcion_cadena() {
         obtoken();
         if (token == corcheteI) {
             obtoken();
-            if(!valor_cadena()){
+            if (!valor_cadena()) {
                 return 0;
             }
             if (token == coma) {
                 obtoken();
-                if(!valor_cadena()){
+                if (!valor_cadena()) {
                     return 0;
                 }
                 if (token == corcheteF) {
@@ -1440,7 +1448,7 @@ int funcion_archivo() {
         obtoken();
         if (token == corcheteI) {
             obtoken();
-            if(!valor_cadena()){
+            if (!valor_cadena()) {
                 return 0;
             }
             if (token == corcheteF) {
@@ -1492,13 +1500,13 @@ int valor_cadena() {
             obtoken();
             if (token == punto) {
                 obtoken();
-                if(!llamada_metodo()){ // o indetificador??
+                if (!llamada_metodo()) { // o indetificador??
                     return 0;
                 }
             }
             break;
         case concatenarTok:
-            if(!funcion_cadena()){
+            if (!funcion_cadena()) {
                 return 0;
             }
             break;
@@ -1518,7 +1526,7 @@ int valor_caracter() {
             obtoken();
             if (token == punto) {
                 obtoken();
-                if(!llamada_metodo()){ // o indetificador??
+                if (!llamada_metodo()) { // o indetificador??
                     return 0;
                 }
             }
@@ -1549,7 +1557,7 @@ int llamada_metodo() {
                         return 0;
                     }
                 } else {
-                    if(!expresion()){
+                    if (!expresion()) {
                         return 0;
                     }
                 }
@@ -1566,7 +1574,7 @@ int llamada_metodo() {
                             return 0;
                         }
                     } else {
-                        if(!expresion()){
+                        if (!expresion()) {
                             return 0;
                         }
                     }
@@ -1586,7 +1594,7 @@ int llamada_metodo() {
             return 0;
         }
     } else {
-        if(!funcion_arreglo()){
+        if (!funcion_arreglo()) {
             return 0;
         }
     }
@@ -1605,7 +1613,7 @@ int expresion() {
         return 1;
     }
     if (token == concatenarTok) {
-        if(!funcion_cadena()){
+        if (!funcion_cadena()) {
             return 0;
         }
         printf("se encontro una funcion concatenar\n");
@@ -1616,20 +1624,20 @@ int expresion() {
         obtoken();
         return 1;
     }
-    if(!expresion_numerica()){
+    if (!expresion_numerica()) {
         return 0;
     }
 }
 
 int expresion_numerica() {
 
-    if(!expresion_conjuncion()){
+    if (!expresion_conjuncion()) {
         return 0;
     }
     while (token == otok) {
         obtoken();
         printf("En expresion numerica con %s \n", lex);
-        if(!expresion_conjuncion()){
+        if (!expresion_conjuncion()) {
             return 0;
         }
     }
@@ -1638,13 +1646,13 @@ int expresion_numerica() {
 
 int expresion_conjuncion() {
 
-    if(!expresion_relacional()){
+    if (!expresion_relacional()) {
         return 0;
     }
     while (token == ytok) {
         obtoken();
         printf("En expresion conjuncion con %s\n", lex);
-        if(!expresion_relacional()){
+        if (!expresion_relacional()) {
             return 0;
         }
     }
@@ -1658,13 +1666,13 @@ int expresion_relacional() {
         obtoken();
     }
 
-    if(!expresion_aritmetrica()){
+    if (!expresion_aritmetrica()) {
         return 0;
     }
     if (token == mnr || token == myr || token == mai || token == mei || token == igl || token == nig) {
         obtoken();
         printf("Exapresion relacional con %s\n", lex);
-        if(!expresion_aritmetrica()){
+        if (!expresion_aritmetrica()) {
             return 0;
         }
     }
@@ -1672,14 +1680,14 @@ int expresion_relacional() {
 }
 
 int expresion_aritmetrica() {
-    if(!termino()){
+    if (!termino()) {
         return 0;
     }
     if (token == mas || token == menos) {
         do {
             obtoken();
             printf("Exapresion aritmetica con %s\n", lex);
-            if(!termino()){
+            if (!termino()) {
                 return 0;
             }
         } while (token == mas || token == menos);
@@ -1688,13 +1696,13 @@ int expresion_aritmetrica() {
 }
 
 int termino() {
-    if(!factor()){
+    if (!factor()) {
         return 0;
     }
     if (token == por || token == barra) {
         do {
             obtoken();
-            if(!factor()){
+            if (!factor()) {
                 return 0;
             }
         } while (token == por || token == barra);
@@ -1714,7 +1722,7 @@ int factor() {
     }
     if (token == parentI) {
         obtoken();
-        if(!expresion_numerica()){
+        if (!expresion_numerica()) {
             return 0;
         }
         if (token == parentF) {
@@ -1729,7 +1737,7 @@ int factor() {
 
     if (token == sistemaTok) {
         obtoken();
-        if(!funcion_num_numcad()){
+        if (!funcion_num_numcad()) {
             return 0;
         }
         return 1;
@@ -1763,7 +1771,7 @@ int funcion_num_numcad() {
                     obtoken();
                     if (token == corcheteI) {
                         obtoken();
-                        if(!expresion_numerica()){
+                        if (!expresion_numerica()) {
                             return 0;
                         }
                         if (token == corcheteF) {
@@ -1784,12 +1792,12 @@ int funcion_num_numcad() {
                     obtoken();
                     if (token == corcheteI) {
                         obtoken();
-                        if(!expresion_numerica()){
+                        if (!expresion_numerica()) {
                             return 0;
                         }
                         if (token == coma) {
                             obtoken();
-                            if(!expresion_numerica()){
+                            if (!expresion_numerica()) {
                                 return 0;
                             }
                             if (token == corcheteF) {
@@ -1811,7 +1819,7 @@ int funcion_num_numcad() {
                     obtoken();
                     if (token == corcheteI) {
                         obtoken();
-                        if(!valor_cadena()){
+                        if (!valor_cadena()) {
                             return 0;
                         }
                         if (token == corcheteF) {
@@ -1829,12 +1837,12 @@ int funcion_num_numcad() {
                     obtoken();
                     if (token == corcheteI) {
                         obtoken();
-                        if(!valor_cadena()){
+                        if (!valor_cadena()) {
                             return 0;
                         }
                         if (token == coma) {
                             obtoken();
-                            if(!valor_cadena()){
+                            if (!valor_cadena()) {
                                 return 0;
                             }
                             if (token == corcheteF) {
@@ -1873,14 +1881,14 @@ int instruccion_mientras(struct nodoArchivo* miArchivo, struct clase *clase, str
         obtoken();
         if (token == corcheteI) {
             obtoken();
-            if(!expresion()){
+            if (!expresion()) {
                 return 0;
             }
             if (token == corcheteF) {
                 obtoken();
                 if (token == llaveI) {
                     obtoken();
-                    if(!instruccion(miArchivo, clase, metodo)){
+                    if (!instruccion(miArchivo, clase, metodo)) {
                         return 0;
                     }
                     if (token == llaveF)
@@ -1931,7 +1939,7 @@ int funcion_arreglo() {
         case quitarTok: obtoken();
             if (token == corcheteI) {
                 obtoken();
-                if(!expresion()){
+                if (!expresion()) {
                     return 0;
                 }
                 if (token == corcheteF) {
@@ -1965,7 +1973,7 @@ int funcion_arreglo() {
             }
             break;
         default: log_error(49); //no es una funcion arreglo
-                return 0;
+            return 0;
     }
     return 1;
 }
@@ -2010,12 +2018,12 @@ int instruccion_es() {
                     obtoken();
                     if (token == corcheteI) {
                         obtoken();
-                        if(!expresion()){
+                        if (!expresion()) {
                             return 0;
                         }
                         if (token == coma) {
                             obtoken();
-                            if(!expresion()){
+                            if (!expresion()) {
                                 return 0;
                             }
                         }
@@ -2056,7 +2064,7 @@ int instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, struc
         obtoken();
         if (token == corcheteI) {
             obtoken();
-            if(!expresion()){
+            if (!expresion()) {
                 return 0;
             }
             if (token == corcheteF) {
@@ -2066,12 +2074,12 @@ int instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, struc
                     if (token == casoTok) {
                         while (token == casoTok) {
                             obtoken();
-                            if(!expresion()){
+                            if (!expresion()) {
                                 return 0;
                             }
                             if (token == dosPuntos) {
                                 obtoken();
-                                if(!instruccion(miArchivo, clase, metodo)){
+                                if (!instruccion(miArchivo, clase, metodo)) {
                                     return 0;
                                 }
                             } else {
@@ -2083,37 +2091,37 @@ int instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, struc
                             obtoken();
                             if (token == dosPuntos) {
                                 obtoken();
-                                if(!instruccion(miArchivo, clase, metodo)){
+                                if (!instruccion(miArchivo, clase, metodo)) {
                                     return 0;
                                 }
-                            }else{
+                            } else {
                                 log_error(50); //falta :
                                 return 0;
                             }
                         }
                         if (token == llaveF) {
                             obtoken();
-                        } else{
+                        } else {
                             log_error(22); //falta }
                             return 0;
                         }
-                    } else{
+                    } else {
                         log_error(51); //falta caso
                         return 0;
                     }
-                } else{
+                } else {
                     log_error(21); //falta {
                     return 0;
                 }
-            } else{
+            } else {
                 log_error(31); //falta ]
                 return 0;
             }
-        } else{
+        } else {
             log_error(29); //falta [
             return 0;
         }
-    } else{
+    } else {
         log_error(52); //falta probar
         return 0;
     }
@@ -2130,17 +2138,17 @@ int instruccion_para(struct nodoArchivo* miArchivo, struct clase *clase, struct 
                 obtoken();
                 if (token == asignacion) {
                     obtoken();
-                    if(!expresion_numerica()){
+                    if (!expresion_numerica()) {
                         return 0;
                     }
                     if (token == coma) {
                         obtoken();
-                        if(!expresion_numerica()){
+                        if (!expresion_numerica()) {
                             return 0;
                         }
                         if (token == coma) {
                             obtoken();
-                            if(!expresion_numerica()){
+                            if (!expresion_numerica()) {
                                 return 0;
                             }
                             if (token == corcheteF) {
@@ -2150,7 +2158,7 @@ int instruccion_para(struct nodoArchivo* miArchivo, struct clase *clase, struct 
                                 } else {
                                     if (token == llaveI) {
                                         obtoken();
-                                        if(!instruccion(miArchivo, clase, metodo)){
+                                        if (!instruccion(miArchivo, clase, metodo)) {
                                             return 0;
                                         }
                                         if (token == llaveF) {
@@ -2200,7 +2208,7 @@ int instruccion_hacer(struct nodoArchivo* miArchivo, struct clase *clase, struct
         obtoken();
         if (token == llaveI) {
             obtoken();
-            if(!instruccion(miArchivo, clase, metodo)){
+            if (!instruccion(miArchivo, clase, metodo)) {
                 return 0;
             }
             if (token == llaveF) {
@@ -2209,34 +2217,34 @@ int instruccion_hacer(struct nodoArchivo* miArchivo, struct clase *clase, struct
                     obtoken();
                     if (token == corcheteI) {
                         obtoken();
-                        if(!expresion_numerica()){
+                        if (!expresion_numerica()) {
                             return 0;
                         }
                         if (token == corcheteF) {
                             obtoken();
                             if (token == puntoycoma)
                                 obtoken();
-                            else{
+                            else {
                                 log_error(14); //falta ;
                                 return 0;
                             }
-                        } else{
+                        } else {
                             log_error(31); //falta ]
                             return 0;
                         }
-                    } else{
+                    } else {
                         log_error(29); //falta [
                         return 0;
                     }
-                } else{
+                } else {
                     log_error(47); //falta token mientras
                     return 0;
                 }
-            } else{
+            } else {
                 log_error(22); //falta }
                 return 0;
             }
-        } else{
+        } else {
             log_error(21); //falta {
             return 0;
         }
@@ -2249,7 +2257,7 @@ int instruccion_paraCada(struct nodoArchivo* miArchivo, struct clase *clase, str
         obtoken();
         if (token == corcheteI) {
             obtoken();
-            if(!tipo(miArchivo, clase)){
+            if (!tipo(miArchivo, clase)) {
                 return 0;
             }
             if (token == ident) {
@@ -2264,40 +2272,40 @@ int instruccion_paraCada(struct nodoArchivo* miArchivo, struct clase *clase, str
                             obtoken();
                             if (token == llaveI) {
                                 obtoken();
-                                if(!instruccion(miArchivo, clase, metodo)){
+                                if (!instruccion(miArchivo, clase, metodo)) {
                                     return 0;
                                 }
                                 if (token == llaveF) {
                                     obtoken();
-                                }else{
+                                } else {
                                     log_error(22); //falta }
                                     return 0;
                                 }
-                            } else{
+                            } else {
                                 log_error(21); //falta {
                                 return 0;
                             }
-                        } else{
+                        } else {
                             log_error(31); //falta ]
                             return 0;
                         }
-                    } else{
+                    } else {
                         log_error(18); //no es un identificador
                         return 0;
                     }
-                } else{
+                } else {
                     log_error(36); //falta ,
                     return 0;
                 }
-            } else{
+            } else {
                 log_error(18); // no es un identificador
                 return 0;
             }
-        } else{
+        } else {
             log_error(29); // no esta el [
             return 0;
         }
-    } else{
+    } else {
         log_error(54); //no esta token paracada
         return 0;
     }
