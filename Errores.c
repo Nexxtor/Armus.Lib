@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Errores.h"
-#include <jni.h>
 #include "Standar.h"
-char *errores[55] = {
+#include <string.h>
+#include <jni.h>
+
+char *errores[56] = {
     "000 Error importante: un archivo no pudo ser abierto \n",
     "001 Error: existe un enter entre incluir y \" \n",
     "002 Error: falto comillia (\") de cierre en un incluir \n",
@@ -58,18 +60,19 @@ char *errores[55] = {
     "051 Se esperaba la palabra reservada caso\n",
     "052 Se esperaba la palabra reservada probar\n",
     "053 Se esperaba la palabra reservada para\n",
-    "054 Se esperaba la palabra reservada paraCada\n"
-            
-            
+    "054 Se esperaba la palabra reservada paraCada\n",
+    "055 Se está inentando utilizar un metodo o propiedad en una varible primtiva\n"
+
+
 
 };
 int primerError = 0;
+char **erroresEncontrados = NULL;
 
 void log_error(int error) {
     FILE *f;
     if (primerError == 0) {
         f = fopen("log.txt", "a");
-        primerError = 1;
     } else {
         f = fopen("log.txt", "a");
     }
@@ -77,9 +80,19 @@ void log_error(int error) {
         printf("Verifique los permisos sobre el directorio\n");
         return;
     }
+
+    char ** erroresEncontradosAux = realloc(erroresEncontrados, primerError + 2);
+    erroresEncontradosAux[primerError] = malloc(strlen(errores[error]) + 2 + sizeof(int)*2 );
+    sprintf(erroresEncontradosAux[primerError],"%d,%d,%s\n", LineaActual, PosicionLineaActual, errores[error] );
+    primerError++;
+    erroresEncontradosAux[primerError] =  malloc(1);
+    erroresEncontradosAux[primerError][0] = '\0';
+    
+    erroresEncontrados = erroresEncontradosAux;
+    
     fprintf(f, "%d,%d,%s\n", LineaActual, PosicionLineaActual, errores[error]);
 
     fclose(f);
     printf("%d,%d,%s", LineaActual, PosicionLineaActual, errores[error]);
-    exit(0);
+   // exit(0);
 }
