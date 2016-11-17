@@ -110,10 +110,12 @@ int pasada1(char **lsfiles, int cant) {
         fclose(f);
 
         fp = fopen(lsfiles[i], "r");
+        archivoActual = lsfiles[i];
         if (fp == NULL) {
             return -1; //panico si no se puede abrir el archivo
         }
 
+        
         ch = ' ';
         fin_de_archivo = 0;
         offset = -1;
@@ -151,6 +153,7 @@ int pasada2(char **lsfiles, int cant) {
         fprintf(f, "%s\n", lsfiles[i]);
         fclose(f);
         fp = fopen(lsfiles[i], "r");
+        archivoActual = lsfiles[i];
         if (fp == NULL) {
             return -1; //panico si no se puede abrir el archivo
         }
