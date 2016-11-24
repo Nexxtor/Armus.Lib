@@ -6,6 +6,7 @@
 
 //conjunto de sincronización de arranque
 int set_arranque[NOTOKENS];
+int set_clases[NOTOKENS];
 
 void inicializa_conjuntos() {
     //creación de conjuntos de tokens iniciales
