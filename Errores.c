@@ -71,29 +71,31 @@ char **erroresEncontrados = NULL;
 char *archivoActual;
 
 void log_error(int error) {
-    FILE *f;
-    if (primerError == 0) {
-        f = fopen("log.txt", "a");
-    } else {
-        f = fopen("log.txt", "a");
-    }
-    if (f == NULL) {
-        printf("Verifique los permisos sobre el directorio\n");
-        return;
-    }
+    if (error != -1) {
+        FILE *f;
+        if (primerError == 0) {
+            f = fopen("log.txt", "a");
+        } else {
+            f = fopen("log.txt", "a");
+        }
+        if (f == NULL) {
+            printf("Verifique los permisos sobre el directorio\n");
+            return;
+        }
 
-    char ** erroresEncontradosAux = realloc(erroresEncontrados, primerError + 2);
-    erroresEncontradosAux[primerError] = malloc(strlen(errores[error]) + 3 + sizeof(int)*2  + strlen(archivoActual));
-    sprintf(erroresEncontradosAux[primerError],"%s,%d,%d,%s\n",archivoActual, LineaActual, PosicionLineaActual, errores[error] );
-    primerError++;
-    erroresEncontradosAux[primerError] =  malloc(1);
-    erroresEncontradosAux[primerError][0] = '\0';
-    
-    erroresEncontrados = erroresEncontradosAux;
-    
-    fprintf(f, "%s,%d,%d,%s\n",archivoActual, LineaActual, PosicionLineaActual, errores[error]);
+        char ** erroresEncontradosAux = realloc(erroresEncontrados, primerError + 2);
+        erroresEncontradosAux[primerError] = malloc(strlen(errores[error]) + 3 + sizeof (int)*2 + strlen(archivoActual));
+        sprintf(erroresEncontradosAux[primerError], "%s,%d,%d,%s\n", archivoActual, LineaActual, PosicionLineaActual, errores[error]);
+        primerError++;
+        erroresEncontradosAux[primerError] = malloc(1);
+        erroresEncontradosAux[primerError][0] = '\0';
 
-    fclose(f);
-    printf("%d,%d,%s", LineaActual, PosicionLineaActual, errores[error]);
-   // exit(0);
+        erroresEncontrados = erroresEncontradosAux;
+
+        fprintf(f, "%s,%d,%d,%s\n", archivoActual, LineaActual, PosicionLineaActual, errores[error]);
+
+        fclose(f);
+        printf("%d,%d,%s", LineaActual, PosicionLineaActual, errores[error]);
+        // exit(0);
+    }
 }
