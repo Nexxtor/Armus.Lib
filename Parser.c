@@ -8,12 +8,13 @@
 #include "Standar.h"
 #include "Lexico.h"
 #include "Parser.h"
+#include "Conjuntos.h"
 
 tds tabla;
 void clearScanner();
-int programaP1(struct nodoArchivo *archivo);
-int cuerpoP1(struct clase *clase);
-int tipoDP1(struct atributo *atributo);
+int programaP1(struct nodoArchivo *archivo, int conjunto[]);
+int cuerpoP1(struct clase *clase, int conjunto[]);
+int tipoDP1(struct atributo *atributo, int conjunto[]);
 void copiarValor(struct atributo *dest, struct atributo *org);
 int programa(struct nodoArchivo *);
 int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase);
@@ -70,18 +71,18 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
     tabla.valor = NULL;
 
     if (pasada1(lsfiles, cant)) {
-        if (pasada2(lsfiles, cant)) {
+        /*if (pasada2(lsfiles, cant)) {
             return NULL; // Sin errores
-        }   
+        }*/
     }
 
     jobjectArray errores;
-    
-    errores = (*env)->NewObjectArray(env,primerError,
-            (*env)->FindClass(env,"java/lang/String"),NULL);
+
+    errores = (*env)->NewObjectArray(env, primerError,
+            (*env)->FindClass(env, "java/lang/String"), NULL);
     int j;
-    for(j = 0; j < primerError ; j ++){
-        (*env)->SetObjectArrayElement(env,errores,j,(*env)->NewStringUTF(env,erroresEncontrados[j]));
+    for (j = 0; j < primerError; j++) {
+        (*env)->SetObjectArrayElement(env, errores, j, (*env)->NewStringUTF(env, erroresEncontrados[j]));
     }
     //Relase Java things
     for (i = 0; i < cant; i++) {
@@ -115,7 +116,7 @@ int pasada1(char **lsfiles, int cant) {
             return -1; //panico si no se puede abrir el archivo
         }
 
-        
+
         ch = ' ';
         fin_de_archivo = 0;
         offset = -1;
@@ -126,7 +127,7 @@ int pasada1(char **lsfiles, int cant) {
         instarArchivoTDS(lsfiles[i], &tabla, &miArchivo);
 
         obtoken();
-        if (!programaP1(miArchivo)) {
+        if (!programaP1(miArchivo, set_arranque)) {
             fclose(fp);
             fp = NULL;
             return 0;
@@ -191,7 +192,11 @@ void clearScanner() {
     iniciarParamentros();
 }
 
-int programaP1(struct nodoArchivo *archivo) {
+int programaP1(struct nodoArchivo *archivo, int toksig[]) {
+    int sinError = 1;
+    int vacio[NOTOKENS];
+    init_set(vacio);
+    
     do {
         if (token == incluirTok) {
             obtoken();
@@ -203,34 +208,53 @@ int programaP1(struct nodoArchivo *archivo) {
                     instarIncluidosArchivo(valorCadena, archivo);
                     obtoken();
                 } else {
-                    log_error(14); // falto punto y coma;
-                    return 0;
-                }
+                    //log_error(14); // falto punto y coma;
+                    sinError = 0;
+                } //Se quita por que no se marcara errores y se perdonara la fatla de ;
             } else {
-                log_error(15); // No esta bien escrita la cadena;
-                return 0;
+                int eIncluir[NOTOKENS];
+                init_set(eIncluir);
+                eIncluir[incluirTok] = 1;
+                test(eIncluir, toksig, -1); //NO marcaremos errores el la primera pasada
+                //log_error(15); // No esta bien escrita la cadena;
+                //return 0;
+                sinError = 0;
             }
         }
     } while (token == incluirTok);
 
-    //Si es publica podria estar escribiendo
-    //Un metodo o atributo en un mal lugar
-    if (token == publicaTok || token == localTok) {
-        do {
-            enum simbolo tokeAux = token;
-            obtoken();
-
+    do {
+        //Si es publica podria estar escribiendo
+        //Un metodo o atributo en un mal lugar
+        if (token == publicaTok || token == localTok || token == claseTok) {
+            enum simbolo tokeAux;
             if (token == claseTok) {
-                //OK si es una clase
+                tokeAux = -1;
+            } else {
+                tokeAux = token;
                 obtoken();
-                if (token == ident) {
+            }
+            if (token == claseTok || token == ident || token == llaveI) {
+                int tokenEntrada = token;
+                //OK si es una clase
+                if (token != ident && token != llaveI) {
+                    obtoken();
+                }
+
+                if (token == ident || tokenEntrada == llaveI || token == llaveI) {
                     //y Esta decentemente escrita
                     // printf("\tA guardar la clase %s\n", lex);
                     //Guardamos la definicion de clase
                     // Aunque pueda estar mal escrita
                     // Solo intereza su exitencia
-                    struct clase *claseActual;
-                    insertarTDSClase(archivo, lex, tokeAux, &claseActual);
+                    struct clase *claseActual = NULL;
+                    printf("Clase detectada\n");
+                    if (token == ident) {
+                        insertarTDSClase(archivo, lex, tokeAux, &claseActual);
+                    } else {
+                        strcpy(lex, "1Clase");
+                        insertarTDSClase(archivo, lex, tokeAux, &claseActual);
+                    }
 
                     //printf("Se inserto la clase %s con hash %d\n", claseActual->ident, claseActual->hash);
                     //Aunque no interese mucho que esta 100% bien 
@@ -238,45 +262,60 @@ int programaP1(struct nodoArchivo *archivo) {
                     // para poder detectar todas las clases
                     // del mismo archivo
                     // Y evitar ambiguedades en el cuerpo
-                    obtoken();
-                    if (token == llaveI) {
+                    if (token != llaveI) {
                         obtoken();
-                        //printf("\tRevisando el cuerpo\n");
-                        if (!cuerpoP1(claseActual)) {
-                            return 0;
+                    }
+                    if (token == llaveI || token == privadoTok || token == publicaTok) {
+                        if (token != privadoTok && token != publicaTok) {
+                            obtoken();
                         }
+                        //printf("\tRevisando el cuerpo\n");
+
+                        int set_paso[NOTOKENS];
+                        copia_set(set_paso, toksig);
+                        set_paso[llaveF] = 1;
+
+                        sinError = cuerpoP1(claseActual, set_paso);
+
+
                         if (token == llaveF) {
-                            // printf("\tClase bien escrita\n");
+                             printf("\tClase bien escrita\n");
                             obtoken();
                         } else {
-                            log_error(22); //falto llave de cierre
-                            return 0;
+
+                            test(toksig, vacio, -1);
+                            sinError = 1;
                         }
                     } else {
-                        log_error(21); //falta llave de apertura
-                        return 0;
+                        test(toksig, vacio, -1);
+                        sinError = 1;
                     }
-                } else {
-                    log_error(18); //Falta indentificador
-                    return 0;
                 }
-            } else {
-                log_error(17); // no puso la palabra clave clase         
-                return 0;
             }
-        } while (token != -1);
-    } else {
-        log_error(16);
-        return 0;
-    }
+        } else {
+            if (token == privadoTok) {
+                log_error(56);
+                return -1;
+            } else {
+                test(toksig, vacio, -1);
+                sinError = 1;
+            }
+        }
+        printf("Repitiendo \n");
+    } while (token != -1);
 
-    return 1;
+
+    return sinError;
 }
 
-int cuerpoP1(struct clase *clase) {
+int cuerpoP1(struct clase *clase, int toksig[]) {
     // Se aumentara cada vez que exista una llaver de apertura
     // Se disminuira cuando se cierre
-    int countLlaveI = 0;
+    int saltar[NOTOKENS],vacio[NOTOKENS];
+    init_set(saltar);
+    init_set(vacio);
+    saltar[publicaTok] =  saltar[privadoTok] = 1;
+    int countLlaveI = 1;
     if (token == llaveF) {
         //printf("\tClase vacia no se avanzara un token\n");
         return 1;
@@ -344,7 +383,8 @@ int cuerpoP1(struct clase *clase) {
                             parametros->atributo = parametroX;
 
                             //printf("\t\t\tSe detecto parametro de tipo ");
-                            if (!tipoDP1(parametroX)) {
+                            if (!tipoDP1(parametroX, NULL)) {
+                                log_error(27);
                                 return 0;
                             }
 
@@ -375,15 +415,19 @@ int cuerpoP1(struct clase *clase) {
                                 // printf("\t\t\t y con retorno %d\n", token);
                                 metodo->tipoRetorno = token;
                                 metodo->esFuncion = -1;
-                            } else {
+                            } else{
                                 if (token == llaveI) countLlaveI++;
                                 if (token == llaveF) countLlaveI--;
                             }
+                            
+                            
                             //printf("\t\t\ty esta bien escrito\n");
                         } else {
                             log_error(31); // si esperaba corchete de cierre
                             return 0;
                         }
+                        
+                        
                     }
 
 
@@ -404,7 +448,8 @@ int cuerpoP1(struct clase *clase) {
                     atributo->tipo = OBJETO;
 
                 } else {
-                    if (!tipoDP1(atributo)) {
+                    if (!tipoDP1(atributo, NULL)) {
+                        log_error(27);
                         return 0;
                     }
                 }
@@ -464,7 +509,7 @@ int cuerpoP1(struct clase *clase) {
         if (token == llaveI) countLlaveI++;
         if (token == llaveF) countLlaveI--;
 
-    } while (countLlaveI >= 0 && token != -1);
+    } while (countLlaveI > 0 && token != -1);
 
     if (token == -1) {
         log_error(39);
@@ -474,7 +519,7 @@ int cuerpoP1(struct clase *clase) {
     }
 }
 
-int tipoDP1(struct atributo *atributo) {
+int tipoDP1(struct atributo *atributo, int toksig[]) {
     atributo->esPrimitivo = 1;
     atributo->valor = NULL; // NO se crea la instaciona hasta que sea necesario
     switch (token) {
@@ -523,7 +568,7 @@ int tipoDP1(struct atributo *atributo) {
             if (token == mnr) {
                 struct atributo *valor = (struct atributo*) malloc(sizeof (struct atributo));
                 obtoken();
-                if (!tipoDP1(valor)) {
+                if (!tipoDP1(valor, NULL)) {
                     return 0;
                 }
 
