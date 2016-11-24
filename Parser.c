@@ -1710,6 +1710,7 @@ int termino() {
             }
         } while (token == por || token == barra);
     }
+    return 1;
     //printf("\nTerminio termino");
 }
 
