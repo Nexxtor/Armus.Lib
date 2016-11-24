@@ -5,7 +5,7 @@
 #include <string.h>
 #include <jni.h>
 
-char *errores[56] = {
+char *errores[57] = {
     "000 Error importante: un archivo no pudo ser abierto \n",
     "001 Error: existe un enter entre incluir y \" \n",
     "002 Error: falto comillia (\") de cierre en un incluir \n",
@@ -61,7 +61,8 @@ char *errores[56] = {
     "052 Se esperaba la palabra reservada probar\n",
     "053 Se esperaba la palabra reservada para\n",
     "054 Se esperaba la palabra reservada paraCada\n",
-    "055 Se está inentando utilizar un metodo o propiedad en una varible primtiva\n"
+    "055 Se está inentando utilizar un metodo o propiedad en una varible primtiva\n",
+    "056 Error fatal se intenta definir una clase privado o escribir un metodo o atributo fuera de una clase \n"
 
 
 
