@@ -1,4 +1,6 @@
 #include "Parametros.h"
+#include <stdio.h>
+
 extern char *linea;//[MAX_LINEA];
 extern FILE *fp;
 extern int ll;               //contador de caracteres
