@@ -6,6 +6,7 @@
 //#define MAX_FILE 150
 //#define MAX_NAME_FILE 256*4
 #define MAXPAL 54  //numero de palabras reservadas
+#define NOTOKENS MAXPAL + 32
 //#define MAX_CADENA 123456
 //#define MAX_SIZE_FILE 99999
 
