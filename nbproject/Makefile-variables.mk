@@ -8,9 +8,9 @@ CND_BUILDDIR=build
 CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux
-CND_ARTIFACT_DIR_Debug=/opt/armus/lib
+CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
 CND_ARTIFACT_NAME_Debug=libArmus.Lib.so
-CND_ARTIFACT_PATH_Debug=/opt/armus/lib/libArmus.Lib.so
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/libArmus.Lib.so
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
 CND_PACKAGE_NAME_Debug=libArmus.Lib.so.tar
 CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/libArmus.Lib.so.tar

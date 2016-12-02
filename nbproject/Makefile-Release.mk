@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/cdfee43a/Scanner.o \
+	${OBJECTDIR}/Conjuntos.o \
 	${OBJECTDIR}/Errores.o \
 	${OBJECTDIR}/Lexico.o \
 	${OBJECTDIR}/Parametros.o \
@@ -74,6 +75,11 @@ ${OBJECTDIR}/_ext/cdfee43a/Scanner.o: /home/nextor/NetBeansProjects/Armus.Lib/Sc
 	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
 	${RM} "$@.d"
 	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Scanner.o /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c
+
+${OBJECTDIR}/Conjuntos.o: Conjuntos.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Conjuntos.o Conjuntos.c
 
 ${OBJECTDIR}/Errores.o: Errores.c 
 	${MKDIR} -p ${OBJECTDIR}

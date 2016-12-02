@@ -7,6 +7,7 @@
 //conjunto de sincronización de arranque
 int set_arranque[NOTOKENS];
 int set_clases[NOTOKENS];
+int set_ins[NOTOKENS];
 
 void inicializa_conjuntos() {
     //creación de conjuntos de tokens iniciales
@@ -14,7 +15,11 @@ void inicializa_conjuntos() {
     set_arranque[incluirTok] = set_arranque[publicaTok] =set_arranque[localTok] = 1;
     init_set(set_clases);
     set_clases[claseTok] = set_clases[publicaTok] = set_clases[localTok] = 1;
-    
+    init_set(set_ins);
+    set_ins[ident] = set_ins[romperTok] = set_ins[retornarTok] = set_ins[agregarTok]  =1;
+    set_ins[obtenerTok] =  set_ins[quitarTok] = set_ins[cuantosTok] = set_ins[siTok] = 1;
+    set_ins[probarTok] = set_ins[mientrasTok] = set_ins[paraTok] = set_ins[hacerTok] =1;
+    set_ins[paracadaTok] = set_ins[sistemaTok] = 1;
 }
 
 //init_set                     
@@ -57,9 +62,11 @@ void test(int conjunto1[], int conjunto2[], int n) {
         //el token no está en el conjunto1
         log_error(n); //se marca el error
         //se arma un conjunto de estabilización
+
         union_set(conj_union, conjunto1, conjunto2);
         //se salta texto de manera "inteligente"
-        while (conj_union[token] == 0)
+        while (token != -1 && conj_union[token] == 0 ){
             obtoken();
+        }
     }
 }

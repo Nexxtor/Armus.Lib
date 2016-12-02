@@ -5,6 +5,7 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="f2" displayName="Parser" projectFiles="true">
+        <itemPath>Conjuntos.h</itemPath>
         <itemPath>Parser.h</itemPath>
         <itemPath>tds.h</itemPath>
       </logicalFolder>
@@ -25,6 +26,7 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="f1" displayName="Parser" projectFiles="true">
+        <itemPath>Conjuntos.c</itemPath>
         <itemPath>Parser.c</itemPath>
         <itemPath>tds.c</itemPath>
       </logicalFolder>
@@ -68,16 +70,16 @@
             <pElem>/usr/lib/jvm/java-8-oracle/include/linux</pElem>
           </incDir>
           <commandLine>-shared</commandLine>
-          <warningLevel>2</warningLevel>
         </cTool>
-        <linkerTool>
-          <output>/opt/armus/lib/libArmus.Lib.so</output>
-        </linkerTool>
       </compileType>
       <item path="/home/nextor/NetBeansProjects/Armus.Lib/Scanner.c"
             ex="false"
             tool="0"
             flavor2="0">
+      </item>
+      <item path="Conjuntos.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="Conjuntos.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Errores.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -132,10 +134,14 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="Scanner.c"
+      <item path="/home/nextor/NetBeansProjects/Armus.Lib/Scanner.c"
             ex="false"
             tool="0"
             flavor2="0">
+      </item>
+      <item path="Conjuntos.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="Conjuntos.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Errores.c" ex="false" tool="0" flavor2="0">
       </item>
