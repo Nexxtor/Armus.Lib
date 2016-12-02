@@ -27,7 +27,7 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_scanner_Scanner_lsFiles
         listaPreliminar = unirListaArchivos(listaPreliminar,masArchivos);
         i++;
     }
-    jobjectArray respuesta = 0;
+    jobjectArray respuesta;
     jsize size = i;
     respuesta = (*env)->NewObjectArray(env,size,(*env)->FindClass(env,"java/lang/String"),0);
     i = 0;

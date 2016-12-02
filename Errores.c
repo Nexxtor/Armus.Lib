@@ -84,17 +84,20 @@ void log_error(int error) {
             printf("Verifique los permisos sobre el directorio\n");
             return;
         }
-
-        char ** erroresEncontradosAux = realloc(erroresEncontrados, primerError + 2);
+        printf("Rerservando memoria para guardar error\n");
+        /*char ** erroresEncontradosAux = realloc(erroresEncontrados, primerError + 2);
+        printf("RerservandA\n");
         erroresEncontradosAux[primerError] = malloc(strlen(errores[error]) + 3 + sizeof (int)*2 + strlen(archivoActual));
+        printf("Rerservar texto\n");
         sprintf(erroresEncontradosAux[primerError], "%s,%d,%d,%s\n", archivoActual, LineaActual, PosicionLineaActual, errores[error]);
         primerError++;
         erroresEncontradosAux[primerError] = malloc(1);
         erroresEncontradosAux[primerError][0] = '\0';
 
         erroresEncontrados = erroresEncontradosAux;
-
-        fprintf(f, "%s,%d,%d,%s\n", archivoActual, LineaActual, PosicionLineaActual, errores[error]);
+*/
+        primerError++;
+        fprintf(f, "%s,%d,%d,%s", archivoActual, LineaActual, PosicionLineaActual, errores[error]);
 
         fclose(f);
         printf("%d,%d,%s", LineaActual, PosicionLineaActual, errores[error]);

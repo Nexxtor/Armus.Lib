@@ -82,14 +82,17 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
             return NULL; // Sin errores
         }
     }
-    printf("Con %d errores\n" , primerError);
+    printf("Con %d errores\n", primerError);
     jobjectArray errores;
 
     errores = (*env)->NewObjectArray(env, primerError,
             (*env)->FindClass(env, "java/lang/String"), NULL);
+    fp = fopen("log.txt", "r");
+    
     int j;
     for (j = 0; j < primerError; j++) {
-        (*env)->SetObjectArrayElement(env, errores, j, (*env)->NewStringUTF(env, erroresEncontrados[j]));
+        getLine(linea,MAX_LINEA);
+        (*env)->SetObjectArrayElement(env, errores, j, (*env)->NewStringUTF(env, linea));
     }
     //Relase Java things
     for (i = 0; i < cant; i++) {
@@ -113,14 +116,14 @@ int pasada1(char **lsfiles, int cant) {
     for (i = 0; i < cant; i++) {
 
         FILE * f;
-        f = fopen("log.txt", "a");
+        /*f = fopen("log.txt", "a");
         fprintf(f, "%s\n", lsfiles[i]);
-        fclose(f);
+        fclose(f);*/
 
         fp = fopen(lsfiles[i], "r");
         archivoActual = lsfiles[i];
         if (fp == NULL) {
-            return -1; //panico si no se puede abrir el archivo
+            return -1; // si no se puede abrir el archivo
         }
 
 
@@ -157,10 +160,10 @@ int pasada2(char **lsfiles, int cant) {
     //Hacerlo con cada archivo
     int sinError = 1;
     for (i = 0; i < cant; i++) {
-        FILE * f;
+        /*FILE * f;
         f = fopen("log.txt", "a");
         fprintf(f, "%s\n", lsfiles[i]);
-        fclose(f);
+        fclose(f);*/
         fp = fopen(lsfiles[i], "r");
         archivoActual = lsfiles[i];
         if (fp == NULL) {
@@ -182,12 +185,12 @@ int pasada2(char **lsfiles, int cant) {
         }
         obtoken();
         int retorno = programa(valor, set_arranque);
-        if ( retorno == -1) {
+        if (retorno == -1) {
             fclose(fp);
             fp = NULL;
             return -1;
         }
-        
+
         sinError = sinError & retorno;
 
         fclose(fp);
@@ -308,8 +311,9 @@ int programaP1(struct nodoArchivo *archivo, int toksig[]) {
             }
         } else {
             if (token == privadoTok) {
-                log_error(56);
-                return -1;
+                test(toksig, vacio, 56);
+                //log_error(56);
+                sinErrores = 0;
             } else {
                 test(toksig, vacio, -1);
                 sinErrores = 1;
@@ -354,6 +358,7 @@ int cuerpoP1(struct clase *clase, int toksig[]) {
                     struct metodo *metodo;
                     metodo = (struct metodo*) malloc(sizeof (struct metodo));
                     metodo->ident = (char *) malloc(sizeof (char)*strlen(nombre) + 1);
+                    metodo->locales = NULL;
                     strcpy(metodo->ident, nombre);
 
                     insertarTDSMetodo(clase, metodo);
@@ -476,6 +481,7 @@ int cuerpoP1(struct clase *clase, int toksig[]) {
                     // printf("El nombre es %s ", lex);
                     atributo->ident = (char *) malloc(sizeof (char)* strlen(lex) + 1);
                     strcpy(atributo->ident, lex);
+                    printf(">>>>>>>>>>>>>>>>>>>>>>> Guardando en TDS propiedad  %s -------------------- \n", lex);
                     insertarTDSAtributo(clase, atributo);
                     obtoken();
                     do {
@@ -496,6 +502,7 @@ int cuerpoP1(struct clase *clase, int toksig[]) {
 
                                 strcpy(atributo2->ident, lex);
                                 //printf("\t\t luego esta %s ", lex);
+                                printf(">>>>>>>>>>>>>>>>>>>>>>> Guardando en TDS propiedad  %s <<<<<<<<<<<<<<<<<<<<<<<<<<< \n", lex);
                                 insertarTDSAtributo(clase, atributo2);
                             } else {
                                 log_error(18);
@@ -722,38 +729,30 @@ int programa(struct nodoArchivo* miArchivo, int toksig[]) {
     //Area de clase
 
     do {
+        printf("Actual \n");
         if (token == publicaTok || token == localTok) {
             int tokenAux = token;
-            if (token == claseTok || token == ident) {
-                log_error(16);
-                sinErrores = 0;
-            } else {
-                obtoken();
-            }
-
-            if (token == claseTok || token == ident) {
+            obtoken();
+            if (token == claseTok) {
                 int tokenAux2 = token;
-                if (token == ident) {
-                    log_error(17);
-                    sinErrores = 0;
-                } else {
-                    obtoken();
-                }
+                obtoken();
+
                 if (token == ident) {
                     struct clase *yoClase = NULL;
                     obtenerClase(miArchivo, &yoClase, lex);
                     if (yoClase == NULL) {
-                        //printf("Error clase no registrad en la primera pasada\n");
+                        printf("Error clase no registrad en la primera pasada\n");
                         log_error(19);
                         sinErrores = 0;
                     }
-                    //printf("------------Soy la clase %s\n", yoClase->ident);
+                    printf("------------Soy la clase %s\n", yoClase->ident);
 
                     //verifica que la clase solo exita en este archivo
                     if (evitarRedefinicionClase(lex, miArchivo, &tabla) >= 1) {
-                        // printf("Esta clase exite en mas de un lugar\n");
+                        printf("Esta clase exite en mas de un lugar\n");
                         log_error(20); //la calse estaba definida
                         sinErrores = 0;
+                        printf("AAAA");
                     }
                     obtoken();
                     if (token == llaveI) {
@@ -787,15 +786,17 @@ int programa(struct nodoArchivo* miArchivo, int toksig[]) {
                 }
             } else {
                 //log_error(17); //Se esperaba la declaracion de un clase
+                printf("Hola");
                 test(toksig, vacio, 17);
                 sinErrores = 0;
             }
         } else {
-            //log_error(16);
-            test(toksig, vacio, 16);
+            //log_error(56);
+            test(toksig, vacio, 56);
             sinErrores = 0;
-            printf("\n -------------------- Saltando --------------- \n");
+            printf("\n 1-------------------- Saltando --------------- 2\n");
         }
+        printf("Sig Ejecucion program\n");
     } while (token != -1);
 
     return sinErrores;
@@ -831,7 +832,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                     struct atributo *atr = NULL;
                     buscarAtributo(&atr, clase, lex);
                     if (atr == NULL) {
-
+                        printf("--------------Aqui-----------\n");
                         printf("\t\t Se esta redefiniedo el atributo %s\n", lex);
                         log_error(23); //este atributo no se detecto en la primera pasada
                         sinErrores = 0;
@@ -941,7 +942,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                                 if (token == ident) {
                                     struct atributo *atrAux = NULL;
                                     buscarAtributo(&atrAux, clase, lex);
-                                    if (atrAux != NULL) {
+                                    if (atrAux == NULL) {
                                         printf("\t\t Se esta redefiniedo el atributo %s\n", lex);
                                         log_error(23); //este atributo no se detecto en la primera pasada 
                                         sinErrores = 0;
@@ -1394,7 +1395,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
     struct atributo *atr;
     switch (token) {
         case ident:
-
+            printf("es objeto %s\n", lex);
             es0 = esObjeto(clase, metodo, lex, &atr);
             obtoken();
 
@@ -1948,8 +1949,8 @@ int expresion(int toksig[]) {
         obtoken();
         return 1;
     }
-    if (!expresion_numerica(toksig)) {
-        return 0;
+    if (expresion_numerica(toksig) == 1) {
+        return 1;
     }
     test(toksig, vacio, 57);
     return 0;
@@ -2065,7 +2066,7 @@ int factor(int toksig[]) {
 
     if (token == numeroEntero || token == numeroReal) {
         obtoken();
-        //printf("\n\tEncontre un numero\n");
+        printf("\n\tEncontre un numero\n");
         return 1;
     }
     if (token == parentI) {
@@ -2106,6 +2107,7 @@ int factor(int toksig[]) {
         //obtoken();
         //FALTA LLAMADA A METODO O IDENT (TDS)
     }
+    printf("Sin factor\n");
     test(toksig, vacio, 43);
     //log_error(43); //se esperaba un factor
     return 0;
@@ -2777,7 +2779,7 @@ int instruccion_paraCada(struct nodoArchivo* miArchivo, struct clase *clase, str
                                 copia_set(sigIns, toksig);
                                 sigIns[llaveF] = 1;
                                 if (!instruccion(miArchivo, clase, metodo, sigIns)) {
-                                    sinError =  0;
+                                    sinError = 0;
                                 }
                                 if (token == llaveF) {
                                     obtoken();
@@ -2812,7 +2814,7 @@ int instruccion_paraCada(struct nodoArchivo* miArchivo, struct clase *clase, str
                 return 0;
             }
         } else {
-            
+
             test(toksig, vacio, 29);
             //log_error(29); // no esta el [
             return 0;

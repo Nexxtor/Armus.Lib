@@ -401,7 +401,8 @@ int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado, struct a
         }
         ls = ls->sig;
     }
-
+    printf("ant Parametros\n");
+    printf("ant Parametros2\n");
     //Buscamos en parametros
     ls = metodo->parametros;
     printf("Paramentros \n");

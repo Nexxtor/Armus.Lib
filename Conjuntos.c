@@ -56,17 +56,22 @@ void union_set(int conjunto1[], int conjunto2[], int conjunto3[]) {
 //rutina de comprobación (test) y posible salto de texto sobre el programa fuente
 
 void test(int conjunto1[], int conjunto2[], int n) {
+    printf("TEST\n");
     int conj_union[NOTOKENS];
 
+    log_error(n); //se marca el error
+     
     if (conjunto1[token] == 0) {
         //el token no está en el conjunto1
-        log_error(n); //se marca el error
+       
         //se arma un conjunto de estabilización
 
         union_set(conj_union, conjunto1, conjunto2);
         //se salta texto de manera "inteligente"
         while (token != -1 && conj_union[token] == 0 ){
+            
             obtoken();
+            printf("avanzado %d \n" , token);
         }
     }
 }
