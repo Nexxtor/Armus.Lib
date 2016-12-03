@@ -30,24 +30,24 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
 int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
 int instruccion_romper(int toksig[]);
 int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
-int asignacionf(int toksig[]);
-int expresion(int toksig[]);
-int funcion_cadena(int toksig[]);
+int asignacionf(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int expresion(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int funcion_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
 int instruccion_mientras(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
 int instruccion_para(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
-int instruccion_es(int toksig[]);
-int expresion_numerica(int toksig[]);
-int expresion_conjuncion(int toksig[]);
-int expresion_relacional(int toksig[]);
-int expresion_aritmetrica(int toksig[]);
-int termino(int toksig[]);
-int factor(int toksig[]);
-int valor_cadena(int toksig[]);
-int valor_caracter(int toksig[]);
-int funcion_arreglo(int toksig[]);
-int funcion_archivo(int toksig[]);
-int llamada_metodo(int toksig[]);
-int funcion_num_numcad(int toksig[]);
+int instruccion_es(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int expresion_numerica(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int expresion_conjuncion(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int expresion_relacional(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int expresion_aritmetrica(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int termino(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int factor(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int valor_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int valor_caracter(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int funcion_arreglo(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int funcion_archivo(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int llamada_metodo(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
+int funcion_num_numcad(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
 int instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
 int instruccion_hacer(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
 int instruccion_paraCada(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]);
@@ -851,7 +851,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                         int sigExpresion[NOTOKENS];
                         copia_set(sigExpresion, toksig);
                         sigExpresion[puntoycoma] = sigExpresion[coma] = 1;
-                        if (!expresion(sigExpresion)) {
+                        if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                             sinErrores = 0;
                         }
 
@@ -876,7 +876,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                                     int sigExpresion[NOTOKENS];
                                     copia_set(sigExpresion, toksig);
                                     sigExpresion[puntoycoma] = sigExpresion[coma] = 1;
-                                    if (!expresion(sigExpresion)) {
+                                    if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                                         sinErrores = 0;
                                     }
                                 }
@@ -956,7 +956,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                             int sigExpresion[NOTOKENS];
                             copia_set(sigExpresion, toksig);
                             sigExpresion[puntoycoma] = sigExpresion[coma] = 1;
-                            if (!expresion(sigExpresion)) {
+                            if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                                 sinErrores = 0;
                             }
                         }
@@ -991,7 +991,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                                         int sigExpresion[NOTOKENS];
                                         copia_set(sigExpresion, toksig);
                                         sigExpresion[puntoycoma] = sigExpresion[coma] = 1;
-                                        if (!expresion(sigExpresion)) {
+                                        if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                                             sinErrores = 0;
                                         }
                                     }
@@ -1347,7 +1347,7 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
                             int sigExpresion[NOTOKENS];
                             copia_set(sigExpresion, toksig);
                             sigExpresion[coma] = 1;
-                            if (!expresion(sigExpresion)) {
+                            if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                                 sinError = 0;
                             }
                         }
@@ -1379,7 +1379,7 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
                                     int sigExpresion[NOTOKENS];
                                     copia_set(sigExpresion, toksig);
                                     sigExpresion[coma] = 1;
-                                    if (!expresion(sigExpresion)) {
+                                    if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                                         sinError = 0;
                                     }
                                 }
@@ -1456,7 +1456,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                 int sigLlaMet[NOTOKENS];
                 copia_set(sigLlaMet, sig);
                 sigLlaMet[puntoycoma] = 1;
-                llamada_metodo(sigLlaMet);
+                llamada_metodo(miArchivo, clase, metodo,sigLlaMet);
                 printf("Metodo Encontrado salida a mi mismo metodo\n");
                 if (token == puntoycoma) {
                     obtoken();
@@ -1479,7 +1479,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                     copia_set(sigFa, toksig);
                     sigFa[puntoycoma] = 1;
                     obtoken();
-                    if (!funcion_archivo(sigFa)) {
+                    if (!funcion_archivo(miArchivo, clase, metodo,sigFa)) {
                         sinError = 0;
                     }
                     if (token == puntoycoma) {
@@ -1504,7 +1504,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                         int sigLlaMet[NOTOKENS];
                         copia_set(sigLlaMet, sig);
                         sigLlaMet[puntoycoma] = 1;
-                        llamada_metodo(sigLlaMet);
+                        llamada_metodo(miArchivo, clase, metodo,sigLlaMet);
                         printf("Metodo Encontrado salida a mi mismo metodo\n");
                         if (token == puntoycoma) {
                             obtoken();
@@ -1527,7 +1527,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                             int expresionSig[NOTOKENS];
                             union_set(expresionSig, toksig, set_ins);
                             expresionSig[puntoycoma] = 1;
-                            if (!expresion(expresionSig)) {
+                            if (!expresion(miArchivo, clase, metodo,expresionSig)) {
                                 sinError = 0;
                             }
                         }
@@ -1593,7 +1593,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                     int expresionSig[NOTOKENS];
                     union_set(expresionSig, toksig, set_ins);
                     expresionSig[puntoycoma] = 1;
-                    if (!expresion(expresionSig)) {
+                    if (!expresion(miArchivo, clase, metodo,expresionSig)) {
                         sinError = 0;
                     }
                     if (token == puntoycoma) {
@@ -1645,7 +1645,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
             }
             break;
         case sistemaTok:
-            if (!instruccion_es(sig)) {
+            if (!instruccion_es(miArchivo, clase, metodo,sig)) {
                 sinError = 0;
             }
             break;
@@ -1654,7 +1654,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
             int sigExpresion[NOTOKENS];
             copia_set(sigExpresion, sig);
             sigExpresion[puntoycoma] = 1;
-            if (!expresion(sigExpresion)) {
+            if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                 sinError = 0;
             }
             if (token == puntoycoma) {
@@ -1698,7 +1698,7 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
             int sigExpresion[NOTOKENS];
             copia_set(sigExpresion, toksig);
             sigExpresion[coma] = sigExpresion[corcheteF] = 1;
-            if (!expresion(sigExpresion)) {
+            if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                 sinError = 0;
             }
             if (token == coma) {
@@ -1707,7 +1707,7 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                 int sigAsignacion[NOTOKENS];
                 copia_set(sigAsignacion, toksig);
                 sigAsignacion[coma] = 1;
-                if (!asignacionf(sigAsignacion)) {
+                if (!asignacionf(miArchivo, clase, metodo,sigAsignacion)) {
                     sinError = 0;
                 }
                 printf("\nRegrese de asignacion en si corto\n");
@@ -1716,7 +1716,7 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                     obtoken();
                     sigAsignacion[coma] = 0;
                     sigAsignacion[corcheteF] = 1;
-                    if (!asignacionf(sigAsignacion)) {
+                    if (!asignacionf(miArchivo, clase, metodo,sigAsignacion)) {
                         sinError = 0;
                     }
                     printf("\nRegrese de 2 asignacion en si corto\n");
@@ -1808,7 +1808,7 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
     return sinError;
 }
 
-int asignacionf(int toksig[]) {
+int asignacionf(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int vacio[NOTOKENS];
     init_set(vacio);
     if (token == ident) {
@@ -1817,7 +1817,7 @@ int asignacionf(int toksig[]) {
         if (token == asignacion) {
             printf("\nEncontre un  = \n");
             obtoken();
-            if (!expresion(toksig)) {
+            if (!expresion(miArchivo, clase, metodo,toksig)) {
                 return 0;
             }
         } else {
@@ -1833,7 +1833,7 @@ int asignacionf(int toksig[]) {
     return 1;
 }
 
-int funcion_cadena(int toksig[]) {
+int funcion_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int vacio[NOTOKENS];
     int sinError = 1;
     init_set(vacio);
@@ -1844,14 +1844,14 @@ int funcion_cadena(int toksig[]) {
             int sigValCad[NOTOKENS];
             copia_set(sigValCad, toksig);
             sigValCad[coma] = 1;
-            if (!valor_cadena(sigValCad)) {
+            if (!valor_cadena(miArchivo, clase, metodo,sigValCad)) {
                 sinError = 0;
             }
             if (token == coma) {
                 obtoken();
                 sigValCad[coma] = 0;
                 sigValCad[corcheteF] = 1;
-                if (!valor_cadena(sigValCad)) {
+                if (!valor_cadena(miArchivo, clase, metodo,sigValCad)) {
                     sinError = 0;
                 }
                 if (token == corcheteF) {
@@ -1880,7 +1880,7 @@ int funcion_cadena(int toksig[]) {
     return sinError;
 }
 
-int funcion_archivo(int toksig[]) {
+int funcion_archivo(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int vacio[NOTOKENS];
     init_set(vacio);
@@ -1891,7 +1891,7 @@ int funcion_archivo(int toksig[]) {
             int sigValCad[NOTOKENS];
             copia_set(sigValCad, toksig);
             sigValCad[corcheteF] = 1;
-            if (!valor_cadena(sigValCad)) {
+            if (!valor_cadena(miArchivo, clase, metodo,sigValCad)) {
                 sinError = 0;
             }
             if (token == corcheteF) {
@@ -1938,7 +1938,7 @@ int funcion_archivo(int toksig[]) {
     return sinError;
 }
 
-int valor_cadena(int toksig[]) {
+int valor_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int vacio[NOTOKENS];
     init_set(vacio);
@@ -1951,13 +1951,13 @@ int valor_cadena(int toksig[]) {
             obtoken();
             if (token == punto) {
                 obtoken();
-                if (!llamada_metodo(toksig)) { // o indetificador??
+                if (!llamada_metodo(miArchivo, clase, metodo,toksig)) { // o indetificador??
                     sinError = 0;
                 }
             }
             break;
         case concatenarTok:
-            if (!funcion_cadena(toksig)) {
+            if (!funcion_cadena(miArchivo, clase, metodo,toksig)) {
                 sinError = 0;
             }
             break;
@@ -1970,7 +1970,7 @@ int valor_cadena(int toksig[]) {
     return sinError;
 }
 
-int valor_caracter(int toksig[]) {
+int valor_caracter(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo,  int toksig[]) {
     int vacio[NOTOKENS];
     init_set(vacio);
     switch (token) {
@@ -1981,7 +1981,7 @@ int valor_caracter(int toksig[]) {
             obtoken();
             if (token == punto) {
                 obtoken();
-                if (!llamada_metodo(toksig)) { // o indetificador??
+                if (!llamada_metodo(miArchivo, clase, metodo,toksig)) { // o indetificador??
                     return 0;
                 }
             }
@@ -1994,7 +1994,7 @@ int valor_caracter(int toksig[]) {
     return 1;
 }
 
-int llamada_metodo(int toksig[]) {
+int llamada_metodo(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int vacio[NOTOKENS];
     init_set(vacio);
@@ -2021,7 +2021,7 @@ int llamada_metodo(int toksig[]) {
                         sinError = 0;
                     }
                 } else {
-                    if (!expresion(sigExpresion)) {
+                    if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                         sinError = 0;
                     }
                 }
@@ -2039,7 +2039,7 @@ int llamada_metodo(int toksig[]) {
                             sinError = 0;
                         }
                     } else {
-                        if (!expresion(sigExpresion)) {
+                        if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                             sinError = 0;
                         }
                     }
@@ -2061,14 +2061,14 @@ int llamada_metodo(int toksig[]) {
             return 0;
         }
     } else {
-        if (!funcion_arreglo(toksig)) {
+        if (!funcion_arreglo(miArchivo, clase, metodo,toksig)) {
             return 0;
         }
     }
     return sinError;
 }
 
-int expresion(int toksig[]) {
+int expresion(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo,  int toksig[]) {
     int vacio[NOTOKENS];
     init_set(vacio);
     if (token == verdaderoTok || token == falsoTok) {
@@ -2082,7 +2082,7 @@ int expresion(int toksig[]) {
         return 1;
     }
     if (token == concatenarTok) {
-        if (!funcion_cadena(toksig)) {
+        if (!funcion_cadena(miArchivo, clase, metodo,toksig)) {
             return 0;
         }
         printf("se encontro una funcion concatenar\n");
@@ -2093,50 +2093,50 @@ int expresion(int toksig[]) {
         obtoken();
         return 1;
     }
-    if (expresion_numerica(toksig) == 1) {
+    if (expresion_numerica(miArchivo, clase, metodo,toksig) == 1) {
         return 1;
     }
     test(toksig, vacio, 57);
     return 0;
 }
 
-int expresion_numerica(int toksig[]) {
+int expresion_numerica(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int sigExpCon[NOTOKENS];
     copia_set(sigExpCon, toksig);
     sigExpCon[otok] = 1;
-    if (!expresion_conjuncion(sigExpCon)) {
+    if (!expresion_conjuncion(miArchivo, clase, metodo,sigExpCon)) {
         sinError = 0;
     }
     while (token == otok) {
         obtoken();
         printf("En expresion numerica con %s \n", lex);
-        if (!expresion_conjuncion(sigExpCon)) {
+        if (!expresion_conjuncion(miArchivo, clase, metodo,sigExpCon)) {
             sinError = 0;
         }
     }
     return sinError;
 }
 
-int expresion_conjuncion(int toksig[]) {
+int expresion_conjuncion(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int sigExpRel[NOTOKENS];
     copia_set(sigExpRel, toksig);
     sigExpRel[ytok] = 1;
-    if (!expresion_relacional(sigExpRel)) {
+    if (!expresion_relacional(miArchivo, clase, metodo,sigExpRel)) {
         sinError = 0;
     }
     while (token == ytok) {
         obtoken();
         printf("En expresion conjuncion con %s\n", lex);
-        if (!expresion_relacional(sigExpRel)) {
+        if (!expresion_relacional(miArchivo, clase, metodo,sigExpRel)) {
             sinError = 0;
         }
     }
     return sinError;
 }
 
-int expresion_relacional(int toksig[]) {
+int expresion_relacional(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int sigExpAri[NOTOKENS];
     copia_set(sigExpAri, toksig);
@@ -2147,25 +2147,25 @@ int expresion_relacional(int toksig[]) {
         obtoken();
     }
 
-    if (!expresion_aritmetrica(sigExpAri)) {
+    if (!expresion_aritmetrica(miArchivo, clase, metodo,sigExpAri)) {
         sinError = 0;
     }
     if (token == mnr || token == myr || token == mai || token == mei || token == igl || token == nig) {
         obtoken();
         printf("Exapresion relacional con %s\n", lex);
-        if (!expresion_aritmetrica(sigExpAri)) {
+        if (!expresion_aritmetrica(miArchivo, clase, metodo,sigExpAri)) {
             sinError = 0;
         }
     }
     return sinError;
 }
 
-int expresion_aritmetrica(int toksig[]) {
+int expresion_aritmetrica(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int sigTermino[NOTOKENS];
     copia_set(sigTermino, toksig);
     sigTermino[mas] = sigTermino[menos] = 1;
-    if (!termino(sigTermino)) {
+    if (!termino(miArchivo, clase, metodo,sigTermino)) {
         sinError = 0;
     }
 
@@ -2173,7 +2173,7 @@ int expresion_aritmetrica(int toksig[]) {
         do {
             obtoken();
             printf("Exapresion aritmetica con %s\n", lex);
-            if (!termino(sigTermino)) {
+            if (!termino(miArchivo, clase, metodo,sigTermino)) {
                 sinError = 0;
             }
         } while (token == mas || token == menos);
@@ -2181,19 +2181,19 @@ int expresion_aritmetrica(int toksig[]) {
     return sinError;
 }
 
-int termino(int toksig[]) {
+int termino(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int sigFactor[NOTOKENS];
     copia_set(sigFactor, toksig);
     sigFactor[por] = sigFactor[barra] = 1;
-    if (!factor(sigFactor)) {
+    if (!factor(miArchivo, clase, metodo,sigFactor)) {
         sinError = 0;
     }
 
     if (token == por || token == barra) {
         do {
             obtoken();
-            if (!factor(sigFactor)) {
+            if (!factor(miArchivo, clase, metodo,sigFactor)) {
                 sinError = 0;
             }
         } while (token == por || token == barra);
@@ -2202,7 +2202,7 @@ int termino(int toksig[]) {
     //printf("\nTerminio termino");
 }
 
-int factor(int toksig[]) {
+int factor(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int vacio[NOTOKENS];
     init_set(vacio);
@@ -2220,7 +2220,7 @@ int factor(int toksig[]) {
         int sigExpNum[NOTOKENS];
         copia_set(sigExpNum, toksig);
         sigExpNum[parentF] = 1;
-        if (!expresion_numerica(sigExpNum)) {
+        if (!expresion_numerica(miArchivo, clase, metodo,sigExpNum)) {
             sinError = 0;
         }
         if (token == parentF) {
@@ -2236,7 +2236,7 @@ int factor(int toksig[]) {
 
     if (token == sistemaTok) {
         obtoken();
-        if (!funcion_num_numcad(toksig)) {
+        if (!funcion_num_numcad(miArchivo, clase, metodo,toksig)) {
             return 0;
         }
         return 1;
@@ -2259,7 +2259,7 @@ int factor(int toksig[]) {
     return 0;
 }
 
-int funcion_num_numcad(int toksig[]) {
+int funcion_num_numcad(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int vacio[NOTOKENS];
     init_set(vacio);
@@ -2278,7 +2278,7 @@ int funcion_num_numcad(int toksig[]) {
                         int sigExpNum[NOTOKENS];
                         copia_set(sigExpNum, toksig);
                         sigExpNum[corcheteF] = 1;
-                        if (!expresion_numerica(sigExpNum)) {
+                        if (!expresion_numerica(miArchivo, clase, metodo,sigExpNum)) {
                             sinError = 0;
                         }
                         if (token == corcheteF) {
@@ -2304,14 +2304,14 @@ int funcion_num_numcad(int toksig[]) {
                         int sigExpNum[NOTOKENS];
                         copia_set(sigExpNum, toksig);
                         sigExpNum[coma] = 1;
-                        if (!expresion_numerica(sigExpNum)) {
+                        if (!expresion_numerica(miArchivo, clase, metodo,sigExpNum)) {
                             sinError = 0;
                         }
                         if (token == coma) {
                             obtoken();
                             sigExpNum[coma] = 0;
                             sigExpNum[corcheteF] = 1;
-                            if (!expresion_numerica(sigExpNum)) {
+                            if (!expresion_numerica(miArchivo, clase, metodo,sigExpNum)) {
                                 sinError = 0;
                             }
                             if (token == corcheteF) {
@@ -2339,7 +2339,7 @@ int funcion_num_numcad(int toksig[]) {
                         int sigValCad[NOTOKENS];
                         copia_set(sigValCad, toksig);
                         sigValCad[corcheteF] = 1;
-                        if (!valor_cadena(sigValCad)) {
+                        if (!valor_cadena(miArchivo, clase, metodo,sigValCad)) {
                             sinError = 0;
                         }
                         if (token == corcheteF) {
@@ -2362,14 +2362,14 @@ int funcion_num_numcad(int toksig[]) {
                         int sigValCad[NOTOKENS];
                         copia_set(sigValCad, toksig);
                         sigValCad[coma] = 1;
-                        if (!valor_cadena(sigValCad)) {
+                        if (!valor_cadena(miArchivo, clase, metodo,sigValCad)) {
                             sinError = 0;
                         }
                         if (token == coma) {
                             obtoken();
                             sigValCad[coma] = 0;
                             sigValCad[corcheteF] = 1;
-                            if (!valor_cadena(sigValCad)) {
+                            if (!valor_cadena(miArchivo, clase, metodo,sigValCad)) {
                                 sinError = 0;
                             }
                             if (token == corcheteF) {
@@ -2420,7 +2420,7 @@ int instruccion_mientras(struct nodoArchivo* miArchivo, struct clase *clase, str
             int sigExpesion[NOTOKENS];
             copia_set(sigExpesion, toksig);
             sigExpesion[corcheteF] = 1;
-            if (!expresion(sigExpesion)) {
+            if (!expresion(miArchivo, clase, metodo,sigExpesion)) {
                 sinError = 0;
             }
             if (token == corcheteF) {
@@ -2463,7 +2463,7 @@ int instruccion_mientras(struct nodoArchivo* miArchivo, struct clase *clase, str
     return sinError;
 }
 
-int instruccion_romper(int toksig[]) {
+int instruccion_romper( int toksig[]) {
     int vacio[NOTOKENS];
     init_set(vacio);
     if (token == romperTok) {
@@ -2483,7 +2483,7 @@ int instruccion_romper(int toksig[]) {
     return 1;
 }
 
-int funcion_arreglo(int toksig[]) {
+int funcion_arreglo(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int vacio[NOTOKENS];
     init_set(vacio);
@@ -2497,7 +2497,7 @@ int funcion_arreglo(int toksig[]) {
                 int sigExpresion[NOTOKENS];
                 copia_set(sigExpresion, toksig);
                 sigExpresion[corcheteF] = 1;
-                if (!expresion(sigExpresion)) {
+                if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                     sinError = 0;
                 }
                 if (token == corcheteF) {
@@ -2541,7 +2541,7 @@ int funcion_arreglo(int toksig[]) {
     return sinError;
 }
 
-int instruccion_es(int toksig[]) {
+int instruccion_es(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
     int vacio[NOTOKENS];
     init_set(vacio);
@@ -2591,13 +2591,13 @@ int instruccion_es(int toksig[]) {
                         int sigExpresion[NOTOKENS];
                         copia_set(sigExpresion, toksig);
                         sigExpresion[coma] = sigExpresion[corcheteF] = 1;
-                        if (!expresion(sigExpresion)) {
+                        if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                             sinError = 0;
                         }
                         if (token == coma) {
                             obtoken();
                             sigExpresion[coma] = 0;
-                            if (!expresion(sigExpresion)) {
+                            if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                                 sinError = 0;
                             }
                         }
@@ -2650,7 +2650,7 @@ int instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, struc
             int sigExpresion[NOTOKENS];
             copia_set(sigExpresion, toksig);
             sigExpresion[corcheteF] = 1;
-            if (!expresion(sigExpresion)) {
+            if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                 sinError = 0;
             }
             if (token == corcheteF) {
@@ -2662,7 +2662,7 @@ int instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, struc
                             obtoken();
                             sigExpresion[corcheteF] = 0;
                             sigExpresion[dosPuntos] = 1;
-                            if (!expresion(sigExpresion)) {
+                            if (!expresion(miArchivo, clase, metodo,sigExpresion)) {
                                 sinError = 0;
                             }
                             int sigIns[NOTOKENS];
@@ -2751,19 +2751,19 @@ int instruccion_para(struct nodoArchivo* miArchivo, struct clase *clase, struct 
                     int sigExp[NOTOKENS];
                     copia_set(sigExp, toksig);
                     sigExp[coma] = 1;
-                    if (!expresion_numerica(sigExp)) {
+                    if (!expresion_numerica(miArchivo, clase, metodo,sigExp)) {
                         sinError = 0;
                     }
                     if (token == coma) {
                         obtoken();
-                        if (!expresion_numerica(sigExp)) {
+                        if (!expresion_numerica(miArchivo, clase, metodo,sigExp)) {
                             sinError = 0;
                         }
                         if (token == coma) {
                             obtoken();
                             sigExp[coma] = 0;
                             sigExp[corcheteF] = 1;
-                            if (!expresion_numerica(sigExp)) {
+                            if (!expresion_numerica(miArchivo, clase, metodo,sigExp)) {
                                 sinError = 0;
                             }
                             if (token == corcheteF) {
@@ -2854,7 +2854,7 @@ int instruccion_hacer(struct nodoArchivo* miArchivo, struct clase *clase, struct
                         int sigExp[NOTOKENS];
                         copia_set(sigExp, toksig);
                         sigExp[corcheteF] = 1;
-                        if (!expresion_numerica(sigExp)) {
+                        if (!expresion_numerica(miArchivo, clase, metodo,sigExp)) {
                             sinError = 0;
                         }
                         if (token == corcheteF) {
