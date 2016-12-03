@@ -88,10 +88,10 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
     errores = (*env)->NewObjectArray(env, primerError,
             (*env)->FindClass(env, "java/lang/String"), NULL);
     fp = fopen("log.txt", "r");
-    
+
     int j;
     for (j = 0; j < primerError; j++) {
-        getLine(linea,MAX_LINEA);
+        getLine(linea, MAX_LINEA);
         (*env)->SetObjectArrayElement(env, errores, j, (*env)->NewStringUTF(env, linea));
     }
     //Relase Java things
@@ -137,10 +137,10 @@ int pasada1(char **lsfiles, int cant) {
         instarArchivoTDS(lsfiles[i], &tabla, &miArchivo);
 
         obtoken();
-        if (!programaP1(miArchivo, set_arranque)) {
+        if (-1 == programaP1(miArchivo, set_arranque)) {
             fclose(fp);
             fp = NULL;
-            return 0;
+            return -1;
         };
 
         fclose(fp);
@@ -190,7 +190,7 @@ int pasada2(char **lsfiles, int cant) {
             fp = NULL;
             return -1;
         }
-
+        printf("Rgreso con %d\n", retorno);
         sinError = sinError & retorno;
 
         fclose(fp);
@@ -218,7 +218,7 @@ int programaP1(struct nodoArchivo *archivo, int toksig[]) {
                 obtoken();
                 if (token == puntoycoma) {
                     //guardar en la tabla
-                    //printf("Se va a guardar en la tabla %s \n", valorCadena);
+                    printf("Se va a guardar en la tabla %s \n", valorCadena);
                     instarIncluidosArchivo(valorCadena, archivo);
                     obtoken();
                 } else {
@@ -265,7 +265,7 @@ int programaP1(struct nodoArchivo *archivo, int toksig[]) {
                     // Aunque pueda estar mal escrita
                     // Solo intereza su exitencia
                     struct clase *claseActual = NULL;
-                    printf("Clase detectada\n");
+                    printf("Clase %s\n", lex);
                     if (token == ident) {
                         insertarTDSClase(archivo, lex, tokeAux, &claseActual);
                     } else {
@@ -294,7 +294,9 @@ int programaP1(struct nodoArchivo *archivo, int toksig[]) {
 
                         sinErrores = cuerpoP1(claseActual, set_paso);
 
-
+                        if (sinErrores == -1) {
+                            return -1;
+                        }
                         if (token == llaveF) {
                             printf("\tClase bien escrita\n");
                             obtoken();
@@ -360,7 +362,7 @@ int cuerpoP1(struct clase *clase, int toksig[]) {
                     metodo->ident = (char *) malloc(sizeof (char)*strlen(nombre) + 1);
                     metodo->locales = NULL;
                     strcpy(metodo->ident, nombre);
-
+                    printf("Insertando metodo %s\n", nombre);
                     insertarTDSMetodo(clase, metodo);
 
                     obtoken();
@@ -401,7 +403,7 @@ int cuerpoP1(struct clase *clase, int toksig[]) {
 
                             parametros->atributo = parametroX;
 
-                            //printf("\t\t\tSe detecto parametro de tipo ");
+                            printf("\n\t\t\tSe detecto parametro de tipo");
                             if (!tipoDP1(parametroX, NULL)) {
                                 log_error(27);
                                 return -1;
@@ -418,7 +420,7 @@ int cuerpoP1(struct clase *clase, int toksig[]) {
                                 strcpy(parametroX->ident, lex);
                                 obtoken();
                                 i = 1;
-                                //printf("Se inserta el parametro \n");
+                                printf("Se inserta el parametro %s\n", lex);
                             } else {
                                 log_error(18); // Se esperaba un ident
                                 return -1;
@@ -431,7 +433,7 @@ int cuerpoP1(struct clase *clase, int toksig[]) {
                             if (token == arregloTok || token == objetoTok || token == archivoTok
                                     || token == caracterTok || token == cadenaTok || token == enteroTok
                                     || token == realTok || token == byteTok || token == booleanoTok || token == ident) {
-                                // printf("\t\t\t y con retorno %d\n", token);
+                                printf("\t\t\t y con retorno %d\n", token);
                                 metodo->tipoRetorno = token;
                                 metodo->esFuncion = -1;
                             } else {
@@ -468,7 +470,7 @@ int cuerpoP1(struct clase *clase, int toksig[]) {
 
                 } else {
                     if (!tipoDP1(atributo, NULL)) {
-                        log_error(27);
+                        log_error(-1);
                         return -1;
                     }
                 }
@@ -527,6 +529,7 @@ int cuerpoP1(struct clase *clase, int toksig[]) {
 
         }
         obtoken();
+        printf("Otro metodo o atributo \n");
         if (token == llaveI) countLlaveI++;
         if (token == llaveF) countLlaveI--;
 
@@ -700,14 +703,16 @@ int programa(struct nodoArchivo* miArchivo, int toksig[]) {
                 //Verificamos pro que le la primera pasada solo se registor
                 //pero no se sabia si existia o no
                 if (incluir == NULL) {
-                    // printf("El archivo a incluir no se reconoce\n");
+                    printf("El archivo a incluir no se reconoce\n");
                     log_error(13);
                     sinErrores = 0;
                 }
+                printf("######## A BUSCAR PUNTO Y COMA DE INCLUIR\n");
                 if (token == puntoycoma) {
-                    //printf("Incluir %s\n", valorCadena);
+                    printf("Incluir %s\n", valorCadena);
                     obtoken();
                 } else {
+                    printf("######## A BUSCAR PUNTO Y COMA DE INCLUIR\n");
                     log_error(14); //se esperaba ;
                     sinErrores = 0;
                 }
@@ -799,6 +804,7 @@ int programa(struct nodoArchivo* miArchivo, int toksig[]) {
         printf("Sig Ejecucion program\n");
     } while (token != -1);
 
+    printf("Terminadno program con %d \n", sinErrores);
     return sinErrores;
 }
 
@@ -827,7 +833,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                 sigTipo[puntoycoma] = sigTipo[coma] = 1;
 
                 int valor = tipo(miArchivo, clase, sigTipo);
-                sinErrores = valor;
+                sinErrores = sinErrores & valor;
                 if (token == ident) {
                     struct atributo *atr = NULL;
                     buscarAtributo(&atr, clase, lex);
@@ -848,8 +854,9 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                         if (!expresion(sigExpresion)) {
                             sinErrores = 0;
                         }
-                    }
 
+                    }
+                    int segundaVez = 0;
                     do {
                         if (token == coma) {
                             obtoken();
@@ -886,10 +893,12 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                                 //log_error(18); //se esperaba un idnet de atributo
                                 sinErrores = 0;
                             }
+
                         }
-                        if (token == puntoycoma) {
+                        if (token == puntoycoma || (segundaVez == 1 && token != puntoycoma && token != coma)) {
                             break;
                         }
+                        segundaVez = 1;
                     } while (token != -1);
 
                     if (token == puntoycoma) {
@@ -915,16 +924,32 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                 int sigTipo[NOTOKENS];
                 copia_set(sigTipo, toksig);
                 sigTipo[puntoycoma] = 1;
+                char claseAtributo[MAX_LINEA];
+                strcpy(claseAtributo, lex);
+                printf("Fallando \n");
                 if (tipo(miArchivo, clase, sigTipo) == 1) {
                     if (token == ident) {
+                        printf("FAllando 2\n");
                         struct atributo *atr = NULL;
                         buscarAtributo(&atr, clase, lex);
                         if (atr == NULL) {
                             printf("\t\tSe esta redefiniedo el atributo %s\n", lex);
                             log_error(23); //este atributo no se detecto en la primera pasada
                             sinErrores = 0;
+                        } else {
+
+                            struct clase* clase = NULL;
+                            buscarClaseTDS(&clase, &tabla, claseAtributo);
+                            if (clase != NULL) {
+                                atr->hashClase = clase->hash;
+                                //hash atributo
+                            } else {
+                                printf("\t\tSe esta redefiniedo el atributo %s\n", lex);
+                                log_error(58); //este atributo no se detecto en la primera pasada
+                                sinErrores = 0;
+                            }
                         }
-                        printf("\t\tSe Declaro con exito %s (objeto)\n", atr->ident);
+                        printf("\n\t\tSe Declaro con exito %s (objeto)\n", atr->ident);
                         obtoken();
                         if (token == asignacion) {
                             obtoken();
@@ -946,6 +971,17 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                                         printf("\t\t Se esta redefiniedo el atributo %s\n", lex);
                                         log_error(23); //este atributo no se detecto en la primera pasada 
                                         sinErrores = 0;
+                                    } else {
+                                        struct clase* clase = NULL;
+                                        buscarClaseTDS(&clase, &tabla, claseAtributo);
+                                        if (clase != NULL) {
+                                            atr->hashClase = clase->hash;
+                                            //hash atributo
+                                        } else {
+                                            printf("\t\tSe esta redefiniedo el atributo %s\n", lex);
+                                            log_error(58); //este atributo no se detecto en la primera pasada
+                                            sinErrores = 0;
+                                        }
                                     }
                                     printf("\t\tSe Declaro con exito %s\n", atrAux->ident);
                                     obtoken();
@@ -998,20 +1034,28 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                         sinErrores = 0;
                     }
                 } else {
+
+
+
                     printf("\t\t---------Definicion de metodo-------------------- \n");
                     int sigMetodo[NOTOKENS];
                     copia_set(sigMetodo, toksig);
                     sigMetodo[llaveI] = 1;
                     if (!metodo(miArchivo, clase, sigMetodo)) {
                         sinErrores = 0;
+                        printf("Retornando con error\n");
                     }
                     printf("\t\t---------Definicio de metodo completa---------------- \n");
                 }
 
             }
         } else {
-            test(toksig, vacio, 16);
+            int sigCuerpo[NOTOKENS];
+            init_set(sigCuerpo);
+            sigCuerpo[llaveF] = 1;
+            test(toksig, sigCuerpo, 16);
             sinErrores = 0;
+            printf("Hola---");
         }
 
         if (token == llaveF) {
@@ -1019,7 +1063,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
         }
 
     } while (token != -1);
-
+    printf("Terminando cuerpo con %d\n", sinErrores);
     return sinErrores;
 }
 
@@ -1031,12 +1075,13 @@ int tipo(struct nodoArchivo *miArchivo, struct clase *clase, int toksig[]) {
     switch (token) {
 
         case ident:
-            //printf("A preguntar por tipo obejto\n");
+            printf("A preguntar por tipo obejto %s\n", lex);
             if (puedoUsarEsteTipo(lex, miArchivo, clase, &tabla) == 1) {
                 obtoken();
-                //  printf("Tipo Adecuado\n");
+                printf("Tipo Adecuado\n");
                 return 1;
             } else {
+                printf("Tipo NO Adecuado\n");
                 return 0;
             }
             break;
@@ -1105,8 +1150,10 @@ int metodo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
         buscarMetodo(&metodo, clase, lex);
         if (metodo == NULL) {
             printf("Se esta intentando redefinir el metodo %s\n", lex);
+            printf("primerr %d\n", primerError);
             log_error(28); // declaracion mal escrita
             sinError = 0;
+            printf("primerr %d\n", primerError);
         }
         obtoken();
         if (token == corcheteI) {
@@ -1116,13 +1163,19 @@ int metodo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                 copia_set(sigTipo, toksig);
                 toksig[llaveI] = 1;
                 obtoken();
+                int tokenAux = token;
+
+                printf("---->---------> %d\n", tokenAux);
                 int rs = tipo(miArchivo, clase, sigTipo);
                 if (rs == 1) {
                     //tiene rotorno verificar si es el mismo
-                    if (metodo->tipoRetorno != token) {
-                        printf("Tipo de retono inesperado");
-                        log_error(30);
-                        return 0;
+                    if (metodo->tipoRetorno != tokenAux) {
+                        printf("Tipo de retono inesperado\n");
+                        int sigMetodo[NOTOKENS];
+                        init_set(sigMetodo);
+                        sigMetodo[llaveI] = 1;
+                        test(toksig, sigMetodo, 30); // se esperaba cierre de corchete
+                        sinError = 0;
                     }
                 }
                 printf("Metodo %s bien declarado \n", metodo->ident);
@@ -1150,10 +1203,11 @@ int metodo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                     int sigTipo[NOTOKENS];
                     copia_set(sigParametro, toksig);
                     sigTipo[llaveI] = 1;
+                    int tokenAux = token;
                     int rs = tipo(miArchivo, clase, sigTipo);
                     if (rs == 1) {
                         //tiene rotorno verificar si es el mismo
-                        if (metodo->tipoRetorno != token) {
+                        if (metodo->tipoRetorno != tokenAux) {
                             printf("Tipo de retono inesperado");
                             log_error(30);
                             sinError = 0;
@@ -1390,23 +1444,41 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
 int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int es0 = 0, sinError = 1;
     int sig[NOTOKENS];
-    copia_set(sig, toksig);
-    copia_set(sig, set_ins);
+    union_set(sig, toksig, set_ins);
+
     struct atributo *atr;
     switch (token) {
         case ident:
+            printf("es metodo %s\n", lex);
+
+            if (esMetodo(clase, lex)) {
+                printf("Metodo Encontrado llamada a mi mismo metodo\n");
+                int sigLlaMet[NOTOKENS];
+                copia_set(sigLlaMet, sig);
+                sigLlaMet[puntoycoma] = 1;
+                llamada_metodo(sigLlaMet);
+                printf("Metodo Encontrado salida a mi mismo metodo\n");
+                if (token == puntoycoma) {
+                    obtoken();
+                } else {
+                    test(set_ins, toksig, 14);
+                    sinError = 0;
+                }
+                break;
+            }
+
             printf("es objeto %s\n", lex);
             es0 = esObjeto(clase, metodo, lex, &atr);
             obtoken();
-
+            printf("Llegamos al punto \n");
             //Es una llamada a metodo de una clase
             if (token == punto) {
-                obtoken();
-                if (token == abrirTok || token == leerLineaTok
-                        || token == volcadoTok || token == cerrarTok) {
+                printf("Entrando al punto\n");
+                if (atr->tipo == ARCHIVO) {
                     int sigFa[NOTOKENS];
                     copia_set(sigFa, toksig);
                     sigFa[puntoycoma] = 1;
+                    obtoken();
                     if (!funcion_archivo(sigFa)) {
                         sinError = 0;
                     }
@@ -1418,30 +1490,101 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                         sinError = 0;
                     }
                 } else {
-                    struct clase* actual;
-                    if (es0 == 1) {
-                        //obtenerClase(miArchivo, struct clase ** clase, char *lex)
-                        int sigLlamada[NOTOKENS];
-                        union_set(sigLlamada, toksig, set_ins);
-                        sigLlamada[puntoycoma] = 1;
-
-                        if (!llamada_metodo(sigLlamada)) {
+                    printf("Llamada a metodo o atributo\n");
+                    obtoken();
+                    struct clase *clase = NULL;
+                    printf("HashClaes %d \n", atr->hashClase);
+                    buscar_def_clase_hash(&clase, atr->hashClase, &tabla); //regresa la def de la clase
+                    printf("Ya se de que clase es \n");
+                    //busca dentro de ella si es metodo o es atributo
+                    printf("------------- Es llamada a metodo \n");
+                    if (esMetodo(clase, lex)) {
+                        obtoken();
+                        printf("Metodo Encontrado llamada a mi mismo metodo\n");
+                        int sigLlaMet[NOTOKENS];
+                        copia_set(sigLlaMet, sig);
+                        sigLlaMet[puntoycoma] = 1;
+                        llamada_metodo(sigLlaMet);
+                        printf("Metodo Encontrado salida a mi mismo metodo\n");
+                        if (token == puntoycoma) {
+                            obtoken();
+                        } else {
+                            test(set_ins, toksig, 14);
                             sinError = 0;
+                        }
+                        break;
+                    } else {
+                        printf("------------- Es atributo \n");
+                        int esatr = esAtributo(clase, lex);
+                        if (!esatr) {
+                            log_error(59);
+                            sinError = 0;
+                        }
+                        obtoken();
+                        if (token == asignacion) {
+                            printf("Se esta haciendo una asignacion\n");
+                            obtoken();
+                            int expresionSig[NOTOKENS];
+                            union_set(expresionSig, toksig, set_ins);
+                            expresionSig[puntoycoma] = 1;
+                            if (!expresion(expresionSig)) {
+                                sinError = 0;
+                            }
                         }
                         if (token == puntoycoma) {
                             obtoken();
-                            printf("EStaba escrita bien la llamada a metodo\n");
                         } else {
-                            test(set_ins, toksig, 14);
-                            //log_error(14); //se eperaba punto y coma
+                            if (esatr == 1 & token == corcheteI) {
+                                test(set_ins, toksig, 60);
+                            } else {
+                                test(set_ins, toksig, 14);
+                            }
                             sinError = 0;
                         }
-                    } else {
-                        printf("Se esta inentando llamar a metodo o propiedad a un varible primtiva\n");
-                        log_error(55); //se esperaba un punto y coma
-                        sinError = 0;
+
+                        break;
                     }
                 }
+                /* if (token == abrirTok || token == leerLineaTok
+                         || token == volcadoTok || token == cerrarTok) {
+                     int sigFa[NOTOKENS];
+                     copia_set(sigFa, toksig);
+                     sigFa[puntoycoma] = 1;
+                     if (!funcion_archivo(sigFa)) {
+                         sinError = 0;
+                     }
+                     if (token == puntoycoma) {
+                         obtoken();
+                     } else {
+                         test(set_ins, toksig, 14);
+                         //log_error(14); //se eperaba punto y coma
+                         sinError = 0;
+                     }
+                 } else {
+                     struct clase* actual;
+                     if (es0 == 1) {
+                         //obtenerClase(miArchivo, struct clase ** clase, char *lex)
+                         int sigLlamada[NOTOKENS];
+                         union_set(sigLlamada, toksig, set_ins);
+                         sigLlamada[puntoycoma] = 1;
+
+                         if (!llamada_metodo(sigLlamada)) {
+                             sinError = 0;
+                         }
+                         if (token == puntoycoma) {
+                             obtoken();
+                             printf("EStaba escrita bien la llamada a metodo\n");
+                         } else {
+                             test(set_ins, toksig, 14);
+                             //log_error(14); //se eperaba punto y coma
+                             sinError = 0;
+                         }
+                     } else {
+                         printf("Se esta inentando llamar a metodo o propiedad a un varible primtiva\n");
+                         log_error(55); //se esperaba un punto y coma
+                         sinError = 0;
+                     }
+                 }*/
             } else {
                 //Es una asignación
                 if (token == asignacion) {
@@ -1534,6 +1677,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
             break;
 
     }
+    printf("MAs instrucciones\n");
     if (!instruccion(miArchivo, clase, metodo, sig)) {
         sinError = 0;
     }
@@ -2024,6 +2168,7 @@ int expresion_aritmetrica(int toksig[]) {
     if (!termino(sigTermino)) {
         sinError = 0;
     }
+
     if (token == mas || token == menos) {
         do {
             obtoken();
@@ -2044,6 +2189,7 @@ int termino(int toksig[]) {
     if (!factor(sigFactor)) {
         sinError = 0;
     }
+
     if (token == por || token == barra) {
         do {
             obtoken();

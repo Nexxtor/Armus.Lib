@@ -30,7 +30,9 @@ char *obtenerDirectorio(const char *strFirstFile){
          }
          i++;
      }
-     
+     if(posSlash == 0){
+         return strFirstFile;
+     }
      char *directorio = (char *) malloc(MAX_NAME_FILE + 1);
      i = posSlash + 1;
      while(strFirstFile[i] != '\0'){
@@ -39,6 +41,6 @@ char *obtenerDirectorio(const char *strFirstFile){
          j++;
      }
      directorio[j] = '\0';
-     
+     printf("Retornando %s\n",directorio);
      return directorio;
  }

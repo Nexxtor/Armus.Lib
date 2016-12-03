@@ -60,7 +60,6 @@ void test(int conjunto1[], int conjunto2[], int n) {
     int conj_union[NOTOKENS];
 
     log_error(n); //se marca el error
-     
     if (conjunto1[token] == 0) {
         //el token no está en el conjunto1
        

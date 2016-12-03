@@ -60,15 +60,15 @@ void instarArchivoTDS(char *nombreArchivo, tds *t, struct nodoArchivo **arch) {
 void instarIncluidosArchivo(char *incluido, struct nodoArchivo *miArchivo) {
     int i = 0;
     while (miArchivo->incluidos[i][0] != '\0' && ++i);
-    // printf("Se insertara en la posición %i\n", i);
+    printf("Se insertara en la posición %i %s\n", i, incluido);
 
-    free(miArchivo->incluidos[i]);
+    //free(miArchivo->incluidos[i]);
     miArchivo->incluidos = realloc(miArchivo->incluidos, sizeof (char *)*(i + 1));
-    miArchivo->incluidos[i] = (char *) malloc(sizeof (char)* strlen(obtenerNombreBase(incluido) + 1));
+    miArchivo->incluidos[i] = (char *) malloc(sizeof (char)* strlen(obtenerNombreBase(incluido) + 2));
     strcpy(miArchivo->incluidos[i], obtenerNombreBase(incluido));
     miArchivo->incluidos[i + 1] = (char *) malloc(sizeof (char) * 1);
     miArchivo->incluidos[i + 1][0] = '\0';
-
+    printf(">>>>>>>>>||||||| mi archivo: %s\n", miArchivo->incluidos[i]);
     //falta insterar en incluidos la ruta absoluta 
 
 }
@@ -241,6 +241,7 @@ void obtenerClase(struct nodoArchivo *miArchivo, struct clase ** clase, char *le
 
 int puedoUsarEsteTipo(char *buscado, struct nodoArchivo *miArchivo, struct clase *clase, tds *tabla) {
     //SE busca en el Archivo actula
+    printf("Buscando la definiciòn de: %s\n\n", buscado);
     struct clase * resultado = NULL;
     obtenerClase(miArchivo, &resultado, buscado);
     if (resultado != NULL) {
@@ -252,14 +253,16 @@ int puedoUsarEsteTipo(char *buscado, struct nodoArchivo *miArchivo, struct clase
     while (miArchivo->incluidos[i][0] != '\0') {
         struct nodoArchivo *archivo = NULL;
         buscarArchivoTDS(&archivo, tabla, miArchivo->incluidos[i]);
-        struct clase * resultado = NULL;
-        obtenerClase(miArchivo, &resultado, buscado);
-        if (resultado != NULL) {
-            if (resultado->esLocal == TRUE)
-                return 0;
-            return 1;
+        if (archivo != NULL) {
+            struct clase * resultado = NULL;
+            obtenerClase(archivo, &resultado, buscado);
+            if (resultado != NULL) {
+                if (resultado->esLocal == TRUE)
+                    return 0;
+                return 1;
+            }
+            i++;
         }
-        i++;
     }
     return 0;
 }
@@ -448,16 +451,75 @@ void buscarClaseTDS(struct clase** clase, tds *tabla, char * buscado) {
             *clase = claseTemp;
             return;
         } else {
-             buscarClaseTDS(&claseTemp,s->izq, buscado);
+            buscarClaseTDS(&claseTemp, s->izq, buscado);
             if (claseTemp != NULL) {
                 *clase = claseTemp;
                 return;
             }
 
-             buscarClaseTDS(&claseTemp,s->dch, buscado);
+            buscarClaseTDS(&claseTemp, s->dch, buscado);
 
             *clase = claseTemp;
 
         }
+    }
+}
+
+int esMetodo(struct clase* clase, char * buscado) {
+    if (clase->lsMetodo == NULL) {
+        return 0; //la clase no posee metodos declarados
+    } else {
+        struct listaMetodo * ls = clase->lsMetodo;
+        while (ls != NULL) {
+            if (strcmp(ls->metodo->ident, buscado) == 0) {
+                return 1;
+            } else {
+                ls = ls->sig;
+            }
+        }
+        return 0;
+    }
+}
+
+int esAtributo(struct clase* clase, char * buscado) {
+    if (clase->lsAtributo == NULL) {
+        return 0; //la clase no posee metodos declarados
+    } else {
+        struct listaAtributo * ls = clase->lsAtributo;
+        while (ls != NULL) {
+            if (strcmp(ls->atributo->ident, buscado) == 0) {
+                return 1;
+            } else {
+                ls = ls->sig;
+            }
+        }
+        return 0;
+    }
+}
+
+void buscar_def_clase_hash(struct clase** clase, int hashClase, tds *tabla) {
+    if (tabla == NULL) {
+        printf("NO se encontro \n");
+       *clase = NULL;
+       return;
+    }
+    struct nodoArchivo * busAux = tabla->valor;
+
+    struct listaClase *clases = busAux->lsClase;
+    while (clases != NULL) {
+        if (clases->clase->hash == hashClase) {
+            *clase = clases->clase;
+            printf("Se encontro \n");
+            return;
+        }
+        clases = clases->sig;
+    }
+
+
+    printf("Buscando a la izq \n");
+    buscar_def_clase_hash(clase, hashClase, tabla->izq);
+    if (*clase == NULL) {
+        printf("Buscando a la dch \n");
+        buscar_def_clase_hash(clase, hashClase, tabla->dch);
     }
 }

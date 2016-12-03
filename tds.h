@@ -101,7 +101,10 @@ extern "C" {
     void insertarDefinicionLocal(struct metodo * metodo, struct atributo *loca);
     int evitarRedefinicionBloque(struct clase *clase, struct metodo *metodo,char *buscado);
     int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado,struct atributo **atr);
-    void buscarClaseTDS(struct clase** clase, tds *tabla, char * buscado) ;
+    void buscarClaseTDS(struct clase** clase, tds *tabla, char * buscado);
+    int esMetodo(struct clase* clase, char * buscado);
+    int esAtributo(struct clase* clase, char * buscado);
+    void buscar_def_clase_hash(struct clase** clase, int hashClase, tds *tabla);
 #ifdef __cplusplus
 }
 #endif

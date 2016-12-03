@@ -10,8 +10,8 @@
 
 char *linea; //buffer de líneas 
 int ll = 0; //contador de caracteres
-int LineaActual = 0;//contador de linea actual del codigo fuente
-int PosicionLineaActual = 0;//posicion en la linea actual del codigo fuente 
+int LineaActual = 0; //contador de linea actual del codigo fuente
+int PosicionLineaActual = 0; //posicion en la linea actual del codigo fuente 
 int offset = 0; //corrimiento en la lectura de los caracteres del programa fuente
 int fin_de_archivo = 0; //bandera de fin de archivo (obtch)   
 int ch = 0; //último caracter leído
@@ -38,8 +38,8 @@ int getLine(char s[], int lim) {
     if (c == '\n') {
         s[i] = c;
         ++i;
-        ++LineaActual;//SE INCREMENTA LA LINEA ACTUAL DEL CODIGO FUENTE DESPUES DE UN ENTER
-        PosicionLineaActual = 0;//SE REINICIA EL INDICADOR DE EL CARACTER ACTUAL
+        ++LineaActual; //SE INCREMENTA LA LINEA ACTUAL DEL CODIGO FUENTE DESPUES DE UN ENTER
+        PosicionLineaActual = 0; //SE REINICIA EL INDICADOR DE EL CARACTER ACTUAL
     }
 
     s[i] = '\0';
@@ -168,11 +168,11 @@ void obtoken() {
     //quitar blancos, caracter de cambio de línea y tabuladores
     while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
 
-    if (ch == '/') {        
+    if (ch == '/') {
         ch = obtch();
         if (ch == '/') {
             ch = obtch();
-            while (ch != '\n'){
+            while (ch != '\n') {
                 ch = obtch();
             }
             ch = obtch();
@@ -206,7 +206,7 @@ void obtoken() {
         }
     }
 
-     //quitar blancos, caracter de cambio de línea y tabuladores
+    //quitar blancos, caracter de cambio de línea y tabuladores
     //while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
 
     if (ch == '\0') {
@@ -239,34 +239,36 @@ void obtoken() {
         }
         int puntoDecimal = 0;
         while (isdigit((ch = obtch()))
-                || (ch == '.' && hexa == 0)
+                || (ch == '.' && hexa == 0 && puntoDecimal <1)
                 || ((ch == 'A' || ch == 'B' || ch == 'C' || ch == 'D' || ch == 'E'
                 || ch == 'F') && hexa == 1)) {
+            printf("Leyendo numero\n");
             if (i < MAX_DIGIT) lexid[i++] = ch;
             if (ch == '.') puntoDecimal++;
             j++;
         }
-
         lexid[i] = '\0';
 
         if (j > MAX_DIGIT)
             log_error(7); //este número es demasiado grande
-        if (puntoDecimal > 1)
-            log_error(8); //tiene mas de un punto decimal
+        /*if (puntoDecimal > 1)
+            log_error(8); //tiene mas de un punto decimal*/
         if (hexa == 0 && (ch == 'A' || ch == 'B' || ch == 'C'
                 || ch == 'D' || ch == 'E' || ch == 'F'))
             log_error(9); //esta trantado de definir un hex sin #
         if (puntoDecimal == 1) {
             token = numeroReal;
+            valorDoble = atof(lexid);
         } else {
             token = numeroEntero;
+            valor = atol(lexid);
         }
         // printf("%s\n", lexid);
         if (hexa == 1) {
             valor = strtol(lexid, NULL, 16);
         } else {
             if (puntoDecimal == 1) {
-                valor = atof(lexid); //valor numérico de una lexeme correspondiene a un número	        
+                valorDoble = atof(lexid); //valor numérico de una lexeme correspondiene a un número	        
             } else {
                 valor = atol(lexid); //valor numérico de una lexeme correspondiene a un número	        
             }
@@ -447,7 +449,7 @@ int obtch() {
 
     if ((linea[offset] == '\0') || (fin_de_archivo == 1))
         return (' ');
-    else{
+    else {
         PosicionLineaActual++;
         return (linea[offset]); //de esto depende si el lenguaje es sensitivo de mayúsculas o no.
     }

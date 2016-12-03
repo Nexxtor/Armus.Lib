@@ -1,4 +1,4 @@
-extern char *errores[58];
+extern char *errores[61];
 extern int primerError;
 extern char **erroresEncontrados;
 extern char * archivoActual;
