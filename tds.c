@@ -389,23 +389,26 @@ int evitarRedefinicionBloque(struct clase *clase, struct metodo *metodo, char *b
 }
 
 int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado, struct atributo **atr) {
-    //Buscamos primero en local
     struct listaAtributo *ls = metodo->locales;
-    printf("Locales \n");
-    while (ls != NULL) {
-        printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
-        if (strcmp(ls->atributo->ident, buscado) == 0) {
-            if (ls->atributo->esPrimitivo == 0) {
-                *atr = ls->atributo;
-                return 1;
-            } else {
-                return 0;
+    if (metodo != NULL) {
+
+        //Buscamos primero en local
+
+        printf("Locales \n");
+        while (ls != NULL) {
+            printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
+            if (strcmp(ls->atributo->ident, buscado) == 0) {
+                if (ls->atributo->esPrimitivo == 0) {
+                    *atr = ls->atributo;
+                    return 1;
+                } else {
+                    return 0;
+                }
             }
+            ls = ls->sig;
         }
-        ls = ls->sig;
     }
     printf("ant Parametros\n");
-    printf("ant Parametros2\n");
     //Buscamos en parametros
     ls = metodo->parametros;
     printf("Paramentros \n");
@@ -414,6 +417,7 @@ int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado, struct a
         if (strcmp(ls->atributo->ident, buscado) == 0) {
             if (ls->atributo->esPrimitivo == 0) {
                 *atr = ls->atributo;
+                printf("Se econtro %s", ls->atributo->ident);
                 return 1;
             } else {
                 return 0;
@@ -428,9 +432,11 @@ int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado, struct a
         printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
         if (strcmp(ls->atributo->ident, buscado) == 0) {
             if (ls->atributo->esPrimitivo == 0) {
+                 printf("es objeto");
                 *atr = ls->atributo;
                 return 1;
             } else {
+                printf("No es objeto");
                 return 0;
             }
         }
@@ -467,16 +473,19 @@ void buscarClaseTDS(struct clase** clase, tds *tabla, char * buscado) {
 
 int esMetodo(struct clase* clase, char * buscado) {
     if (clase->lsMetodo == NULL) {
+        printf("NO es un metodo\n");
         return 0; //la clase no posee metodos declarados
     } else {
         struct listaMetodo * ls = clase->lsMetodo;
         while (ls != NULL) {
             if (strcmp(ls->metodo->ident, buscado) == 0) {
+                printf("Si es un metodo\n");
                 return 1;
             } else {
                 ls = ls->sig;
             }
         }
+        printf("NO es un metodo\n");
         return 0;
     }
 }
@@ -500,8 +509,8 @@ int esAtributo(struct clase* clase, char * buscado) {
 void buscar_def_clase_hash(struct clase** clase, int hashClase, tds *tabla) {
     if (tabla == NULL) {
         printf("NO se encontro \n");
-       *clase = NULL;
-       return;
+        *clase = NULL;
+        return;
     }
     struct nodoArchivo * busAux = tabla->valor;
 

@@ -58,9 +58,9 @@ void union_set(int conjunto1[], int conjunto2[], int conjunto3[]) {
 void test(int conjunto1[], int conjunto2[], int n) {
     printf("TEST\n");
     int conj_union[NOTOKENS];
-
+    
     log_error(n); //se marca el error
-    if (conjunto1[token] == 0) {
+    if (token != -1 && conjunto1[token] == 0) {
         //el token no está en el conjunto1
        
         //se arma un conjunto de estabilización

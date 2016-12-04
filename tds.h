@@ -47,6 +47,7 @@ extern "C" {
         struct listaAtributo *locales;
         enum tipoDato tipoRetorno;
         int esFuncion;
+        int alcance;
     };
 
     struct listaMetodo {

@@ -5,7 +5,7 @@
 #include <string.h>
 #include <jni.h>
 
-char *errores[61] = {
+char *errores[62] = {
     "000 Error importante: un archivo no pudo ser abierto \n",
     "001 Error: existe un enter entre incluir y \" \n",
     "002 Error: falto comillia (\") de cierre en un incluir \n",
@@ -66,7 +66,8 @@ char *errores[61] = {
     "057 Se esperaba una expresión\n",
     "058 No se encontro el codigo de la clase\n",
     "059 El identificador no es ni atributo ni método del objeto\n",
-    "060 Se está intentando utilzar un atributo como método\n"
+    "060 Se está intentando utilzar un atributo como método\n",
+    "061 Verifique si puede acceder al metodo o atributo\n"
 
 
 
