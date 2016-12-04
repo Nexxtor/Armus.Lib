@@ -761,18 +761,16 @@ int programa(struct nodoArchivo* miArchivo, int toksig[]) {
                         sinErrores = 0;
                         printf("AAAA");
                     }
+                    printf("Buscando llave { clase \n");
                     obtoken();
                     if (token == llaveI) {
-                        if (token != llaveI) {
-                            log_error(21);
-                            sinErrores = 0;
-                        } else {
-                            obtoken();
-                        }
+                        obtoken();
+
 
                         int sigCuerpo[NOTOKENS];
                         copia_set(sigCuerpo, toksig);
                         sigCuerpo[llaveF] = 1;
+                        printf("Examinando el cuerpo\n");
                         if (!cuerpo(miArchivo, yoClase, toksig)) {
                             sinErrores = 0;
                         }
@@ -821,6 +819,7 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
         return 1;
     }
     do {
+        printf("En cueropo\n");
         if (token == publicaTok || token == privadoTok) {
             printf("\tDeclaracion de atributo o metodo\n");
             obtoken();
@@ -1460,7 +1459,9 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                 int sigLlaMet[NOTOKENS];
                 copia_set(sigLlaMet, sig);
                 sigLlaMet[puntoycoma] = 1;
-                llamada_metodo(miArchivo, clase, metodo, sigLlaMet);
+                if (!llamada_metodo(miArchivo, clase, metodo, sigLlaMet)) {
+                    sinError = 0;
+                }
                 printf("Metodo Encontrado salida a mi mismo metodo\n");
                 if (token == puntoycoma) {
                     obtoken();
@@ -1473,7 +1474,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
 
             printf("es objeto %s\n", lex);
             es0 = esObjeto(clase, metodo, lex, &atr);
-            obtoken();
+            if (es0) obtoken();
             printf("Llegamos al punto \n");
             //Es una llamada a metodo de una clase
             if (token == punto) {
@@ -1580,47 +1581,15 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                     }
 
                 }
-                /* if (token == abrirTok || token == leerLineaTok
-                         || token == volcadoTok || token == cerrarTok) {
-                     int sigFa[NOTOKENS];
-                     copia_set(sigFa, toksig);
-                     sigFa[puntoycoma] = 1;
-                     if (!funcion_archivo(sigFa)) {
-                         sinError = 0;
-                     }
-                     if (token == puntoycoma) {
-                         obtoken();
-                     } else {
-                         test(set_ins, toksig, 14);
-                         //log_error(14); //se eperaba punto y coma
-                         sinError = 0;
-                     }
-                 } else {
-                     struct clase* actual;
-                     if (es0 == 1) {
-                         //obtenerClase(miArchivo, struct clase ** clase, char *lex)
-                         int sigLlamada[NOTOKENS];
-                         union_set(sigLlamada, toksig, set_ins);
-                         sigLlamada[puntoycoma] = 1;
-
-                         if (!llamada_metodo(sigLlamada)) {
-                             sinError = 0;
-                         }
-                         if (token == puntoycoma) {
-                             obtoken();
-                             printf("EStaba escrita bien la llamada a metodo\n");
-                         } else {
-                             test(set_ins, toksig, 14);
-                             //log_error(14); //se eperaba punto y coma
-                             sinError = 0;
-                         }
-                     } else {
-                         printf("Se esta inentando llamar a metodo o propiedad a un varible primtiva\n");
-                         log_error(55); //se esperaba un punto y coma
-                         sinError = 0;
-                     }
-                 }*/
             } else {
+                if (!es0) {
+                    //es una variable normal
+                    printf("Asignacion a una varaible \n");
+                } else {
+                    //es un objeto
+                    printf("Asignacion a un objeto\n");
+                }
+                obtoken();
                 //Es una asignación
                 if (token == asignacion) {
                     printf("Se esta haciendo una asignacion\n");
@@ -1636,8 +1605,10 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                         printf("EStaba escrita bien la asgnacion\n");
                     }
                 } else {
-                    test(set_ins, toksig, 32); //esperaba una llaamda a metodo o un asignacion;
+                    obtoken();
+                    log_error(32); //esperaba una llaamda a metodo o un asignacion;
                     sinError = 0;
+
                 }
             }
             break;
@@ -1706,8 +1677,10 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
             return 1;
             break;
         default:
+            obtoken();
             test(toksig, set_ins, 33);
             //log_error(33); //carater inseperado
+
             sinError = 0;
             break;
 
@@ -1984,7 +1957,7 @@ int valor_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
             break;
         case ident:
             if (esMetodo(clase, lex)) {
-                obtoken();
+                //obtoken();
                 printf("Es un metodo\n");
                 if (!llamada_metodo(miArchivo, clase, metodo, toksig)) {
                     return 0;
@@ -2005,7 +1978,7 @@ int valor_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
                         if (miClase == NULL) {
                             test(toksig, vacio, 55);
                             return 0;
-                            
+
                         }
                         printf("Ya se de que clase es \n");
                         //busca dentro de ella si es metodo o es atributo
@@ -2082,7 +2055,7 @@ int valor_caracter(struct nodoArchivo* miArchivo, struct clase *clase, struct me
             break;
         case ident:
             if (esMetodo(clase, lex)) {
-                obtoken();
+                // obtoken();
                 printf("Es un metodo\n");
                 if (!llamada_metodo(miArchivo, clase, metodo, toksig)) {
                     return 0;
@@ -2189,11 +2162,11 @@ int llamada_metodo(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                         //log_error(18); //se espera un ident
                         sinError = 0;
                     }
-                } else {
-                    if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
-                        sinError = 0;
-                    }
                 }
+                if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
+                    sinError = 0;
+                }
+
                 int i = 2;
                 while (token == coma) {
                     printf("Parametro %d\n", i);
@@ -2207,11 +2180,11 @@ int llamada_metodo(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                             //log_error(18); //se espera un ident
                             sinError = 0;
                         }
-                    } else {
-                        if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
-                            sinError = 0;
-                        }
                     }
+                    if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
+                        sinError = 0;
+                    }
+
                     i++;
                 }
                 if (token == corcheteF) {
@@ -2375,6 +2348,7 @@ int factor(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
     int sinError = 1;
     int vacio[NOTOKENS];
     init_set(vacio);
+    printf("En factor ---\n");
     while (token == mas || token == menos) {
         obtoken();
     }
@@ -2404,7 +2378,7 @@ int factor(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
     }
 
     if (token == sistemaTok) {
-        obtoken();
+        //obtoken();
         if (!funcion_num_numcad(miArchivo, clase, metodo, toksig)) {
             return 0;
         }
@@ -2413,7 +2387,7 @@ int factor(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
     if (token == ident) {
         printf("En factor con %s\n", lex);
         if (esMetodo(clase, lex)) {
-            obtoken();
+            //obtoken();
             printf("Es un metodo\n");
             if (!llamada_metodo(miArchivo, clase, metodo, toksig)) {
                 return 0;
@@ -2530,6 +2504,7 @@ int funcion_num_numcad(struct nodoArchivo* miArchivo, struct clase *clase, struc
                 case menorTok:
                 case potenciaTok:
                 case moduloTok:
+                    printf("Funcion prederteinada\n");
                     obtoken();
                     if (token == corcheteI) {
                         obtoken();

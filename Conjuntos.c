@@ -62,7 +62,7 @@ void test(int conjunto1[], int conjunto2[], int n) {
     log_error(n); //se marca el error
     if (token != -1 && conjunto1[token] == 0) {
         //el token no está en el conjunto1
-       
+        
         //se arma un conjunto de estabilización
 
         union_set(conj_union, conjunto1, conjunto2);

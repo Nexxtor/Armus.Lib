@@ -166,7 +166,7 @@ void obtoken() {
     int i, j;
     simbolo = 0;
     //quitar blancos, caracter de cambio de línea y tabuladores
-    while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
+    while (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r') ch = obtch();
 
     if (ch == '/') {
         ch = obtch();
