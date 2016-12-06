@@ -127,6 +127,8 @@ void insertarTDSClase(struct nodoArchivo *archivo, char * nombre, int alcanze, s
 }
 
 void insertarTDSAtributo(struct clase *clase, struct atributo *atributo) {
+    atributo->esPorReferencia = 0;
+    atributo->atributoNum = 0;
     if (clase->lsAtributo == NULL) {
         clase->lsAtributo = (struct listaAtributo *) malloc(sizeof (struct listaAtributo));
         clase->lsAtributo->atributo = atributo;
@@ -289,6 +291,27 @@ void buscarAtributo(struct atributo **atr, struct clase *clase, char *buscado) {
 
 }
 
+void buscarAtributo2(struct atributo **atr, struct listaAtributo *lso, char *buscado) {
+    if (lso == NULL) {
+        *atr = NULL;
+        return;
+    }
+
+
+    struct listaAtributo *ls = lso;
+    int i = 0;
+    while (ls != NULL) {
+        ////printf("Comparando %s,%s\n",ls->atributo->ident,buscado);
+        if (strcmp(ls->atributo->ident, buscado) == 0) {
+            *atr = ls->atributo;
+            i++;
+        }
+        ls = ls->sig;
+    }
+    if (i != 1) *atr = NULL;
+
+}
+
 void buscarMetodo(struct metodo **metodo, struct clase* clase, char * buscado) {
 
     struct listaMetodo *ls = clase->lsMetodo;
@@ -335,6 +358,8 @@ int sePuedeUsarComoParametro(struct clase *clase, struct metodo *metodo, char *b
 
 void insertarDefinicionLocal(struct metodo * metodo, struct atributo *local) {
     struct listaAtributo *ls = metodo->locales;
+    local->esPorReferencia = 0;
+    local->atributoNum = 0;
     if (ls == NULL) {
         metodo->locales = (struct listaAtributo *) malloc(sizeof (struct listaAtributo));
         metodo->locales->atributo = local;
@@ -389,7 +414,7 @@ int evitarRedefinicionBloque(struct clase *clase, struct metodo *metodo, char *b
     return i;
 }
 
-int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado, struct atributo **atr) {
+int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado, struct atributo **atr, int *esLocal) {
     struct listaAtributo *ls = metodo->locales;
     if (metodo != NULL) {
 
@@ -399,10 +424,13 @@ int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado, struct a
         while (ls != NULL) {
             //printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
             if (strcmp(ls->atributo->ident, buscado) == 0) {
+                 *atr = ls->atributo;
                 if (ls->atributo->esPrimitivo == 0) {
-                    *atr = ls->atributo;
+                   
+                    *esLocal  = 0;
                     return 1;
                 } else {
+                    *esLocal  = 0;
                     return 0;
                 }
             }
@@ -416,11 +444,14 @@ int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado, struct a
     while (ls != NULL) {
         //printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
         if (strcmp(ls->atributo->ident, buscado) == 0) {
+            *atr = ls->atributo;
             if (ls->atributo->esPrimitivo == 0) {
-                *atr = ls->atributo;
+                
+                *esLocal  = 0;
                 //printf("Se econtro %s", ls->atributo->ident);
                 return 1;
             } else {
+                *esLocal  = 0;
                 return 0;
             }
         }
@@ -432,11 +463,14 @@ int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado, struct a
     while (ls != NULL) {
         //printf("Comparando %s,%s\n", ls->atributo->ident, buscado);
         if (strcmp(ls->atributo->ident, buscado) == 0) {
+             *atr = ls->atributo;
             if (ls->atributo->esPrimitivo == 0) {
-                 //printf("es objeto");
-                *atr = ls->atributo;
+                //printf("es objeto");
+               
+                *esLocal  = 1;
                 return 1;
             } else {
+                *esLocal  = 1;
                 //printf("No es objeto");
                 return 0;
             }

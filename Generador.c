@@ -5,8 +5,12 @@
 
 
 struct cod codigo;
+FILE *intermedio = NULL;
 
-char *nM[7] = {"INS", "INO", "ALM", "OPR", "SAL", "SAC", "LIT"};
+char *nM[9] = {"INS", "INO", "ALM", "OPR", "SAL", "SAC", "LIT", "CAR", "CRR"};
+
+
+int numeroLinea = 0;
 
 struct ins genIns(enum nemonico f, int n, int d, int p) {
     struct ins instruccion;
@@ -15,8 +19,9 @@ struct ins genIns(enum nemonico f, int n, int d, int p) {
     instruccion.d = d;
     instruccion.p = p;
 
+    numeroLinea++;
 
-    printf("%s %d %d %d\n", nM[f], n, d, p);
+    //printf("%s %d %d %d\n", nM[f], instruccion.n, instruccion.d, instruccion.p);
 
     return instruccion;
 }
@@ -32,39 +37,57 @@ struct ins genInsL(enum nemonico f, int n, void * d, int p) {
     char *caracter = (char*) d;
     int *entero = (int *) d;
     double *real = (double *) d;
-    printf("%s %d ", nM[f], n);
+    //printf("%s %d ", nM[f], n);
     switch (p) {
         case 1:
-           // printf("cadena \n");
-            instruccion.data.cadena = (char *) malloc(sizeof(char ) * MAX_CADENA);
+            //     fprintf(intermedio,"cadena \n");
+            instruccion.data.cadena = (char *) malloc(sizeof (char) * MAX_CADENA);
             strcpy(instruccion.data.cadena, cadena);
-            printf("%s %d \n", instruccion.data.cadena, p);
+            //   fprintf(intermedio,"%s %d \n", instruccion.data.cadena, p);
             break;
         case 2:
             instruccion.data.caracter = *caracter;
-            printf("%c %d \n", instruccion.data.caracter, p);
+            //    fprintf(intermedio,"%c %d \n", instruccion.data.caracter, p);
             break;
         case 3:
             instruccion.data.entero = *entero;
-            printf("%d %d \n", instruccion.data.entero, p);
+            //   fprintf(intermedio,"%d %d \n", instruccion.data.entero, p);
             break;
         case 4:
             instruccion.data.doble = *real;
-            printf("%f %d \n", instruccion.data.doble, p);
+            //    fprintf(intermedio,"%f %d \n", instruccion.data.doble, p);
             break;
         case 5:
-            //printf("Booleano \n");
+            //   fprintf(intermedio,"Booleano \n");
             instruccion.data.byte = *entero;
-            printf("%d %d \n", instruccion.data.byte, p);
+            //   fprintf(intermedio,"%d %d \n", instruccion.data.byte, p);
             break;
         case 6:
             instruccion.data.booleano = *entero;
-            printf("%d %d \n", instruccion.data.booleano, p);
+            //  fprintf(intermedio,"%d %d \n", instruccion.data.booleano, p);
             break;
 
     }
-
+    numeroLinea++;
     return instruccion;
+}
+
+void addBlockLs(struct lsCod bloque, struct lsCod *destino) {
+    struct lsCod *ls = &bloque;
+    while (ls->sig != NULL) {
+        if (ls->instruccion.p != -6) {
+            addLsCode(ls->instruccion, destino);
+        }
+
+        ls = ls->sig;
+
+    }
+
+    if (ls->instruccion.p != -6) {
+        addLsCode(ls->instruccion, destino);
+    }
+
+
 }
 
 void addLsCode(struct ins codigo, struct lsCod *destino) {
@@ -102,15 +125,13 @@ void addGroupCode(struct lsCod lscod, struct groupCode *grupo) {
 
 void addClase(struct claseCod clase, struct cod *cod) {
     struct cod *ls = cod;
-    struct cod *nuevo = (struct claseCod *) malloc(sizeof (cod));
+    struct cod *nuevo = (struct cod *) malloc(sizeof ( struct cod));
 
     nuevo->clase = clase;
     nuevo->sig = NULL;
-
     while (ls->sig != NULL) {
         ls = ls->sig;
     }
-
     ls->sig = nuevo;
 }
 
@@ -176,6 +197,94 @@ void genInstacia(int *numAtr, struct atributo *atr, struct lsCod *atributos) {
         }
     }
     //printf("Finalizando instrucción para atributo %s\n",atr->ident);
-    addLsCode(genIns(ALM, 0, 4, *numAtr), atributos);
-    *numAtr = *numAtr + 1;
+    addLsCode(genIns(ALM, 0, 4, atr->atributoNum), atributos);
+    *numAtr = (*numAtr) + 1;
+}
+
+void mostrar(struct cod value, char * name) {
+    struct cod *lsClase = &value;
+
+    intermedio = fopen(name, "W");
+
+    while (lsClase != NULL) {
+        if (lsClase->clase.hash != 0) {
+            mostrar_clase(lsClase->clase);
+        }
+        lsClase = lsClase->sig;
+    }
+}
+
+void mostrar_clase(struct claseCod clase) {
+    fprintf(intermedio, "-- %d\n", clase.hash);
+    fprintf(intermedio, "-- %d a\n", clase.hash);
+    mostrar_lsCode(clase.atributos);
+    fprintf(intermedio, "-- %d a\n", clase.hash);
+    mostrar_groupCode(clase.metodos);
+}
+
+void mostrar_groupCode(struct groupCode grupo) {
+    struct groupCode *gp = &grupo;
+    while (gp != NULL) {
+        if (gp->groupNum != -1) {
+            fprintf(intermedio, "#%d\n", gp->groupNum + 1);
+            mostrar_lsCode(gp->value);
+        }
+        gp = gp->sig;
+    }
+}
+
+void mostrar_lsCode(struct lsCod ls) {
+    struct lsCod *sls = (ls.sig);
+    int num = 0;
+    while (sls != NULL) {
+
+        struct ins *ins1 = &sls->instruccion;
+        if (ins1->f != LIT) {
+            fprintf(intermedio, "%d %s %d %d %d\n", num, nM[ins1->f], ins1-> n, ins1->d, ins1->p);
+        } else {
+            fprintf(intermedio, "%d %s %d ", num, nM[ins1->f], ins1->n);
+            switch (ins1->p) {
+                case 1:
+
+                    fprintf(intermedio, "%s %d \n", ins1->data.cadena, ins1->p);
+                    break;
+                case 2:
+
+                    fprintf(intermedio, "%c %d \n", ins1->data.caracter, ins1->p);
+                    break;
+                case 3:
+
+                    fprintf(intermedio, "%d %d \n", ins1->data.entero, ins1->p);
+                    break;
+                case 4:
+
+                    fprintf(intermedio, "%f %d \n", ins1->data.doble, ins1->p);
+                    break;
+                case 5:
+                    //printf("Booleano \n");
+
+                    fprintf(intermedio, "%d %d \n", ins1->data.byte, ins1->p);
+                    break;
+                case 6:
+
+                    fprintf(intermedio, "%d %d \n", ins1->data.booleano, ins1->p);
+                    break;
+
+            }
+
+        }
+        num++;
+        sls = sls->sig;
+    }
+}
+
+void lastReferecence(struct ins **res, struct lsCod *org) {
+    struct lsCod *ls = org;
+
+    while (ls->sig != NULL) {
+        ls = ls->sig;
+    }
+
+    *res = &ls->instruccion;
+
 }

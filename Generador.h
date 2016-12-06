@@ -18,10 +18,10 @@ extern "C" {
     /* Estructura para escribir codigo */
 
     enum nemonico {
-        INS, INO, ALM, OPR, SAL, SAC, LIT
+        INS, INO, ALM, OPR, SAL, SAC, LIT, CAR, CRR
     };
 
-    extern char *nM[7];
+    extern char *nM[9];
 
     union Data {
         double doble;
@@ -55,11 +55,11 @@ extern "C" {
 
     struct cod {
         struct claseCod clase;
-        struct claseCod *sig;
+        struct cod *sig;
     };
 
     extern struct cod codigo; //aqui va estar guardado el codigo
-
+    extern int numeroLinea;
 
 
 
@@ -68,6 +68,9 @@ extern "C" {
     void addLsCode(struct ins codigo, struct lsCod *destino);
     void addGroupCode(struct lsCod lscod, struct groupCode *grupo);
     void addClase(struct claseCod clase, struct cod *cod);
+    void mostrar_clase(struct claseCod clase);
+    void mostrar_groupCode(struct groupCode grupo);
+    void mostrar_lsCode(struct lsCod ls);
 
 #ifdef __cplusplus
 }

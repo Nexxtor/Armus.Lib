@@ -5,7 +5,7 @@
 #include <string.h>
 #include <jni.h>
 
-char *errores[62] = {
+char *errores[63] = {
     "000 Error importante: un archivo no pudo ser abierto \n",
     "001 Error: existe un enter entre incluir y \" \n",
     "002 Error: falto comillia (\") de cierre en un incluir \n",
@@ -29,7 +29,7 @@ char *errores[62] = {
     "020 El identificador de la clase ya ha sido declarada en su proyecto\n",
     "021 Se esperaba llave de apertura\n",
     "022 Se esperaba llave de cierre\n",
-    "023 Atributo no existente\n",
+    "023 identificador sin declarar\n",
     "024 Clase fuera de ámbito o no declarada\n",
     "025 Se esperaba la apertura del tipo del arreglo (<)\n",
     "026 Se esperaba el cierre del tipo del arreglo (>)\n",
@@ -67,7 +67,8 @@ char *errores[62] = {
     "058 No se encontro el codigo de la clase\n",
     "059 El identificador no es ni atributo ni método del objeto\n",
     "060 Se está intentando utilzar un atributo como método\n",
-    "061 Verifique si puede acceder al metodo o atributo\n"
+    "061 Verifique si puede acceder al metodo o atributo\n",
+    "062 Solamente se puede usar numeros enteros como condicion\n"
 
 
 

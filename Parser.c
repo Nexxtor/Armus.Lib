@@ -15,7 +15,7 @@ tds tabla;
 
 struct claseCod *claseAct = NULL;
 struct lsCod *lsCodActual = NULL;
-
+int numActual = 0;
 
 
 
@@ -86,14 +86,17 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
     tabla.valor = NULL;
     inicializa_conjuntos();
 
-    printf("---------------------------Pasada 1 -----------------------------------\n");
+  //printf("---------------------------Pasada 1 -----------------------------------\n");
     if (pasada1(lsfiles, cant) != -1) {
-        printf("---------------------------Pasada 2 -----------------------------------\n");
+      //printf("---------------------------Pasada 2 -----------------------------------\n");
         if (pasada2(lsfiles, cant)) {
             //printf("Sin errores\n");
             return NULL; // Sin errores
         }
     }
+    codigo.clase.hash = 0;
+    
+    
     //printf("Con %d errores\n", primerError);
     jobjectArray errores;
 
@@ -101,6 +104,9 @@ JNIEXPORT jobjectArray JNICALL Java_armus_lib_parser_Parser_run
             (*env)->FindClass(env, "java/lang/String"), NULL);
     fp = fopen("log.txt", "r");
 
+    if(primerError == 0){
+        mostrar(codigo, lsfiles[0]);
+    }
     int j;
     for (j = 0; j < primerError; j++) {
         getLine(linea, MAX_LINEA);
@@ -169,6 +175,9 @@ int pasada2(char **lsfiles, int cant) {
     f = fopen("log.txt", "w");
     fprintf(f, "");
     fclose(f);
+
+    codigo.sig = NULL;
+
     //Hacerlo con cada archivo
     int sinError = 1;
     for (i = 0; i < cant; i++) {
@@ -311,6 +320,7 @@ int programaP1(struct nodoArchivo *archivo, int toksig[]) {
                         }
                         if (token == llaveF) {
                             //printf("\tClase bien escrita\n");
+
                             obtoken();
                         } else {
 
@@ -633,7 +643,7 @@ int tipoDP1(struct atributo *atributo, int toksig[]) {
             }
             break;
         default:
-            printf("Error en tipo \n");
+            //printf("Error en tipo \n");
             log_error(27); //NO es un tipo de dato valido
             return 0;
     }
@@ -706,6 +716,7 @@ int programa(struct nodoArchivo* miArchivo, int toksig[]) {
     int vacio[NOTOKENS];
     init_set(vacio);
     //Area de inclusion 
+    
     do {
         if (token == incluirTok) {
             obtoken();
@@ -762,7 +773,7 @@ int programa(struct nodoArchivo* miArchivo, int toksig[]) {
 
                     //Esatableciendo la clase en la que se esta escribiendo
                     struct claseCod clase; //Ya conozco la clase
-
+                    //clase->hash = 0;
                     claseAct = &clase;
 
                     if (yoClase == NULL) {
@@ -773,7 +784,7 @@ int programa(struct nodoArchivo* miArchivo, int toksig[]) {
                     } else {
                         clase.hash = yoClase->hash;
                     }
-                    printf(" ------------- %d %s %d-------------\n", yoClase->hash, yoClase->ident, yoClase->hash);
+                  //printf(" ------------- %d %s %d-------------\n", yoClase->hash, yoClase->ident, yoClase->hash);
 
                     //verifica que la clase solo exita en este archivo
                     if (evitarRedefinicionClase(lex, miArchivo, &tabla) >= 1) {
@@ -797,6 +808,9 @@ int programa(struct nodoArchivo* miArchivo, int toksig[]) {
                             sinErrores = 0;
                         }
                         if (token == llaveF) {
+                            //                            clase.
+                            clase.hash = yoClase->hash;
+                            addClase(clase, &codigo);
                             //printf("-------------Clase bien escrita-----------------\n");
                             obtoken();
                         } else {
@@ -843,10 +857,13 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
 
     struct lsCod atributos; // Codigo para instanciar los atributos
     atributos.sig = NULL;
+    atributos.instruccion = genIns(INS, -6, -6, -6);
     struct groupCode metodos; //Codigo que se encutara en llamada a metodos
     metodos.sig = NULL;
-    int numAtr = 1;
-    int numMetodo = 1;
+    metodos.value.instruccion = genIns(INS, -6, -6, -6);
+    metodos.groupNum = -1;
+    int numAtr = 0;
+    //int numMetodo = 1;
 
     do {
         //printf("En cueropo\n");
@@ -877,7 +894,10 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                         log_error(23); //este atributo no se detecto en la primera pasada
                         sinErrores = 0;
                     } else {
+
+                        atr->atributoNum = numAtr;
                         genInstacia(&numAtr, atr, &atributos);
+                      //printf("Para %s tiene de numero atr %d", atr->ident, atr->atributoNum);
                     }
 
 
@@ -896,6 +916,8 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                             sinErrores = 0;
                         }
 
+                        addLsCode(genIns(ALM, 0, 4, atr->atributoNum), lsCodActual);
+
                     }
                     int segundaVez = 0;
                     do {
@@ -909,7 +931,9 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                                     log_error(23); //este atributo no se detecto en la primera pasada 
                                     sinErrores = 0;
                                 } else {
+                                    atrAux->atributoNum = numAtr;
                                     genInstacia(&numAtr, atrAux, &atributos);
+                                  //printf("Para %s tiene de numero atr %d", atrAux->ident, atrAux->atributoNum);
                                 }
                                 //printf("\t\tSe Declaro con exito %s\n", atrAux->ident);
                                 obtoken();
@@ -919,9 +943,14 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                                     int sigExpresion[NOTOKENS];
                                     copia_set(sigExpresion, toksig);
                                     sigExpresion[puntoycoma] = sigExpresion[coma] = 1;
+
+                                    lsCodActual = &atributos;
+
                                     if (!expresion(miArchivo, clase, NULL, sigExpresion)) {
                                         sinErrores = 0;
                                     }
+
+                                    addLsCode(genIns(ALM, 0, 4, atrAux->atributoNum), lsCodActual);
                                 }
                                 /* } else {
                                      //printf("\t\t Se esta redefiniedo el atributo %s\n", lex);
@@ -986,7 +1015,9 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                             if (miClase != NULL) {
                                 atr->hashClase = miClase->hash;
                                 // printf("Atributo detectado clase hash %d\n" ,atr->hashClase);
+                                atr->atributoNum = numAtr;
                                 genInstacia(&numAtr, atr, &atributos);
+                              //printf("Para %s tiene de numero atr %d", atr->ident, atr->atributoNum);
                                 //printf("----------------------------------------- guardado has ---------\n");
                                 //hash atributo
                             } else {
@@ -1002,9 +1033,11 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                             int sigExpresion[NOTOKENS];
                             copia_set(sigExpresion, toksig);
                             sigExpresion[puntoycoma] = sigExpresion[coma] = 1;
+                            lsCodActual = &atributos;
                             if (!expresion(miArchivo, clase, NULL, sigExpresion)) {
                                 sinErrores = 0;
                             }
+                            addLsCode(genIns(ALM, 0, 4, atr->atributoNum), lsCodActual);
                         }
 
                         do {
@@ -1023,7 +1056,9 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                                         if (miClase != NULL) {
                                             atrAux->hashClase = miClase->hash;
                                             // printf("1Atributo detectado clase hash %d\n" ,atr->hashClase);
+                                            atrAux->atributoNum = numAtr;
                                             genInstacia(&numAtr, atrAux, &atributos);
+                                          //printf("Para %s tiene de numero atr %d", atrAux->ident, atrAux->atributoNum);
                                             //printf("--------------Guardandole el hash\n");
                                             //hash atributo
                                         } else {
@@ -1040,9 +1075,12 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                                         int sigExpresion[NOTOKENS];
                                         copia_set(sigExpresion, toksig);
                                         sigExpresion[puntoycoma] = sigExpresion[coma] = 1;
+                                        lsCodActual = &atributos;
                                         if (!expresion(miArchivo, clase, NULL, sigExpresion)) {
                                             sinErrores = 0;
                                         }
+                                        
+                                        addLsCode(genIns(ALM, 0, 4, atrAux->atributoNum), lsCodActual);
                                     }
                                     /* } else {
                                          //printf("\t\t Se esta redefiniedo el atributo %s\n", lex);
@@ -1090,10 +1128,21 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                     int sigMetodo[NOTOKENS];
                     copia_set(sigMetodo, toksig);
                     sigMetodo[llaveI] = 1;
+
+
+                    struct lsCod metodoCod;
+                    metodoCod.sig = NULL;
+                    metodoCod.instruccion = genIns(INS, -6, -6, -6);
+
+                    lsCodActual = &metodoCod;
+                    int lineaAnt = numeroLinea;
+                    numeroLinea = 0;
                     if (!metodo(miArchivo, clase, sigMetodo)) {
                         sinErrores = 0;
                         //printf("Retornando con error\n");
                     }
+                    numeroLinea = lineaAnt;
+                    addGroupCode(metodoCod, &metodos);
                     //printf("\t\t---------Definicio de metodo completa---------------- \n");
                 }
 
@@ -1112,6 +1161,11 @@ int cuerpo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
         }
 
     } while (token != -1);
+
+
+    claseAct->atributos = atributos;
+    addLsCode(genIns(OPR, 0, -1, 0), &atributos);
+    claseAct->metodos = metodos;
     //printf("Terminando cuerpo con %d\n", sinErrores);
     return sinErrores;
 }
@@ -1192,7 +1246,7 @@ int tipo(struct nodoArchivo *miArchivo, struct clase *clase, int toksig[]) {
 int metodo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
     int sinError = 1;
     int vacio[NOTOKENS];
-
+    int posLocales = 1;
     init_set(vacio);
     if (token == ident) {
         struct metodo *metodo = NULL;
@@ -1203,6 +1257,8 @@ int metodo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
             log_error(28); // declaracion mal escrita
             sinError = 0;
             //printf("primerr %d\n", primerError);
+        } else {
+            addLsCode(genIns(INS, 0, 4, 0), lsCodActual);
         }
         obtoken();
         if (token == corcheteI) {
@@ -1234,18 +1290,29 @@ int metodo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                 if (!bloque(miArchivo, clase, metodo, toksig)) {
                     sinError = 0;
                 }
+
+                addLsCode(genIns(OPR, 0, 0, 0), lsCodActual);
             } else {
                 int sigParametro[NOTOKENS];
                 copia_set(sigParametro, toksig);
                 sigParametro[corcheteF] = sigParametro[coma] = 1;
+                numActual = posLocales;
                 if (!parametro(miArchivo, clase, metodo, sigParametro)) {
                     sinError = 0;
                 }
+
+                addLsCode(genIns(ALM, 0, 4, posLocales), lsCodActual);
+                posLocales++;
+
                 while (token == coma) {
                     obtoken();
+                    numActual = posLocales;
                     if (!parametro(miArchivo, clase, metodo, sigParametro)) {
                         sinError = 0;
                     }
+
+                    addLsCode(genIns(ALM, 0, 4, posLocales), lsCodActual);
+                    posLocales++;
                 }
                 if (token == corcheteF) {
                     obtoken();
@@ -1267,9 +1334,12 @@ int metodo(struct nodoArchivo* miArchivo, struct clase *clase, int toksig[]) {
                     if (rs == 0) {
                         obtoken();
                     }
+                    numActual = posLocales;
                     if (!bloque(miArchivo, clase, metodo, toksig)) {
                         sinError = 0;
                     }
+
+                    addLsCode(genIns(OPR, 0, -2, 0), lsCodActual);
                 } else {
                     test(toksig, vacio, 31); // se esperaba cierre de corchete
                     sinError = 0;
@@ -1300,16 +1370,26 @@ int parametro(struct nodoArchivo *miArchivo, struct clase *clase, struct metodo 
     int sigTipo[NOTOKENS];
     copia_set(sigTipo, toksig);
     sigTipo[por] = sigTipo[ident] = 1;
+    int referencia = 0;
 
     if (tipo(miArchivo, clase, sigTipo) == 1) {
 
         if (token == por) {
             obtoken();
+            referencia = 1;
         }
 
         if (token == ident) {
             //printf("Parametro %s detectado\n", lex);
             if (1 == sePuedeUsarComoParametro(clase, metodo, lex)) {
+                struct atributo *atr = NULL;
+                buscarAtributo2(&atr, metodo->parametros, lex);
+                atr->atributoNum = numActual;
+                if (referencia) {
+                    addLsCode(genIns(CRR, 2, 0, numActual), lsCodActual);
+                } else {
+                    addLsCode(genIns(CAR, 2, 0, numActual), lsCodActual);
+                }
                 obtoken();
             } else {
                 log_error(41); //se esta redefiniedo parametro
@@ -1390,6 +1470,10 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
                         //SI es de tipo objeto ir a buscar el hash de la clase
                         //Y asignarle un hasd de instancia
                         insertarDefinicionLocal(metodo, atr);
+                        atr->atributoNum = numActual;
+                        genInstacia(&numActual, atr, lsCodActual);
+                      //printf("Para %s tiene de numero atr %d", atr->ident, atr->atributoNum);
+
                         obtoken();
                         if (token == asignacion) {
                             obtoken();
@@ -1399,7 +1483,10 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
                             if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
                                 sinError = 0;
                             }
+
+                            addLsCode(genIns(ALM, 0, 4, atr->atributoNum), lsCodActual);
                         }
+
                         while (token == coma) {
                             obtoken();
                             if (token == ident) {
@@ -1421,6 +1508,9 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
                                 //SI es de tipo objeto ir a buscar el hash de la clase
                                 //Y asignarle un hasd de instancia
                                 insertarDefinicionLocal(metodo, atr);
+                                atr->atributoNum = numActual;
+                                genInstacia(&numActual, atr, lsCodActual);
+                              //printf("Para %s tiene de numero atr %d", atr->ident, atr->atributoNum);
                                 //printf(" Se detecto declaracion misma linea");
                                 obtoken();
                                 if (token == asignacion) {
@@ -1431,6 +1521,8 @@ int bloque(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
                                     if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
                                         sinError = 0;
                                     }
+
+                                    addLsCode(genIns(ALM, 0, 4, atr->atributoNum), lsCodActual);
                                 }
                                 //printf("\n");
                                 /*} else {
@@ -1519,7 +1611,8 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
             }
 
             //printf("es objeto %s\n", lex);
-            es0 = esObjeto(clase, metodo, lex, &atr);
+            int local;
+            es0 = esObjeto(clase, metodo, lex, &atr, &local);
             if (es0) obtoken();
             //printf("Llegamos al punto \n");
             //Es una llamada a metodo de una clase
@@ -1611,6 +1704,8 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                             if (!expresion(miArchivo, clase, metodo, expresionSig)) {
                                 sinError = 0;
                             }
+
+                            addLsCode(genIns(ALM, local, 4, atr->atributoNum), lsCodActual);
                         }
                         if (token == puntoycoma) {
                             obtoken();
@@ -1650,6 +1745,7 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                         obtoken();
                         //printf("EStaba escrita bien la asgnacion\n");
                     }
+                    addLsCode(genIns(ALM, local, 4, atr->atributoNum), lsCodActual);
                 } else {
                     obtoken();
                     log_error(32); //esperaba una llaamda a metodo o un asignacion;
@@ -1718,16 +1814,8 @@ int instruccion(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
                 sinError = 0;
             }
             break;
-        case llaveF:
-            //printf("NO hAY INSTRUCCION"); // no se adelante por que encontro el siguiente
-            return 1;
-            break;
         default:
-            obtoken();
-            test(toksig, set_ins, 33);
-            //log_error(33); //carater inseperado
-
-            sinError = 0;
+            return 1;
             break;
 
     }
@@ -1755,6 +1843,12 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
             if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
                 sinError = 0;
             }
+
+            addLsCode(genIns(SAC, 0, 0, -1), lsCodActual);
+            struct ins* sac = NULL;
+            lastReferecence(&sac, lsCodActual);
+            //int numeroPat = numeroLinea;
+
             if (token == coma) {
                 //printf("\nEncontre una coma\n");
                 obtoken();
@@ -1764,6 +1858,10 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                 if (!asignacionf(miArchivo, clase, metodo, sigAsignacion)) {
                     sinError = 0;
                 }
+
+                addLsCode(genIns(SAL, 0, 0, -1), lsCodActual);
+                struct ins* sal = NULL;
+                lastReferecence(&sal, lsCodActual);
                 //printf("\nRegrese de asignacion en si corto\n");
                 if (token == coma) {
                     //printf("\nEncontre segunda coma\n");
@@ -1773,6 +1871,10 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                     if (!asignacionf(miArchivo, clase, metodo, sigAsignacion)) {
                         sinError = 0;
                     }
+
+                    sal->p = numeroLinea;
+                    sac->p = numeroLinea;
+
                     //printf("\nRegrese de 2 asignacion en si corto\n");
                     if (token == corcheteF) {
                         //printf("\nCorchet F de si corto\n");
@@ -1805,6 +1907,10 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                         if (!instruccion(miArchivo, clase, metodo, sigInstruccion)) {
                             sinError = 0;
                         }
+                        addLsCode(genIns(SAL, 0, 0, -1), lsCodActual);
+                        struct ins* sal = NULL;
+                        lastReferecence(&sal, lsCodActual);
+
                         if (token == llaveF) {
                             obtoken();
                             if (token == sinoTok) {
@@ -1831,6 +1937,10 @@ int instruccion_si(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                                     sinError = 0;
                                 }
                             }
+
+                          //printf("PArching\n");
+                            sal->p = numeroLinea;
+                            sac->p = numeroLinea;
                         } else {
                             test(toksig, vacio, 22);
                             //log_error(22); //faltaba llave de cierre
@@ -1867,6 +1977,19 @@ int asignacionf(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
     init_set(vacio);
     if (token == ident) {
         //printf("\nEncontres un ident\n");
+
+        struct atributo *atr = NULL;
+
+        buscarAtributo(&atr, clase, lex);
+        int local = 1;
+        if (atr == NULL) {
+            buscarAtributo2(&atr, metodo->parametros, lex);
+            local = 0;
+            if (atr == NULL) {
+                buscarAtributo2(&atr, metodo->locales, lex);
+            }
+        }
+
         obtoken();
         if (token == asignacion) {
             //printf("\nEncontre un  = \n");
@@ -1874,6 +1997,7 @@ int asignacionf(struct nodoArchivo* miArchivo, struct clase *clase, struct metod
             if (!expresion(miArchivo, clase, metodo, toksig)) {
                 return 0;
             }
+            addLsCode(genIns(ALM, local, 4, atr->atributoNum), lsCodActual);
         } else {
             test(toksig, vacio, 32);
             //log_error(32);
@@ -1908,6 +2032,7 @@ int funcion_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                 if (!valor_cadena(miArchivo, clase, metodo, sigValCad)) {
                     sinError = 0;
                 }
+                addLsCode(genIns(OPR, 0, 25, 0), lsCodActual);
                 if (token == corcheteF) {
                     obtoken();
                     //printf("funcion concatenar completa\n");
@@ -1999,9 +2124,11 @@ int valor_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
     switch (token) {
         case datoCadena:
             //printf("Hay una cadena\n");
+            addLsCode(genInsL(LIT, 0, valorCadena, 1), lsCodActual);
             obtoken();
             break;
         case ident:
+            //printf("En factor con %s\n", lex);
             if (esMetodo(clase, lex)) {
                 //obtoken();
                 //printf("Es un metodo\n");
@@ -2011,7 +2138,9 @@ int valor_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
 
             } else {
                 struct atributo *atr = NULL;
-                int es0 = esObjeto(clase, metodo, lex, &atr);
+                //printf("|||||||||||||||||EStoy buscando un objeto en la clase %s\n", clase->ident);
+                int local = 0;
+                int es0 = esObjeto(clase, metodo, lex, &atr, &local);
                 if (es0) {
                     obtoken();
                     if (token == punto) {
@@ -2020,16 +2149,16 @@ int valor_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
                         struct clase *miClase = NULL;
                         //printf("HashClaes %d \n", atr->hashClase);
                         buscar_def_clase_hash(&miClase, atr->hashClase, &tabla); //regresa la def de la clase
-
                         if (miClase == NULL) {
                             test(toksig, vacio, 55);
                             return 0;
-
                         }
                         //printf("Ya se de que clase es \n");
                         //busca dentro de ella si es metodo o es atributo
                         //printf("------------- Es llamada a metodo \n");
                         if (esMetodo(miClase, lex)) {
+                            obtoken();
+                            //printf("Metodo Encontrado llamada a mi mismo metodo\n");
                             struct metodo *llamadoMetodo = NULL;
                             buscarMetodo(&llamadoMetodo, miClase, lex);
 
@@ -2040,11 +2169,12 @@ int valor_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
                                 }
                             }
 
-                            obtoken();
-                            //printf("Metodo Encontrado llamada a mi mismo metodo\n");
+                            if (llamada_metodo(miArchivo, clase, metodo, toksig)) {
+                                sinError = 0;
+                            }
 
+                            return sinError;
 
-                            return sinError & llamada_metodo(miArchivo, clase, metodo, toksig);
                         } else {
                             //printf("------------- Es atributo \n");
                             int esatr = esAtributo(miClase, lex);
@@ -2066,14 +2196,35 @@ int valor_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
                                 test(set_ins, toksig, 60);
                                 return 0;
                             }
+                            if (atr->esPorReferencia) {
+                                addLsCode(genIns(CRR, local, 4, atr->atributoNum), lsCodActual);
+                            } else {
+                                addLsCode(genIns(CAR, local, 4, atr->atributoNum), lsCodActual);
+                            }
+
                             return 1;
 
                         }
                     }
+
                     return 1;
                 } else {
+
+                    if (atr->esPorReferencia) {
+
+                        addLsCode(genIns(CRR, local, 4, atr->atributoNum), lsCodActual);
+                    } else {
+
+                        addLsCode(genIns(CAR, local, 4, atr->atributoNum), lsCodActual);
+                    }
+
+
                     //printf("Es una variable\n");
                     obtoken();
+                    //Aqui va un car bien elaborado :)
+                    //addLsCode(genIns(CAR, 0, operacion, 0), lsCodActual);
+
+
                     return 1;
                 }
             }
@@ -2095,13 +2246,16 @@ int valor_cadena(struct nodoArchivo* miArchivo, struct clase *clase, struct meto
 int valor_caracter(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int vacio[NOTOKENS];
     init_set(vacio);
+    int sinError = 1;
     switch (token) {
         case datoCaracter:
+            addLsCode(genInsL(LIT, 0, &valorCaracter, 1), lsCodActual);
             obtoken();
             break;
         case ident:
+            //printf("En factor con %s\n", lex);
             if (esMetodo(clase, lex)) {
-                // obtoken();
+                //obtoken();
                 //printf("Es un metodo\n");
                 if (!llamada_metodo(miArchivo, clase, metodo, toksig)) {
                     return 0;
@@ -2109,7 +2263,9 @@ int valor_caracter(struct nodoArchivo* miArchivo, struct clase *clase, struct me
 
             } else {
                 struct atributo *atr = NULL;
-                int es0 = esObjeto(clase, metodo, lex, &atr);
+                //printf("|||||||||||||||||EStoy buscando un objeto en la clase %s\n", clase->ident);
+                int local = 0;
+                int es0 = esObjeto(clase, metodo, lex, &atr, &local);
                 if (es0) {
                     obtoken();
                     if (token == punto) {
@@ -2122,7 +2278,6 @@ int valor_caracter(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                             test(toksig, vacio, 55);
                             return 0;
                         }
-
                         //printf("Ya se de que clase es \n");
                         //busca dentro de ella si es metodo o es atributo
                         //printf("------------- Es llamada a metodo \n");
@@ -2131,7 +2286,7 @@ int valor_caracter(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                             //printf("Metodo Encontrado llamada a mi mismo metodo\n");
                             struct metodo *llamadoMetodo = NULL;
                             buscarMetodo(&llamadoMetodo, miClase, lex);
-                            int sinError = 1;
+
                             if (llamadoMetodo->alcance == privadoTok) {
                                 if (miClase->hash != clase->hash) {
                                     log_error(61);
@@ -2139,11 +2294,15 @@ int valor_caracter(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                                 }
                             }
 
-                            return sinError & llamada_metodo(miArchivo, clase, metodo, toksig);
+                            if (llamada_metodo(miArchivo, clase, metodo, toksig)) {
+                                sinError = 0;
+                            }
+
+                            return sinError;
+
                         } else {
                             //printf("------------- Es atributo \n");
                             int esatr = esAtributo(miClase, lex);
-                            int sinError = 1;
                             if (!esatr) {
                                 log_error(59);
                                 obtoken();
@@ -2162,14 +2321,35 @@ int valor_caracter(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                                 test(set_ins, toksig, 60);
                                 return 0;
                             }
-                            return 1 & sinError;
+                            if (atr->esPorReferencia) {
+                                addLsCode(genIns(CRR, local, 4, atr->atributoNum), lsCodActual);
+                            } else {
+                                addLsCode(genIns(CAR, local, 4, atr->atributoNum), lsCodActual);
+                            }
+
+                            return 1;
 
                         }
                     }
+
                     return 1;
                 } else {
+
+                    if (atr->esPorReferencia) {
+
+                        addLsCode(genIns(CRR, local, 4, atr->atributoNum), lsCodActual);
+                    } else {
+
+                        addLsCode(genIns(CAR, local, 4, atr->atributoNum), lsCodActual);
+                    }
+
+
                     //printf("Es una variable\n");
                     obtoken();
+                    //Aqui va un car bien elaborado :)
+                    //addLsCode(genIns(CAR, 0, operacion, 0), lsCodActual);
+
+
                     return 1;
                 }
             }
@@ -2333,7 +2513,7 @@ int expresion_conjuncion(struct nodoArchivo* miArchivo, struct clase *clase, str
 
 int expresion_relacional(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *metodo, int toksig[]) {
     int sinError = 1;
-    
+
     int sigExpAri[NOTOKENS];
     copia_set(sigExpAri, toksig);
     sigExpAri[mnr] = sigExpAri[myr] = sigExpAri[mai] = sigExpAri[mei] = 1;
@@ -2341,7 +2521,7 @@ int expresion_relacional(struct nodoArchivo* miArchivo, struct clase *clase, str
     int negar = 0;
     if (token == negacion) {
         //printf("se encontro negación\n");
-        negar =1;
+        negar = 1;
         obtoken();
     }
 
@@ -2349,26 +2529,33 @@ int expresion_relacional(struct nodoArchivo* miArchivo, struct clase *clase, str
         sinError = 0;
     }
     if (token == mnr || token == myr || token == mai || token == mei || token == igl || token == nig) {
-        obtoken();
+
         int operacion;
-        switch(token){
-            case mnr: operacion = 6; break;
-            case myr: operacion = 7; break;
-            case mai: operacion = 8; break;
-            case mei: operacion = 9; break;
-            case igl: operacion = 10; break;
-            case nig: operacion = 11; break;
+        switch (token) {
+            case mnr: operacion = 6;
+                break;
+            case myr: operacion = 7;
+                break;
+            case mai: operacion = 8;
+                break;
+            case mei: operacion = 9;
+                break;
+            case igl: operacion = 10;
+                break;
+            case nig: operacion = 11;
+                break;
         }
+        obtoken();
         //printf("Exapresion relacional con %s\n", lex);
         if (!expresion_aritmetrica(miArchivo, clase, metodo, sigExpAri)) {
             sinError = 0;
         }
-        
+        // printf("2 Ponioen %d\n ", operacion);
         addLsCode(genIns(OPR, 0, operacion, 0), lsCodActual);
-        
+
     }
-    
-    if(negar){
+
+    if (negar) {
         addLsCode(genIns(OPR, 0, 12, 0), lsCodActual);
     }
     return sinError;
@@ -2391,6 +2578,7 @@ int expresion_aritmetrica(struct nodoArchivo* miArchivo, struct clase *clase, st
             if (!termino(miArchivo, clase, metodo, sigTermino)) {
                 sinError = 0;
             }
+            //printf("3 Ponioen %d\n ", operacion);
             addLsCode(genIns(OPR, 0, operacion, 0), lsCodActual);
         } while (token == mas || token == menos);
     }
@@ -2413,10 +2601,10 @@ int termino(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *m
             obtoken();
             if (!factor(miArchivo, clase, metodo, sigFactor)) {
                 sinError = 0;
-            } 
-            
+            }
+            //printf("4 Ponioen %d\n ", operacion);
             addLsCode(genIns(OPR, 0, operacion, 0), lsCodActual);
-            
+
         } while (token == por || token == barra);
     }
     return sinError;
@@ -2494,7 +2682,8 @@ int factor(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
         } else {
             struct atributo *atr = NULL;
             //printf("|||||||||||||||||EStoy buscando un objeto en la clase %s\n", clase->ident);
-            int es0 = esObjeto(clase, metodo, lex, &atr);
+            int local = 0;
+            int es0 = esObjeto(clase, metodo, lex, &atr, &local);
             if (es0) {
                 obtoken();
                 if (token == punto) {
@@ -2550,19 +2739,41 @@ int factor(struct nodoArchivo* miArchivo, struct clase *clase, struct metodo *me
                             test(set_ins, toksig, 60);
                             return 0;
                         }
+                        if (atr->esPorReferencia) {
+                            addLsCode(genIns(CRR, local, 4, atr->atributoNum), lsCodActual);
+                        } else {
+                            addLsCode(genIns(CAR, local, 4, atr->atributoNum), lsCodActual);
+                        }
                         cambioSigno(mNos);
                         return 1;
 
                     }
                 }
+                if (atr->esPorReferencia) {
+                    addLsCode(genIns(CRR, local, 4, atr->atributoNum), lsCodActual);
+                } else {
+                    addLsCode(genIns(CAR, local, 4, atr->atributoNum), lsCodActual);
+                }
+
                 cambioSigno(mNos);
                 return 1;
             } else {
+
+                if (atr->esPorReferencia) {
+
+                    addLsCode(genIns(CRR, local, 4, atr->atributoNum), lsCodActual);
+                } else {
+
+                    addLsCode(genIns(CAR, local, 4, atr->atributoNum), lsCodActual);
+                }
+
+                cambioSigno(mNos);
                 //printf("Es una variable\n");
                 obtoken();
                 //Aqui va un car bien elaborado :)
                 //addLsCode(genIns(CAR, 0, operacion, 0), lsCodActual);
-                cambioSigno(mNos);
+
+
                 return 1;
             }
         }
@@ -2581,15 +2792,22 @@ int funcion_num_numcad(struct nodoArchivo* miArchivo, struct clase *clase, struc
     int sinError = 1;
     int vacio[NOTOKENS];
     init_set(vacio);
+    int op1 = 14, op2 = 18;
+
+  //printf("Entrando en funcion numerica \n ");
     if (token == sistemaTok) {
         obtoken();
         if (token == punto) {
             obtoken();
             switch (token) {
                 case parteEnteraTok:
+                    op1++;
                 case esParTok:
+                    op1++;
                 case decimalBinTok:
+                    op1++;
                 case absolutoTok:
+                    op1++;
                     obtoken();
                     if (token == corcheteI) {
                         obtoken();
@@ -2599,6 +2817,8 @@ int funcion_num_numcad(struct nodoArchivo* miArchivo, struct clase *clase, struc
                         if (!expresion_numerica(miArchivo, clase, metodo, sigExpNum)) {
                             sinError = 0;
                         }
+                      //printf("5 Ponioen %d\n ", op1);
+                        addLsCode(genIns(OPR, 0, op1, 0), lsCodActual);
                         if (token == corcheteF) {
                             obtoken();
                         } else {
@@ -2613,9 +2833,13 @@ int funcion_num_numcad(struct nodoArchivo* miArchivo, struct clase *clase, struc
                     }
                     break;
                 case mayorTok:
+                    op2++;
                 case menorTok:
+                    op2++;
                 case potenciaTok:
+                    op2++;
                 case moduloTok:
+                    op2++;
                     //printf("Funcion prederteinada\n");
                     obtoken();
                     if (token == corcheteI) {
@@ -2633,6 +2857,8 @@ int funcion_num_numcad(struct nodoArchivo* miArchivo, struct clase *clase, struc
                             if (!expresion_numerica(miArchivo, clase, metodo, sigExpNum)) {
                                 sinError = 0;
                             }
+                          //printf("6 Ponioen %d\n ", op2);
+                            addLsCode(genIns(OPR, 0, op2, 0), lsCodActual);
                             if (token == corcheteF) {
                                 obtoken();
                             } else {
@@ -2661,6 +2887,7 @@ int funcion_num_numcad(struct nodoArchivo* miArchivo, struct clase *clase, struc
                         if (!valor_cadena(miArchivo, clase, metodo, sigValCad)) {
                             sinError = 0;
                         }
+                        addLsCode(genIns(OPR, 0, 23, 0), lsCodActual);
                         if (token == corcheteF) {
                             obtoken();
                         } else {
@@ -2691,6 +2918,7 @@ int funcion_num_numcad(struct nodoArchivo* miArchivo, struct clase *clase, struc
                             if (!valor_cadena(miArchivo, clase, metodo, sigValCad)) {
                                 sinError = 0;
                             }
+                            addLsCode(genIns(OPR, 0, 24, 0), lsCodActual);
                             if (token == corcheteF) {
                                 obtoken();
                             } else {
@@ -2739,9 +2967,16 @@ int instruccion_mientras(struct nodoArchivo* miArchivo, struct clase *clase, str
             int sigExpesion[NOTOKENS];
             copia_set(sigExpesion, toksig);
             sigExpesion[corcheteF] = 1;
+            int inicioExpresion = numeroLinea;
             if (!expresion(miArchivo, clase, metodo, sigExpesion)) {
                 sinError = 0;
             }
+
+
+            addLsCode(genIns(SAC, 0, 0, -1), lsCodActual);
+            struct ins* sac = NULL;
+            lastReferecence(&sac, lsCodActual);
+
             if (token == corcheteF) {
                 obtoken();
                 if (token == llaveI) {
@@ -2752,6 +2987,10 @@ int instruccion_mientras(struct nodoArchivo* miArchivo, struct clase *clase, str
                     if (!instruccion(miArchivo, clase, metodo, sigInstruccion)) {
                         sinError = 0;
                     }
+
+                    addLsCode(genIns(SAL, 0, 0, inicioExpresion), lsCodActual);
+                    sac->p = numeroLinea;
+
                     if (token == llaveF)
                         obtoken();
                     else {
@@ -2787,6 +3026,7 @@ int instruccion_romper(int toksig[]) {
     init_set(vacio);
     if (token == romperTok) {
         obtoken();
+        // addLsCode(genIns(SAL, 0, 0, -100000000), lsCodActual);
         if (token == puntoycoma)
             obtoken();
         else {
@@ -2864,20 +3104,45 @@ int instruccion_es(struct nodoArchivo* miArchivo, struct clase *clase, struct me
     int sinError = 1;
     int vacio[NOTOKENS];
     init_set(vacio);
+
+    int op = 28;
+
     if (token == sistemaTok) {
         obtoken();
         if (token == punto) {
             obtoken();
             switch (token) {
                 case obtenerEnteroTok:
+                    op++;
                 case obtenerRealTok:
+                    op++;
                 case obtenerCadenaTok:
+                    op++;
                 case obtenerCaracterTok:
+                    op++;
                     obtoken();
                     if (token == corcheteI) {
+                        //printf("1 Ponioen %d\n ", op);
+                        addLsCode(genIns(OPR, 0, op, 0), lsCodActual);
                         obtoken();
                         if (token == ident) {
+
+                            struct atributo *atr = NULL;
+                            int local;
+                            int es0 = esObjeto(clase, metodo, lex, &atr, &local);
+
+                            if (atr == NULL) {
+                                log_error(23);
+                            } else {
+                                if (atr->esPorReferencia) {
+                                    addLsCode(genIns(CRR, local, 4, atr->atributoNum), lsCodActual);
+                                } else {
+                                    addLsCode(genIns(CAR, local, 4, atr->atributoNum), lsCodActual);
+                                }
+                            }
                             obtoken();
+
+
                             if (token == corcheteF) {
                                 obtoken();
                                 if (token == puntoycoma) {
@@ -2913,13 +3178,16 @@ int instruccion_es(struct nodoArchivo* miArchivo, struct clase *clase, struct me
                         if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
                             sinError = 0;
                         }
-                        if (token == coma) {
+
+                        addLsCode(genIns(OPR, 0, 30, 0), lsCodActual);
+
+                        /*if (token == coma) {
                             obtoken();
                             sigExpresion[coma] = 0;
                             if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
                                 sinError = 0;
                             }
-                        }
+                        }*/
                         if (token == corcheteF) {
                             obtoken();
                             if (token == puntoycoma) {
@@ -2951,6 +3219,7 @@ int instruccion_es(struct nodoArchivo* miArchivo, struct clase *clase, struct me
             return 0;
         }
     } else {
+
         test(toksig, vacio, 6);
         //log_error(6); //se esperaba el token sistema
         return 0;
@@ -2965,25 +3234,69 @@ int instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, struc
     if (token == probarTok) {
         obtoken();
         if (token == corcheteI) {
+          //printf("Probar \n");
             obtoken();
             int sigExpresion[NOTOKENS];
             copia_set(sigExpresion, toksig);
             sigExpresion[corcheteF] = 1;
+            struct lsCod expresionc;
+
+            struct lsCod *lsCodActualCopia = lsCodActual;
+            lsCodActual = &expresionc;
+            expresionc.sig = NULL;
+            expresionc.instruccion.f = INS;
+            expresionc.instruccion.d = -6;
+            expresionc.instruccion.n = -6;
+            expresionc.instruccion.p = -6;
+
+
             if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
                 sinError = 0;
             }
+
+            lsCodActual = lsCodActualCopia;
+            //addBlockLs(expresionc,lsCodActual);
+            //addLsCode(genIns(OPR, 0, 10, 0), lsCodActual);
+            //addLsCode(genIns(SAC, 0, 0, -1), lsCodActual);
+            // struct ins* sac0 = NULL;
+            // lastReferecence(&sac0, lsCodActual);
+
+
+
+
+
             if (token == corcheteF) {
                 obtoken();
                 if (token == llaveI) {
                     obtoken();
                     if (token == casoTok) {
+                        struct ins * sac[100];
+                        struct ins * sal[100];
+                        int posS = 0, posSal = 0;
                         while (token == casoTok) {
+
+
                             obtoken();
                             sigExpresion[corcheteF] = 0;
                             sigExpresion[dosPuntos] = 1;
+                            int linea = numeroLinea;
+                          //printf("Caso \n");
                             if (!expresion(miArchivo, clase, metodo, sigExpresion)) {
                                 sinError = 0;
                             }
+
+                            addBlockLs(expresionc, lsCodActual);
+                            addLsCode(genIns(OPR, 0, 10, 0), lsCodActual);
+
+                            addLsCode(genIns(SAC, 0, 0, -1), lsCodActual);
+                            sac[posS] = NULL;
+                            lastReferecence(&(sac[posS]), lsCodActual);
+
+                            if (posS != 0) {
+                                sac[posS - 1]->p = linea;
+                            }
+                            posS++;
+
                             int sigIns[NOTOKENS];
                             copia_set(sigIns, toksig);
                             sigIns[casoTok] = sigIns[defectoTok] = sigIns[llaveF] = 1;
@@ -2993,12 +3306,22 @@ int instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, struc
                                 if (!instruccion(miArchivo, clase, metodo, sigIns)) {
                                     sinError = 0;
                                 }
+                              //printf("Retornando a caso\n");
+                                addLsCode(genIns(SAL, 0, 0, -1), lsCodActual);
+
+                                sal[posSal] = NULL;
+                                lastReferecence(&(sal[posSal]), lsCodActual);
+                                posSal++;
+
                             } else {
                                 test(toksig, sigIns, 50);
                                 // log_error(50); //faltan :
                                 sinError = 0;
                             }
                         }
+
+                        sac[posS - 1]->p = numeroLinea;
+
                         if (token == defectoTok) {
                             obtoken();
                             int sig[NOTOKENS];
@@ -3007,6 +3330,7 @@ int instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, struc
                             if (token == dosPuntos) {
                                 obtoken();
                                 copia_set(sig, toksig);
+                                sac[posS - 1]->p = numeroLinea + 1;
                                 if (!instruccion(miArchivo, clase, metodo, sig)) {
                                     sinError = 0;
                                 }
@@ -3016,6 +3340,10 @@ int instruccion_probar(struct nodoArchivo* miArchivo, struct clase *clase, struc
                                 //log_error(50); //falta :
                                 sinError = 0;
                             }
+                        }
+                        int i = 0;
+                        for (i = 0; i < posSal; i++) {
+                            sal[i]->p = numeroLinea + 1;
                         }
                         if (token == llaveF) {
                             obtoken();
@@ -3064,25 +3392,65 @@ int instruccion_para(struct nodoArchivo* miArchivo, struct clase *clase, struct 
             obtoken();
             if (token == ident) {
                 //verificar que exista en este metodo o clase
+                struct atributo *atr = NULL;
+
+                buscarAtributo(&atr, clase, lex);
+                int local = 1;
+                if (atr == NULL) {
+                    buscarAtributo2(&atr, metodo->parametros, lex);
+                    local = 0;
+                    if (atr == NULL) {
+                        buscarAtributo2(&atr, metodo->locales, lex);
+                    }
+                }
+
+                if (atr == NULL) {
+                    log_error(23);
+                } else {
+                    if (!atr->esPrimitivo || atr->tipo != ENTERO) {
+                        log_error(63);
+                        atr = NULL;
+                    }
+                }
                 obtoken();
                 if (token == asignacion) {
                     obtoken();
                     int sigExp[NOTOKENS];
                     copia_set(sigExp, toksig);
                     sigExp[coma] = 1;
+                  //printf("Varible para\n");
                     if (!expresion_numerica(miArchivo, clase, metodo, sigExp)) {
                         sinError = 0;
                     }
+                    if (atr != NULL) {
+                        addLsCode(genIns(ALM, local, 4, atr->atributoNum), lsCodActual);
+                        addLsCode(genIns(CAR, local, 4, atr->atributoNum), lsCodActual);
+                    }
                     if (token == coma) {
                         obtoken();
+                      //printf("COndicion para\n");
+                        int linea = numeroLinea;
                         if (!expresion_numerica(miArchivo, clase, metodo, sigExp)) {
                             sinError = 0;
                         }
+
+                        addLsCode(genIns(SAC, 0, 0, -1), lsCodActual);
+                        struct ins *sac = NULL;
+                        lastReferecence(&sac, lsCodActual);
+
                         if (token == coma) {
                             obtoken();
                             sigExp[coma] = 0;
                             sigExp[corcheteF] = 1;
-                            if (!expresion_numerica(miArchivo, clase, metodo, sigExp)) {
+
+                            struct lsCod *tmp = lsCodActual;
+                            struct lsCod actulizarD;
+                            actulizarD.sig = NULL;
+
+                            actulizarD.instruccion.p = -6;
+                            lsCodActual = &actulizarD;
+                          //printf("Aumento para\n");
+                            if (!asignacionf(miArchivo, clase, metodo, sigExp)) {
                                 sinError = 0;
                             }
                             if (token == corcheteF) {
@@ -3096,9 +3464,16 @@ int instruccion_para(struct nodoArchivo* miArchivo, struct clase *clase, struct 
                                         sigExp[corcheteF] = 0;
                                         sigExp[llaveF] = 0;
 
+                                        lsCodActual = tmp;
+                                      //printf("Instrucciones para\n");
                                         if (!instruccion(miArchivo, clase, metodo, sigExp)) {
                                             sinError = 0;
                                         }
+                                        addBlockLs(actulizarD, lsCodActual);
+                                        addLsCode(genIns(SAL, 0, 0, linea), lsCodActual);
+
+                                        sac->p = numeroLinea;
+
                                         if (token == llaveF) {
                                             obtoken();
                                         } else {
@@ -3161,6 +3536,8 @@ int instruccion_hacer(struct nodoArchivo* miArchivo, struct clase *clase, struct
             int sigIns[NOTOKENS];
             copia_set(sigIns, toksig);
             sigIns[llaveF] = 1;
+            int linea  = numeroLinea;
+            
             if (!instruccion(miArchivo, clase, metodo, sigIns)) {
                 sinError = 0;
             }
@@ -3176,6 +3553,8 @@ int instruccion_hacer(struct nodoArchivo* miArchivo, struct clase *clase, struct
                         if (!expresion_numerica(miArchivo, clase, metodo, sigExp)) {
                             sinError = 0;
                         }
+                        addLsCode(genIns(SAC,0,0,numeroLinea + 2),lsCodActual);
+                        addLsCode(genIns(SAL,0,0,linea), lsCodActual);
                         if (token == corcheteF) {
                             obtoken();
                             if (token == puntoycoma)

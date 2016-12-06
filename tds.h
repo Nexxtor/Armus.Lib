@@ -102,7 +102,7 @@ extern "C" {
     int sePuedeUsarComoParametro(struct clase *clase, struct metodo *metodo, char *buscado);
     void insertarDefinicionLocal(struct metodo * metodo, struct atributo *loca);
     int evitarRedefinicionBloque(struct clase *clase, struct metodo *metodo,char *buscado);
-    int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado,struct atributo **atr);
+    int esObjeto(struct clase *clase, struct metodo *metodo, char* buscado,struct atributo **atr,int *esLocal);
     void buscarClaseTDS(struct clase** clase, tds *tabla, char * buscado);
     int esMetodo(struct clase* clase, char * buscado);
     int esAtributo(struct clase* clase, char * buscado);
