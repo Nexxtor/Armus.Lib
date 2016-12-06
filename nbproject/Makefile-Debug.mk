@@ -35,20 +35,21 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_ext/cdfee43a/Scanner.o \
 	${OBJECTDIR}/Conjuntos.o \
 	${OBJECTDIR}/Errores.o \
+	${OBJECTDIR}/Generador.o \
 	${OBJECTDIR}/Lexico.o \
 	${OBJECTDIR}/Parametros.o \
 	${OBJECTDIR}/Parser.o \
 	${OBJECTDIR}/PreScanner.o \
+	${OBJECTDIR}/Scanner.o \
 	${OBJECTDIR}/Standar.o \
 	${OBJECTDIR}/Util.o \
 	${OBJECTDIR}/tds.o
 
 
 # C Compiler Flags
-CFLAGS=-shared
+CFLAGS=-m64 -shared
 
 # CC Compiler Flags
 CCFLAGS=
@@ -71,11 +72,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libArmus.Lib.${CND_DLIB_EXT}: ${OBJEC
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libArmus.Lib.${CND_DLIB_EXT} ${OBJECTFILES} ${LDLIBSOPTIONS} -shared -fPIC
 
-${OBJECTDIR}/_ext/cdfee43a/Scanner.o: /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c 
-	${MKDIR} -p ${OBJECTDIR}/_ext/cdfee43a
-	${RM} "$@.d"
-	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/cdfee43a/Scanner.o /home/nextor/NetBeansProjects/Armus.Lib/Scanner.c
-
 ${OBJECTDIR}/Conjuntos.o: Conjuntos.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -85,6 +81,11 @@ ${OBJECTDIR}/Errores.o: Errores.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Errores.o Errores.c
+
+${OBJECTDIR}/Generador.o: Generador.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Generador.o Generador.c
 
 ${OBJECTDIR}/Lexico.o: Lexico.c 
 	${MKDIR} -p ${OBJECTDIR}
@@ -105,6 +106,11 @@ ${OBJECTDIR}/PreScanner.o: PreScanner.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/PreScanner.o PreScanner.c
+
+${OBJECTDIR}/Scanner.o: Scanner.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -I/usr/lib/jvm/java-8-oracle/include -I/usr/lib/jvm/java-8-oracle/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Scanner.o Scanner.c
 
 ${OBJECTDIR}/Standar.o: Standar.c 
 	${MKDIR} -p ${OBJECTDIR}

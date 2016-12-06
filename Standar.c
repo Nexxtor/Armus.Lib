@@ -210,7 +210,7 @@ void obtoken() {
     //while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
 
     if (ch == '\0') {
-        printf("SE termino el archivo\n");
+      //printf("SE termino el archivo\n");
         token = -1;
         return;
     } //hay que cambiar dearchivo
@@ -242,7 +242,7 @@ void obtoken() {
                 || (ch == '.' && hexa == 0 && puntoDecimal <1)
                 || ((ch == 'A' || ch == 'B' || ch == 'C' || ch == 'D' || ch == 'E'
                 || ch == 'F') && hexa == 1)) {
-            printf("Leyendo numero\n");
+          //printf("Leyendo numero\n");
             if (i < MAX_DIGIT) lexid[i++] = ch;
             if (ch == '.') puntoDecimal++;
             j++;
@@ -263,7 +263,7 @@ void obtoken() {
             token = numeroEntero;
             valor = atol(lexid);
         }
-        // printf("%s\n", lexid);
+        ///printf("%s\n", lexid);
         if (hexa == 1) {
             valor = strtol(lexid, NULL, 16);
         } else {
@@ -335,14 +335,14 @@ void obtoken() {
                         valorCadena[i] = '\0';
 
                         /*printf("Valor cadena = %s\n", valorCadena);
-                        printf("\n fin de archiv0 %d", fin_de_archivo);
-                        printf("caracter ultimo %c valor entero %d\n",ch,ch);*/
+                      //printf("\n fin de archiv0 %d", fin_de_archivo);
+                      //printf("caracter ultimo %c valor entero %d\n",ch,ch);*/
 
                         if (i > MAX_CADENA)
                             log_error(10); //se paso del tamaño de la cadena 
 
                         if (fin_de_archivo == 1) {
-                            printf("en cadena");
+                          //printf("en cadena");
                             log_error(11); //se acano el archivo
                             token = nulo;
                             return;
@@ -360,7 +360,7 @@ void obtoken() {
                             }
                             if (ch == '\n' || fin_de_archivo == 1) {
                                 log_error(11); //se esperaba un caracter
-                                printf("en caracter");
+                              //printf("en caracter");
                                 token = nulo;
                                 return;
                             }
@@ -399,8 +399,8 @@ void obtoken() {
                             /*if (ch == '/') {
                                 ch = obtch();
                                 if (ch == '/') {
-                                    while ((ch = obtch()) != '\n') printf("%c",ch);
-                                    printf("------ FIn comentario -----\n");
+                                    while ((ch = obtch()) != '\n'//printf("%c",ch);
+                                  //printf("------ FIn comentario -----\n");
                                     token = comentario;
                                         //quitar blancos, caracter de cambio de línea y tabuladores
                                     while (ch == ' ' || ch == '\n' || ch == '\t') ch = obtch();
@@ -441,7 +441,7 @@ int obtch() {
             fin_de_archivo = 1; //se retrasa en un blanco la deteccion de EOF, porque obtoken lleva un caracter adelantado. si no, en 
         //algunos casos tendríamos problemas, por ejemplo: no se reconoceria el punto final del programa (...end.)
 
-        // printf("\n%s", linea);
+        ///printf("\n%s", linea);
         offset = -1;
     }
 

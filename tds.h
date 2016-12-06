@@ -30,10 +30,11 @@ extern "C" {
         void *valor;
         enum tipoDato tipo;
         int hashClase; //para saber de que clase es  *
-        int hash; //para diferencias instacias  *
+      //  int hash; //para diferencias instacias  *
         int parametro;
         int esPorReferencia;
         int alcanze;
+        int atributoNum;
     };
 
     struct listaAtributo {

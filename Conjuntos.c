@@ -56,7 +56,7 @@ void union_set(int conjunto1[], int conjunto2[], int conjunto3[]) {
 //rutina de comprobación (test) y posible salto de texto sobre el programa fuente
 
 void test(int conjunto1[], int conjunto2[], int n) {
-    printf("TEST\n");
+   // printf("TEST\n");
     int conj_union[NOTOKENS];
     
     log_error(n); //se marca el error
@@ -70,7 +70,7 @@ void test(int conjunto1[], int conjunto2[], int n) {
         while (token != -1 && conj_union[token] == 0 ){
             
             obtoken();
-            printf("avanzado %d \n" , token);
+           // printf("avanzado %d \n" , token);
         }
     }
 }

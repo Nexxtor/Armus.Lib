@@ -41,6 +41,6 @@ char *obtenerDirectorio(const char *strFirstFile){
          j++;
      }
      directorio[j] = '\0';
-     printf("Retornando %s\n",directorio);
+     //printf("Retornando %s\n",directorio);
      return directorio;
  }
